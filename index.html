@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>Topper Sewing Machine Shopping</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -299,7 +298,7 @@ Gmail: <b>ankitsingh926413@gmail.com</b>
 </div>
 
 <script>
-/* ================= FIREBASE CONFIG ================= -->
+/* ================= FIREBASE CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",
   authDomain: "toppersewingmachine.firebaseapp.com",
@@ -376,7 +375,6 @@ function googleSignIn(){
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   
-  // Using Redirect for mobile safety
   auth.signInWithRedirect(provider).catch(function(error){
     console.error(error);
     alert("❌ Google Login नहीं हुआ: " + error.message);
@@ -597,9 +595,12 @@ window.addEventListener("click", function(event){
   if(event.target === modal){ closeOrderForm(); }
 });
 
-document.getElementById("custPhone").addEventListener("input", function(){
-  this.value = this.value.replace(/[^0-9]/g,"").slice(0,10);
-});
+const custPhoneEl = document.getElementById("custPhone");
+if(custPhoneEl){
+  custPhoneEl.addEventListener("input", function(){
+    this.value = this.value.replace(/[^0-9]/g,"").slice(0,10);
+  });
+}
 
 function escapeHtml(str){
   return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
@@ -610,5 +611,4 @@ function escapeAttr(str){
 </script>
 
 </body>
-                  </html>
-  
+</html>
