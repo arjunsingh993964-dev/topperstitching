@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Topper Sewing Machine Shopping</title>
 
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -325,7 +326,11 @@ let userLocationLink = "उपलब्ध नहीं (GPS अनुमति 
 let ordersListenerAttached = false;
 
 // Handle Redirect Login Result safely on load
-auth.getRedirectResult().catch(function(error) {
+auth.getRedirectResult().then(function(result) {
+    if (result && result.user) {
+        console.log("Logged in successfully:", result.user.email);
+    }
+}).catch(function(error) {
     console.error("Redirect Error:", error);
 });
 
@@ -412,11 +417,13 @@ if(tableSliderTrack){
   tableSliderTrack.addEventListener("scroll", function(){
     const scrollLeft = tableSliderTrack.scrollLeft;
     const slideWidth = tableSliderTrack.clientWidth;
-    const index = Math.round(scrollLeft / slideWidth);
-    const tableColors = ["Light Wooden", "Grey Wooden", "Light Dark Wooden", "Dark Wooden"];
-    const colorEl = document.getElementById("selectedTableColorText");
-    if(colorEl && tableColors[index]){
-      colorEl.innerText = tableColors[index];
+    if(slideWidth > 0){
+      const index = Math.round(scrollLeft / slideWidth);
+      const tableColors = ["Light Wooden", "Grey Wooden", "Light Dark Wooden", "Dark Wooden"];
+      const colorEl = document.getElementById("selectedTableColorText");
+      if(colorEl && tableColors[index]){
+        colorEl.innerText = tableColors[index];
+      }
     }
   });
 }
@@ -431,7 +438,9 @@ function slideImages(sliderId, direction){
 function getSelectedTableColor(){
   const track = document.getElementById("tableSlider");
   if(!track) return "Light Wooden";
-  const index = Math.round(track.scrollLeft / track.clientWidth);
+  const slideWidth = track.clientWidth;
+  if(slideWidth === 0) return "Light Wooden";
+  const index = Math.round(track.scrollLeft / slideWidth);
   const tableColors = ["Light Wooden", "Grey Wooden", "Light Dark Wooden", "Dark Wooden"];
   return tableColors[index] || "Light Wooden";
 }
@@ -478,9 +487,15 @@ function closeOrderForm(){
 }
 
 async function submitOnlineOrder(){
-  const name = document.getElementById("custName").value.trim();
-  const phone = document.getElementById("custPhone").value.trim();
-  const address = document.getElementById("custAddress").value.trim();
+  const nameInput = document.getElementById("custName");
+  const phoneInput = document.getElementById("custPhone");
+  const addressInput = document.getElementById("custAddress");
+
+  if(!nameInput || !phoneInput || !addressInput) return;
+
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const address = addressInput.value.trim();
 
   if(!currentUser){ alert("कृपया पहले Login करें!"); return; }
   if(!name || !phone || !address){ alert("कृपया अपनी सभी जानकारी भरें!"); return; }
@@ -512,9 +527,9 @@ async function submitOnlineOrder(){
 
     const message = "🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n🆔 *Order ID:* " + orderId + "\n\n📦 *सामान:* " + selectedProduct + "\n💰 *कीमत:* ₹" + Number(selectedPrice).toLocaleString("en-IN") + "\n\n👤 *नाम:* " + name + "\n📞 *फ़ोन:* " + phone + "\n🏠 *पता:* " + address + "\n\n📍 *लोकेशन:* " + userLocationLink;
 
-    document.getElementById("custName").value = "";
-    document.getElementById("custPhone").value = "";
-    document.getElementById("custAddress").value = "";
+    nameInput.value = "";
+    phoneInput.value = "";
+    addressInput.value = "";
     closeOrderForm();
 
     alert("✅ आपका Order सफलतापूर्वक सेव हो गया!\nOrder ID: " + orderId);
@@ -529,6 +544,7 @@ async function submitOnlineOrder(){
 
 function loadUserOrders(userId){
   const ordersList = document.getElementById("ordersList");
+  if(!ordersList) return;
   if(ordersListenerAttached){ db.ref("orders").off(); }
   ordersListenerAttached = true;
 
@@ -611,4 +627,5 @@ function escapeAttr(str){
 </script>
 
 </body>
-</html>
+  </html>
+  
