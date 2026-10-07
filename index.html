@@ -103,9 +103,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .avatar-close{width:100%;margin-top:15px;padding:10px;border:0;border-radius:7px;background:#d32f2f;color:#fff;font-weight:bold;font-size:14px;cursor:pointer}
 
 .auth-error{display:none;background:#ffebee;color:#b71c1c;padding:10px;margin:12px 16px;border-radius:8px;font-size:12px;text-align:center}
+
 .empty-orders{text-align:center;color:#777;margin-top:30px}
 
-/* ================= CUSTOM APP MESSAGE ================= */
+/* ================= APP MESSAGE ================= */
 
 #appMessageBox{
  position:fixed;
@@ -164,6 +165,40 @@ button:disabled{opacity:.7;cursor:not-allowed}
  cursor:pointer;
 }
 
+/* ================= AUTH STARTUP ================= */
+
+#authLoading{
+ position:fixed;
+ inset:0;
+ z-index:999998;
+ background:rgba(255,255,255,.96);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ transition:opacity .25s ease;
+}
+
+.auth-loader{
+ width:42px;
+ height:42px;
+ border:4px solid #e0e0e0;
+ border-top-color:#1565c0;
+ border-radius:50%;
+ animation:authSpin .8s linear infinite;
+}
+
+@keyframes authSpin{
+ to{transform:rotate(360deg)}
+}
+
+.auth-loading-text{
+ margin-top:12px;
+ color:#1a237e;
+ font-size:14px;
+ font-weight:bold;
+}
+
 @media(max-width:500px){
  .brand-title{font-size:18px}
  .brand-subtitle{font-size:10px}
@@ -175,13 +210,23 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <body>
 
+<!-- AUTH LOADING -->
+<div id="authLoading">
+ <div class="auth-loader"></div>
+ <div class="auth-loading-text">Account लोड हो रहा है...</div>
+</div>
+
 <header>
 <div>
 <div class="brand-title">TOPPER STITCHING</div>
 <div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>
 </div>
 
-<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">Sign In</button>
+<button id="authBtn"
+class="auth-header-btn"
+onclick="handleAuthAction()">
+Sign In
+</button>
 </header>
 
 <div id="authError" class="auth-error"></div>
@@ -204,7 +249,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="card-details">
 <h3>Topper SV Tailor</h3>
 <div class="price">₹4,500</div>
-
 <div class="specs">
 <div><span>ब्रांड:</span> Topper Stitching</div>
 <div><span>मॉडल:</span> SV tailor</div>
@@ -232,7 +276,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="card-details">
 <h3>Topper SV Tailor Deluxe</h3>
 <div class="price">₹4,500</div>
-
 <div class="specs">
 <div><span>ब्रांड:</span> Topper Stitching</div>
 <div><span>मॉडल:</span> SV tailor delox</div>
@@ -260,7 +303,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="card-details">
 <h3>Bag Closer Single Needle</h3>
 <div class="price">₹5,800</div>
-
 <div class="specs">
 <div><span>ब्रांड:</span> Topper Stitching</div>
 <div><span>मॉडल:</span> single nidile</div>
@@ -288,7 +330,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="card-details">
 <h3>Topper TA1 Model</h3>
 <div class="price">₹6,000</div>
-
 <div class="specs">
 <div><span>ब्रांड:</span> Topper Stitching</div>
 <div><span>मॉडल:</span> umbrella</div>
@@ -425,13 +466,15 @@ Gmail: <b>ankitsingh926413@gmail.com</b>
 
 <div class="profile-photo-wrap">
 
-<img id="profilePageImg" src="u1.png" class="profile-img" alt="Profile">
+<img id="profilePageImg"
+src="u1.png"
+class="profile-img"
+alt="Profile">
 
 <button
 class="profile-edit-btn"
 type="button"
-onclick="openAvatarPicker()"
-aria-label="Profile photo बदलें">
+onclick="openAvatarPicker()">
 ✏️
 </button>
 
@@ -441,8 +484,7 @@ aria-label="Profile photo बदलें">
 Guest User
 </h3>
 
-<p
-id="profileEmail"
+<p id="profileEmail"
 style="color:#666;font-size:13px;margin-top:4px">
 Google Account Not Connected
 </p>
@@ -580,7 +622,7 @@ onclick="payViaUpiIntent()">
 </button>
 
 <p style="font-size:12px;color:#777;margin-top:8px">
-Payment के बाद वापस website पर आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
+Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
 </p>
 
 </div>
@@ -647,7 +689,7 @@ Profile
 
 <script>
 
-/* ================= FIREBASE CONFIG ================= */
+/* ================= FIREBASE ================= */
 
 const firebaseConfig={
 
@@ -669,23 +711,22 @@ const firebaseConfig={
 
 };
 
-
-if(!firebase.apps.length)
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+ firebase.initializeApp(firebaseConfig);
+}
 
 const auth=firebase.auth();
 const db=firebase.database();
 
-
-console.log(
- "Current website domain:",
- location.hostname
-);
-
-console.log(
- "Current website URL:",
- location.href
-);
+/*
+ * Firebase login को browser/app में persistent रखा जाएगा।
+ * इससे ऐप दोबारा खोलने पर पुराना account जल्दी मिल जाता है।
+ */
+auth.setPersistence(
+ firebase.auth.Auth.Persistence.LOCAL
+).catch(function(error){
+ console.error("Auth persistence error:",error);
+});
 
 
 let currentUser=null;
@@ -694,18 +735,18 @@ let selectedPrice="";
 let userLocationLink="उपलब्ध नहीं (GPS अनुमति दें)";
 let ordersQuery=null;
 let authBusy=false;
+let authStateReady=false;
 
 const $=id=>document.getElementById(id);
 
 
-/* ================= CUSTOM APP MESSAGE ================= */
+/* ================= CUSTOM MESSAGE ================= */
 
 function showAppMessage(message,icon="⚠️"){
 
  const old=document.getElementById("appMessageBox");
 
- if(old)
- old.remove();
+ if(old) old.remove();
 
  const box=document.createElement("div");
 
@@ -754,11 +795,8 @@ function showAuthError(message){
  el.style.display="block";
 
  setTimeout(()=>{
-
    el.style.display="none";
-
  },7000);
-
 }
 
 
@@ -768,7 +806,6 @@ function hideAuthError(){
 
  el.style.display="none";
  el.textContent="";
-
 }
 
 
@@ -783,7 +820,46 @@ function setAuthButtonsBusy(busy,text){
    $("profileAuthBtn").innerText=text;
 
  }
+}
 
+
+/* ================= AUTH UI ================= */
+
+function hideAuthLoading(){
+
+ const loader=$("authLoading");
+
+ if(!loader)
+ return;
+
+ loader.style.opacity="0";
+
+ setTimeout(()=>{
+   if(loader)
+   loader.style.display="none";
+ },250);
+
+}
+
+
+/*
+ * सबसे जरूरी हिस्सा:
+ * Firebase का onAuthStateChanged आने में कुछ समय लग सकता है।
+ * इसलिए currentUser को तुरंत check किया जाता है।
+ */
+function initializeExistingUser(){
+
+ const immediateUser=auth.currentUser;
+
+ if(immediateUser){
+
+   currentUser=immediateUser;
+
+   updateAuthUI();
+
+   loadUserOrders(immediateUser.uid);
+
+ }
 }
 
 
@@ -792,8 +868,10 @@ function setAuthButtonsBusy(busy,text){
 auth.onAuthStateChanged(function(user){
 
  currentUser=user||null;
+ authStateReady=true;
 
  updateAuthUI();
+ hideAuthLoading();
 
  if(user){
 
@@ -808,6 +886,19 @@ auth.onAuthStateChanged(function(user){
 });
 
 
+/*
+ * App/WebView खुलते ही पहले से saved Firebase account
+ * को तुरंत पढ़ने की कोशिश।
+ */
+setTimeout(function(){
+
+ initializeExistingUser();
+
+},0);
+
+
+/* ================= REDIRECT RESULT ================= */
+
 auth.getRedirectResult().then(function(result){
 
  if(result && result.user){
@@ -818,7 +909,6 @@ auth.getRedirectResult().then(function(result){
    );
 
    hideAuthError();
-
  }
 
 }).catch(function(error){
@@ -929,11 +1019,7 @@ function handleAuthAction(){
 }
 
 
-/* =========================================================
-   GOOGLE SIGN IN
-   ANDROID = NATIVE GOOGLE ACCOUNT SELECTOR
-   BROWSER = FIREBASE POPUP
-   ========================================================= */
+/* ================= GOOGLE LOGIN ================= */
 
 async function googleSignIn(){
 
@@ -950,11 +1036,11 @@ async function googleSignIn(){
  );
 
 
- /* ================= ANDROID NATIVE LOGIN ================= */
+ /* ===== ANDROID NATIVE GOOGLE ===== */
 
  if(
    window.AndroidApp &&
-   typeof window.AndroidApp.signIn === "function"
+   typeof window.AndroidApp.signIn==="function"
  ){
 
    console.log(
@@ -967,7 +1053,7 @@ async function googleSignIn(){
  }
 
 
- /* ================= NORMAL BROWSER LOGIN ================= */
+ /* ===== BROWSER GOOGLE ===== */
 
  const provider=
    new firebase.auth.GoogleAuthProvider();
@@ -1005,7 +1091,7 @@ async function googleSignIn(){
    ){
 
      showAuthError(
-       "❌ Google popup browser ने block किया। Chrome में इस site के popups allow करें और फिर दोबारा Login दबाएँ।"
+       "❌ Google popup browser ने block किया।"
      );
 
    }else if(
@@ -1014,7 +1100,7 @@ async function googleSignIn(){
    ){
 
      showAuthError(
-       "Google Login window बंद कर दी गई। फिर से Login दबाएँ।"
+       "Google Login window बंद कर दी गई।"
      );
 
    }else{
@@ -1028,7 +1114,7 @@ async function googleSignIn(){
 }
 
 
-/* ================= NATIVE GOOGLE LOGIN CALLBACK ================= */
+/* ================= NATIVE GOOGLE CALLBACK ================= */
 
 window.nativeGoogleLogin=
 async function(idToken){
@@ -1053,9 +1139,15 @@ async function(idToken){
      result.user
    );
 
+   currentUser=result.user;
+
    authBusy=false;
+
    hideAuthError();
+
    updateAuthUI();
+
+   hideAuthLoading();
 
  }catch(error){
 
@@ -1065,6 +1157,7 @@ async function(idToken){
    );
 
    authBusy=false;
+
    updateAuthUI();
 
    handleAuthError(error);
@@ -1074,7 +1167,7 @@ async function(idToken){
 };
 
 
-/* ================= NATIVE GOOGLE LOGIN ERROR ================= */
+/* ================= NATIVE GOOGLE ERROR ================= */
 
 window.nativeGoogleLoginError=
 function(message){
@@ -1099,13 +1192,15 @@ function(message){
 };
 
 
-/* ================= GOOGLE SIGN OUT ================= */
+/* ================= LOGOUT ================= */
 
 function googleSignOut(){
 
  auth.signOut()
 
  .then(()=>{
+
+   currentUser=null;
 
    updateAuthUI();
 
@@ -1129,7 +1224,7 @@ function googleSignOut(){
 }
 
 
-/* ================= AUTH ERROR HANDLER ================= */
+/* ================= AUTH ERROR ================= */
 
 function handleAuthError(error){
 
@@ -1160,7 +1255,7 @@ function handleAuthError(error){
  ){
 
    msg=
-     "Firebase Authentication में Google provider अभी enabled नहीं है।";
+     "Firebase Authentication में Google provider enabled नहीं है।";
 
  }
 
@@ -1193,7 +1288,7 @@ function handleAuthError(error){
 }
 
 
-/* ================= PROFILE AVATARS ================= */
+/* ================= AVATAR ================= */
 
 function openAvatarPicker(){
  $("avatarModal").style.display="block";
@@ -1288,7 +1383,37 @@ if(navigator.geolocation){
 
 /* ================= WHATSAPP ================= */
 
+/*
+ * Android App:
+ * WhatsApp अब WebView के अंदर नहीं खुलेगा।
+ * Android native Intent से WhatsApp खुलेगा।
+ *
+ * Browser:
+ * सामान्य wa.me fallback रहेगा।
+ */
+
 function openWhatsApp(message){
+
+ /* ===== ANDROID NATIVE WHATSAPP ===== */
+
+ if(
+   window.AndroidApp &&
+   typeof window.AndroidApp.openWhatsApp==="function"
+ ){
+
+   console.log(
+     "Opening Native WhatsApp..."
+   );
+
+   window.AndroidApp.openWhatsApp(
+     message
+   );
+
+   return;
+ }
+
+
+ /* ===== NORMAL WEB FALLBACK ===== */
 
  const url=
    'https://wa.me/919264137710?text='+
@@ -1398,7 +1523,7 @@ function getSelectedTableColor(){
 }
 
 
-/* ================= ORDER LOGIN CHECK ================= */
+/* ================= LOGIN CHECK ================= */
 
 function requireLogin(){
 
@@ -1421,7 +1546,7 @@ function requireLogin(){
 }
 
 
-/* ================= ORDER MODAL ================= */
+/* ================= ORDER FORM ================= */
 
 function openOrderForm(productName,price){
 
@@ -1508,26 +1633,16 @@ function payViaUpiIntent(){
  }
 
  const name=
-   $("custName")
-   .value
-   .trim();
+   $("custName").value.trim();
 
  const phone=
-   $("custPhone")
-   .value
-   .trim();
+   $("custPhone").value.trim();
 
  const address=
-   $("custAddress")
-   .value
-   .trim();
+   $("custAddress").value.trim();
 
 
- if(
-   !name||
-   !phone||
-   !address
- ){
+ if(!name||!phone||!address){
 
    showAppMessage(
      'पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।',
@@ -1539,9 +1654,7 @@ function payViaUpiIntent(){
  }
 
 
- if(
-   !/^\d{10}$/.test(phone)
- ){
+ if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
      'कृपया 10 अंकों का सही मोबाइल नंबर डालें!',
@@ -1554,27 +1667,18 @@ function payViaUpiIntent(){
 
 
  sessionStorage.setItem(
-
    'pendingUpiWhatsApp',
-
    JSON.stringify({
 
      product:selectedProduct,
-
      price:amount,
-
      name:name,
-
      phone:phone,
-
      address:address,
-
      location:userLocationLink,
-
      startedAt:Date.now()
 
    })
-
  );
 
 
@@ -1594,11 +1698,11 @@ function payViaUpiIntent(){
    '&cu=INR';
 
 
- /* ================= ANDROID NATIVE UPI ================= */
+ /* ===== ANDROID NATIVE UPI ===== */
 
  if(
    window.AndroidApp &&
-   typeof window.AndroidApp.openUpi === "function"
+   typeof window.AndroidApp.openUpi==="function"
  ){
 
    console.log(
@@ -1614,15 +1718,14 @@ function payViaUpiIntent(){
  }
 
 
- /* ================= BROWSER FALLBACK ================= */
+ /* ===== BROWSER FALLBACK ===== */
 
- window.location.href=
-   upiUrl;
+ window.location.href=upiUrl;
 
 }
 
 
-/* ================= NATIVE UPI ERROR CALLBACK ================= */
+/* ================= UPI ERROR ================= */
 
 window.nativeUpiError=
 function(){
@@ -1635,7 +1738,7 @@ function(){
 };
 
 
-/* ================= PENDING UPI ORDER ================= */
+/* ================= PENDING UPI ================= */
 
 function sendPendingUpiOrderToWhatsApp(){
 
@@ -1772,11 +1875,7 @@ async function submitOnlineOrder(){
    $("utrNumber").value.trim();
 
 
- if(
-   !name||
-   !phone||
-   !address
- ){
+ if(!name||!phone||!address){
 
    showAppMessage(
      'कृपया अपनी सभी जानकारी भरें!',
@@ -1788,9 +1887,7 @@ async function submitOnlineOrder(){
  }
 
 
- if(
-   !/^\d{10}$/.test(phone)
- ){
+ if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
      'कृपया 10 अंकों का सही मोबाइल नंबर डालें!',
@@ -1970,7 +2067,7 @@ async function submitOnlineOrder(){
 }
 
 
-/* ================= USER ORDERS ================= */
+/* ================= ORDERS ================= */
 
 function clearOrdersListener(){
 
@@ -2255,7 +2352,7 @@ function buyTableNow(){
 }
 
 
-/* ================= MODAL / INPUT ================= */
+/* ================= MODAL ================= */
 
 window.addEventListener(
  'click',
@@ -2293,30 +2390,11 @@ function escapeHtml(value){
 
  return String(value)
 
-   .replace(
-     /&/g,
-     '&amp;'
-   )
-
-   .replace(
-     /</g,
-     '&lt;'
-   )
-
-   .replace(
-     />/g,
-     '&gt;'
-   )
-
-   .replace(
-     /"/g,
-     '&quot;'
-   )
-
-   .replace(
-     /'/g,
-     '&#039;'
-   );
+   .replace(/&/g,'&amp;')
+   .replace(/</g,'&lt;')
+   .replace(/>/g,'&gt;')
+   .replace(/"/g,'&quot;')
+   .replace(/'/g,'&#039;');
 
 }
 
@@ -2325,25 +2403,10 @@ function escapeAttribute(value){
 
  return String(value)
 
-   .replace(
-     /&/g,
-     '&amp;'
-   )
-
-   .replace(
-     /"/g,
-     '&quot;'
-   )
-
-   .replace(
-     /</g,
-     '&lt;'
-   )
-
-   .replace(
-     />/g,
-     '&gt;'
-   );
+   .replace(/&/g,'&amp;')
+   .replace(/"/g,'&quot;')
+   .replace(/</g,'&lt;')
+   .replace(/>/g,'&gt;');
 
 }
 
