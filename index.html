@@ -97,7 +97,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .avatar-close{width:100%;margin-top:15px;padding:10px;border:0;border-radius:7px;background:#d32f2f;color:#fff;font-weight:bold;font-size:14px;cursor:pointer}
 
 .auth-error{display:none;background:#ffebee;color:#b71c1c;padding:10px;margin:12px 16px;border-radius:8px;font-size:12px;text-align:center}
-
 .empty-orders{text-align:center;color:#777;margin-top:30px}
 
 #appMessageBox{position:fixed;inset:0;z-index:999999}
@@ -248,12 +247,29 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div>
 <div class="slider-container">
 <button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>
+
 <div class="slider-track" id="tableSlider">
-<div class="slide"><img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Wooden</div></div>
-<div class="slide"><img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'"><div class="slide-name">Grey Wooden</div></div>
-<div class="slide"><img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Dark Wooden</div></div>
-<div class="slide"><img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Dark Wooden</div></div>
+<div class="slide">
+<img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'">
+<div class="slide-name">Light Wooden</div>
 </div>
+
+<div class="slide">
+<img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'">
+<div class="slide-name">Grey Wooden</div>
+</div>
+
+<div class="slide">
+<img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'">
+<div class="slide-name">Light Dark Wooden</div>
+</div>
+
+<div class="slide">
+<img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'">
+<div class="slide-name">Dark Wooden</div>
+</div>
+</div>
+
 <button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>
 </div>
 
@@ -291,6 +307,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </div>
 </div>
 </div>
+
 <div>
 <button class="btn-online" onclick="openOrderForm('Anis Scissors (Size 10)','300')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Anis Scissors (Size 10)','300')">📲 व्हाट्सएप पर खरीदें</button>
@@ -321,6 +338,7 @@ Gmail: <b>ankitsingh926413@gmail.com</b>
 
 <div id="profileView" class="view-section">
 <div class="profile-container">
+
 <div class="profile-photo-wrap">
 <img id="profilePageImg" src="u1.png" class="profile-img" alt="Profile">
 <button class="profile-edit-btn" type="button" onclick="openAvatarPicker()">✏️</button>
@@ -337,11 +355,13 @@ Google Account Not Connected
 Google Account से लॉगिन करें
 </button>
 </div>
+
 </div>
 </div>
 
 <div id="avatarModal" class="avatar-modal">
 <div class="avatar-box">
+
 <h3>Profile Photo चुनें</h3>
 
 <div class="avatar-grid">
@@ -354,6 +374,7 @@ Google Account से लॉगिन करें
 </div>
 
 <button class="avatar-close" type="button" onclick="closeAvatarPicker()">बंद करें</button>
+
 </div>
 </div>
 
@@ -386,6 +407,7 @@ Google Account से लॉगिन करें
 </div>
 
 <div class="qr-box">
+
 <p style="font-size:15px;font-weight:700;color:#333">
 💳 नीचे Pay बटन दबाकर उपलब्ध UPI App चुनें और भुगतान करें।
 </p>
@@ -397,6 +419,7 @@ Google Account से लॉगिन करें
 <p style="font-size:12px;color:#777;margin-top:8px">
 Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
 </p>
+
 </div>
 
 <div class="form-group">
@@ -414,15 +437,19 @@ Payment के बाद वापस ऐप में आने पर WhatsApp
 </div>
 
 <div class="bottom-nav">
+
 <button class="nav-item active" onclick="switchTab('homeView',this)">
 <span class="icon">🏠</span>Home
 </button>
+
 <button class="nav-item" onclick="switchTab('ordersView',this)">
 <span class="icon">📦</span>Orders
 </button>
+
 <button class="nav-item" onclick="switchTab('profileView',this)">
 <span class="icon">👤</span>Profile
 </button>
+
 </div>
 
 <script>
@@ -460,6 +487,7 @@ let userLocationLink="उपलब्ध नहीं (GPS अनुमति �
 let ordersQuery=null;
 let authBusy=false;
 let authStateReady=false;
+let whatsappOpening=false;
 
 const $=id=>document.getElementById(id);
 
@@ -879,11 +907,11 @@ if(navigator.geolocation){
 }
 
 
-/* ================= WHATSAPP ================= */
+/* ================= WHATSAPP FIXED ================= */
 
 function openWhatsApp(message){
 
- const text=String(message||"");
+ const text=String(message||"").trim();
 
  if(!text){
    showAppMessage(
@@ -893,16 +921,28 @@ function openWhatsApp(message){
    return;
  }
 
- /* ===== NATIVE ANDROID APP ===== */
+ if(whatsappOpening){
+   return;
+ }
+
+ whatsappOpening=true;
+
+ const bridge=window.AndroidApp;
 
  if(
-   window.AndroidApp &&
-   typeof window.AndroidApp.openWhatsApp==="function"
+   bridge &&
+   typeof bridge.openWhatsApp==="function"
  ){
 
    try{
 
-     window.AndroidApp.openWhatsApp(text);
+     bridge.openWhatsApp(text);
+
+     setTimeout(function(){
+       whatsappOpening=false;
+     },1500);
+
+     return;
 
    }catch(error){
 
@@ -911,14 +951,15 @@ function openWhatsApp(message){
        error
      );
 
+     whatsappOpening=false;
+
      showAppMessage(
        "WhatsApp खोलने में समस्या हुई।",
        "❌"
      );
 
+     return;
    }
-
-   return;
  }
 
 
@@ -928,18 +969,51 @@ function openWhatsApp(message){
    "https://wa.me/919264137710?text="+
    encodeURIComponent(text);
 
- window.location.href=url;
+ try{
+
+   window.location.href=url;
+
+ }catch(error){
+
+   console.error(
+     "Browser WhatsApp Error:",
+     error
+   );
+
+   showAppMessage(
+     "WhatsApp खोलने में समस्या हुई।",
+     "❌"
+   );
+
+ }finally{
+
+   setTimeout(function(){
+     whatsappOpening=false;
+   },1500);
+
+ }
 }
 
 
 window.nativeWhatsAppError=function(){
 
+ whatsappOpening=false;
+
  showAppMessage(
-   "WhatsApp इस डिवाइस पर उपलब्ध नहीं है। कृपया WhatsApp install करें।",
+   "WhatsApp इस डिवाइस पर उपलब्ध नहीं है। कृपया WhatsApp install करके फिर कोशिश करें।",
    "📱"
  );
 };
 
+
+window.nativeWhatsAppOpened=function(){
+
+ whatsappOpening=false;
+
+};
+
+
+/* ================= BUY NOW ================= */
 
 function buyNow(productName,price){
 
@@ -1165,14 +1239,26 @@ function payViaUpiIntent(){
 
      console.error("Native UPI Error:",error);
 
-     window.nativeUpiError();
+     if(typeof window.nativeUpiError==="function"){
+       window.nativeUpiError();
+     }
 
    }
 
    return;
  }
 
- window.location.href=upiUrl;
+ try{
+
+   window.location.href=upiUrl;
+
+ }catch(error){
+
+   console.error("UPI Error:",error);
+
+   window.nativeUpiError();
+
+ }
 }
 
 
@@ -1373,7 +1459,9 @@ async function submitOnlineOrder(){
      "✅"
    );
 
-   openWhatsApp(message);
+   setTimeout(function(){
+     openWhatsApp(message);
+   },300);
 
  }catch(error){
 
