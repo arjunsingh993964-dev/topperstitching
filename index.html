@@ -27,29 +27,23 @@ header{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:15p
 .active-view{display:block}
 
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;padding:16px;max-width:1200px;margin:auto}
-
 .card{background:#fff;border-radius:12px;padding:15px;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #e0e0e0;display:flex;flex-direction:column;justify-content:space-between}
-
 .img-container{position:relative;width:100%;height:200px;background:#000;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .img-container img{max-width:100%;max-height:100%;object-fit:contain}
-
 .slider-container{position:relative;width:100%;height:200px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #eee}
 .slider-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth}
 .slider-track::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;background:#fff;position:relative}
 .slide img{max-width:100%;max-height:100%;object-fit:contain}
 .slide-name{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;font-size:11px;border-radius:4px}
-
 .slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border:0;cursor:pointer;padding:8px 10px;z-index:10;font-size:14px;border-radius:50%}
 .slider-prev{left:5px}
 .slider-next{right:5px}
-
 .card-details{margin-top:12px}
 .card h3{font-size:17px;color:#1a237e;margin-bottom:6px}
 .price{color:#2e7d32;font-weight:bold;font-size:20px;margin-bottom:8px}
 .specs{font-size:12px;color:#555;line-height:1.6;margin-bottom:12px;background:#f9f9f9;padding:8px 10px;border-radius:6px}
 .specs span{font-weight:bold;color:#333}
-
 .btn-buy,.btn-online,.btn-submit,.btn-close{border:0;padding:11px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;font-size:14px;display:block;margin-top:6px}
 .btn-buy{background:#25d366;color:#fff}
 .btn-online{background:#ff9800;color:#fff}
@@ -106,114 +100,33 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 .empty-orders{text-align:center;color:#777;margin-top:30px}
 
-/* ================= APP MESSAGE ================= */
+#appMessageBox{position:fixed;inset:0;z-index:999999}
+#appMessageBox .app-message-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px}
+#appMessageBox .app-message-card{width:100%;max-width:360px;background:#fff;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,.3);animation:appMessageIn .18s ease-out}
+@keyframes appMessageIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.app-message-icon{font-size:40px;margin-bottom:10px}
+.app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
+.app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
 
-#appMessageBox{
- position:fixed;
- inset:0;
- z-index:999999;
-}
-
-#appMessageBox .app-message-overlay{
- position:fixed;
- inset:0;
- background:rgba(0,0,0,.55);
- display:flex;
- align-items:center;
- justify-content:center;
- padding:20px;
-}
-
-#appMessageBox .app-message-card{
- width:100%;
- max-width:360px;
- background:#fff;
- border-radius:18px;
- padding:24px 20px;
- text-align:center;
- box-shadow:0 10px 35px rgba(0,0,0,.3);
- animation:appMessageIn .18s ease-out;
-}
-
-@keyframes appMessageIn{
- from{transform:scale(.92);opacity:0}
- to{transform:scale(1);opacity:1}
-}
-
-.app-message-icon{
- font-size:40px;
- margin-bottom:10px;
-}
-
-.app-message-text{
- font-size:17px;
- font-weight:600;
- color:#222;
- line-height:1.5;
- margin-bottom:20px;
- white-space:pre-line;
-}
-
-.app-message-ok{
- border:0;
- background:#1565c0;
- color:#fff;
- padding:11px 32px;
- border-radius:10px;
- font-size:15px;
- font-weight:bold;
- cursor:pointer;
-}
-
-/* ================= AUTH STARTUP ================= */
-
-#authLoading{
- position:fixed;
- inset:0;
- z-index:999998;
- background:rgba(255,255,255,.96);
- display:flex;
- align-items:center;
- justify-content:center;
- flex-direction:column;
- transition:opacity .25s ease;
-}
-
-.auth-loader{
- width:42px;
- height:42px;
- border:4px solid #e0e0e0;
- border-top-color:#1565c0;
- border-radius:50%;
- animation:authSpin .8s linear infinite;
-}
-
-@keyframes authSpin{
- to{transform:rotate(360deg)}
-}
-
-.auth-loading-text{
- margin-top:12px;
- color:#1a237e;
- font-size:14px;
- font-weight:bold;
-}
+#authLoading{position:fixed;inset:0;z-index:999998;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .25s ease}
+.auth-loader{width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
+@keyframes authSpin{to{transform:rotate(360deg)}}
+.auth-loading-text{margin-top:12px;color:#1a237e;font-size:14px;font-weight:bold}
 
 @media(max-width:500px){
- .brand-title{font-size:18px}
- .brand-subtitle{font-size:10px}
- .modal-content{margin:3% auto;padding:15px}
- .qr-box img{width:200px;height:200px}
+.brand-title{font-size:18px}
+.brand-subtitle{font-size:10px}
+.modal-content{margin:3% auto;padding:15px}
+.qr-box img{width:200px;height:200px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- AUTH LOADING -->
 <div id="authLoading">
- <div class="auth-loader"></div>
- <div class="auth-loading-text">Account लोड हो रहा है...</div>
+<div class="auth-loader"></div>
+<div class="auth-loading-text">Account लोड हो रहा है...</div>
 </div>
 
 <header>
@@ -221,12 +134,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="brand-title">TOPPER STITCHING</div>
 <div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>
 </div>
-
-<button id="authBtn"
-class="auth-header-btn"
-onclick="handleAuthAction()">
-Sign In
-</button>
+<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">Sign In</button>
 </header>
 
 <div id="authError" class="auth-error"></div>
@@ -245,7 +153,6 @@ Sign In
 <div class="img-container">
 <img src="IMG_20260829_174914.png" alt="Topper SV Tailor" onerror="this.style.display='none'">
 </div>
-
 <div class="card-details">
 <h3>Topper SV Tailor</h3>
 <div class="price">₹4,500</div>
@@ -259,20 +166,17 @@ Sign In
 </div>
 </div>
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Topper SV Tailor','4500')">📲 व्हाट्सएप पर खरीदें</button>
 </div>
 </div>
 
-
 <div class="card">
 <div>
 <div class="img-container">
 <img src="IMG_20260829_175005.png" alt="Topper SV Tailor Deluxe" onerror="this.style.display='none'">
 </div>
-
 <div class="card-details">
 <h3>Topper SV Tailor Deluxe</h3>
 <div class="price">₹4,500</div>
@@ -286,20 +190,17 @@ Sign In
 </div>
 </div>
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Topper SV Tailor Deluxe','4500')">📲 व्हाट्सएप पर खरीदें</button>
 </div>
 </div>
 
-
 <div class="card">
 <div>
 <div class="img-container">
 <img src="IMG_20260829_174949.png" alt="Bag Closer Single Needle" onerror="this.style.display='none'">
 </div>
-
 <div class="card-details">
 <h3>Bag Closer Single Needle</h3>
 <div class="price">₹5,800</div>
@@ -313,20 +214,17 @@ Sign In
 </div>
 </div>
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Bag Closer Single Needle','5800')">📲 व्हाट्सएप पर खरीदें</button>
 </div>
 </div>
 
-
 <div class="card">
 <div>
 <div class="img-container">
 <img src="file_00000000a1f88211baaa2ea57e9f39f9.png" alt="Topper TA1" onerror="this.style.display='none'">
 </div>
-
 <div class="card-details">
 <h3>Topper TA1 Model</h3>
 <div class="price">₹6,000</div>
@@ -340,53 +238,28 @@ Sign In
 </div>
 </div>
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Topper TA1 Model','6000')">📲 व्हाट्सएप पर खरीदें</button>
 </div>
 </div>
 
-
 <div class="card">
 <div>
-
 <div class="slider-container">
-
 <button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>
-
 <div class="slider-track" id="tableSlider">
-
-<div class="slide">
-<img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Light Wooden</div>
+<div class="slide"><img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Wooden</div></div>
+<div class="slide"><img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'"><div class="slide-name">Grey Wooden</div></div>
+<div class="slide"><img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Dark Wooden</div></div>
+<div class="slide"><img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Dark Wooden</div></div>
 </div>
-
-<div class="slide">
-<img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Grey Wooden</div>
-</div>
-
-<div class="slide">
-<img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Light Dark Wooden</div>
-</div>
-
-<div class="slide">
-<img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Dark Wooden</div>
-</div>
-
-</div>
-
 <button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>
-
 </div>
 
 <div class="card-details">
 <h3>Sewing Machine Top Table</h3>
 <div class="price">₹550</div>
-
 <div class="specs">
 <div><span>मॉडल:</span> SV / TA1</div>
 <div><span>कलर:</span> <span id="selectedTableColorText">Light Wooden</span></div>
@@ -394,7 +267,6 @@ Sign In
 <div><span>वारंटी / गारंटी:</span> None</div>
 </div>
 </div>
-
 </div>
 
 <div>
@@ -403,18 +275,14 @@ Sign In
 </div>
 </div>
 
-
 <div class="card">
 <div>
-
 <div class="img-container">
 <img src="IMG_20260829_174934.png" alt="Anis Scissors" onerror="this.style.display='none'">
 </div>
-
 <div class="card-details">
 <h3>Anis Scissors (Size 10)</h3>
 <div class="price">₹300</div>
-
 <div class="specs">
 <div><span>ब्रांड:</span> Anis Scissors</div>
 <div><span>साइज:</span> Size 10</div>
@@ -422,9 +290,7 @@ Sign In
 <div><span>वारंटी / गारंटी:</span> None</div>
 </div>
 </div>
-
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Anis Scissors (Size 10)','300')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Anis Scissors (Size 10)','300')">📲 व्हाट्सएप पर खरीदें</button>
@@ -444,115 +310,54 @@ Gmail: <b>ankitsingh926413@gmail.com</b>
 
 </div>
 
-
 <div id="ordersView" class="view-section">
-
 <div class="orders-container">
-
 <h2 class="orders-title">आपके ऑर्डर्स (My Orders)</h2>
-
 <div id="ordersList">
 <p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>
 </div>
-
 </div>
-
 </div>
-
 
 <div id="profileView" class="view-section">
-
 <div class="profile-container">
-
 <div class="profile-photo-wrap">
-
-<img id="profilePageImg"
-src="u1.png"
-class="profile-img"
-alt="Profile">
-
-<button
-class="profile-edit-btn"
-type="button"
-onclick="openAvatarPicker()">
-✏️
-</button>
-
+<img id="profilePageImg" src="u1.png" class="profile-img" alt="Profile">
+<button class="profile-edit-btn" type="button" onclick="openAvatarPicker()">✏️</button>
 </div>
 
-<h3 id="profileName" style="color:#1a237e">
-Guest User
-</h3>
+<h3 id="profileName" style="color:#1a237e">Guest User</h3>
 
-<p id="profileEmail"
-style="color:#666;font-size:13px;margin-top:4px">
+<p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">
 Google Account Not Connected
 </p>
 
 <div style="margin-top:20px">
-
-<button
-id="profileAuthBtn"
-class="btn-submit"
-onclick="googleSignIn()">
+<button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">
 Google Account से लॉगिन करें
 </button>
-
 </div>
-
 </div>
-
 </div>
-
 
 <div id="avatarModal" class="avatar-modal">
-
 <div class="avatar-box">
-
 <h3>Profile Photo चुनें</h3>
 
 <div class="avatar-grid">
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
-<img src="m1.png" alt="m1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
-<img src="m2.png" alt="m2">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
-<img src="m3.png" alt="m3">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
-<img src="m4.png" alt="m4">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
-<img src="f1.png" alt="f1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
-<img src="f2.png" alt="f2">
-</button>
-
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')"><img src="m1.png" alt="m1"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')"><img src="m2.png" alt="m2"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')"><img src="m3.png" alt="m3"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')"><img src="m4.png" alt="m4"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')"><img src="f1.png" alt="f1"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')"><img src="f2.png" alt="f2"></button>
 </div>
 
-<button
-class="avatar-close"
-type="button"
-onclick="closeAvatarPicker()">
-बंद करें
-</button>
-
+<button class="avatar-close" type="button" onclick="closeAvatarPicker()">बंद करें</button>
 </div>
-
 </div>
-
 
 <div id="orderModal" class="modal">
-
 <div class="modal-content">
 
 <h3>🛒 ऑनलाइन आर्डर और पेमेंट</h3>
@@ -566,149 +371,73 @@ onclick="closeAvatarPicker()">
 <p id="modalProductInfo"></p>
 
 <div class="form-group">
-
 <label>आपका पूरा नाम:</label>
-
-<input
-type="text"
-id="custName"
-placeholder="अपना नाम लिखें"
-autocomplete="name">
-
+<input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">
 </div>
 
-
 <div class="form-group">
-
 <label>मोबाइल नंबर:</label>
-
-<input
-type="tel"
-id="custPhone"
-placeholder="मोबाइल नंबर लिखें"
-inputmode="numeric"
-maxlength="10">
-
+<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
 </div>
-
 
 <div class="form-group">
-
 <label>पूरा पता:</label>
-
-<textarea
-id="custAddress"
-rows="3"
-placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज">
-</textarea>
-
+<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>
 </div>
-
 
 <div class="qr-box">
-
 <p style="font-size:15px;font-weight:700;color:#333">
 💳 नीचे Pay बटन दबाकर उपलब्ध UPI App चुनें और भुगतान करें।
 </p>
 
-<button
-type="button"
-class="btn-submit"
-style="margin-top:10px;background:#1565c0"
-onclick="payViaUpiIntent()">
-
+<button type="button" class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">
 💳 Online Pay ₹<span id="upiPayAmount">0</span>
-
 </button>
 
 <p style="font-size:12px;color:#777;margin-top:8px">
 Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
 </p>
-
 </div>
-
 
 <div class="form-group">
-
 <label>UTR / Transaction Number:</label>
-
-<input
-type="text"
-id="utrNumber"
-placeholder="Payment के बाद UTR नंबर डालें"
-autocomplete="off"
-inputmode="numeric"
-maxlength="40">
-
+<input type="text" id="utrNumber" placeholder="Payment के बाद UTR नंबर डालें" autocomplete="off" inputmode="numeric" maxlength="40">
 </div>
 
-
-<button
-id="onlineOrderBtn"
-class="btn-submit"
-onclick="submitOnlineOrder()">
+<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">
 💬 WhatsApp पर Order भेजें
 </button>
 
-<button
-class="btn-close"
-onclick="closeOrderForm()">
-रद्द करें
-</button>
+<button class="btn-close" onclick="closeOrderForm()">रद्द करें</button>
 
 </div>
-
 </div>
-
 
 <div class="bottom-nav">
-
-<button
-class="nav-item active"
-onclick="switchTab('homeView',this)">
-<span class="icon">🏠</span>
-Home
+<button class="nav-item active" onclick="switchTab('homeView',this)">
+<span class="icon">🏠</span>Home
 </button>
-
-<button
-class="nav-item"
-onclick="switchTab('ordersView',this)">
-<span class="icon">📦</span>
-Orders
+<button class="nav-item" onclick="switchTab('ordersView',this)">
+<span class="icon">📦</span>Orders
 </button>
-
-<button
-class="nav-item"
-onclick="switchTab('profileView',this)">
-<span class="icon">👤</span>
-Profile
+<button class="nav-item" onclick="switchTab('profileView',this)">
+<span class="icon">👤</span>Profile
 </button>
-
 </div>
-
 
 <script>
 
 /* ================= FIREBASE ================= */
 
 const firebaseConfig={
-
  apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",
-
  authDomain:"toppersewingmachine.firebaseapp.com",
-
  databaseURL:"https://toppersewingmachine-default-rtdb.firebaseio.com",
-
  projectId:"toppersewingmachine",
-
  storageBucket:"toppersewingmachine.firebasestorage.app",
-
  messagingSenderId:"281176461879",
-
  appId:"1:281176461879:web:97648170de01d8c975e5b2",
-
  measurementId:"G-GRP6EXGE3L"
-
 };
 
 if(!firebase.apps.length){
@@ -718,16 +447,11 @@ if(!firebase.apps.length){
 const auth=firebase.auth();
 const db=firebase.database();
 
-/*
- * Firebase login को browser/app में persistent रखा जाएगा।
- * इससे ऐप दोबारा खोलने पर पुराना account जल्दी मिल जाता है।
- */
 auth.setPersistence(
  firebase.auth.Auth.Persistence.LOCAL
 ).catch(function(error){
  console.error("Auth persistence error:",error);
 });
-
 
 let currentUser=null;
 let selectedProduct="";
@@ -745,52 +469,33 @@ const $=id=>document.getElementById(id);
 function showAppMessage(message,icon="⚠️"){
 
  const old=document.getElementById("appMessageBox");
-
- if(old) old.remove();
+ if(old)old.remove();
 
  const box=document.createElement("div");
-
  box.id="appMessageBox";
 
  box.innerHTML=`
-
  <div class="app-message-overlay">
-
    <div class="app-message-card">
-
-     <div class="app-message-icon">
-       ${escapeHtml(icon)}
-     </div>
-
-     <div class="app-message-text">
-       ${escapeHtml(message)}
-     </div>
-
-     <button
-       type="button"
-       class="app-message-ok"
+     <div class="app-message-icon">${escapeHtml(icon)}</div>
+     <div class="app-message-text">${escapeHtml(message)}</div>
+     <button type="button" class="app-message-ok"
        onclick="
-         const b=document.getElementById('appMessageBox');
-         if(b)b.remove();
-       ">
-       OK
-     </button>
-
+       const b=document.getElementById('appMessageBox');
+       if(b)b.remove();
+       ">OK</button>
    </div>
-
- </div>
- `;
+ </div>`;
 
  document.body.appendChild(box);
 }
 
 
-/* ================= AUTH ERROR ================= */
+/* ================= AUTH ================= */
 
 function showAuthError(message){
 
  const el=$("authError");
-
  el.textContent=message;
  el.style.display="block";
 
@@ -799,15 +504,12 @@ function showAuthError(message){
  },7000);
 }
 
-
 function hideAuthError(){
 
  const el=$("authError");
-
  el.style.display="none";
  el.textContent="";
 }
-
 
 function setAuthButtonsBusy(busy,text){
 
@@ -815,55 +517,34 @@ function setAuthButtonsBusy(busy,text){
  $("profileAuthBtn").disabled=busy;
 
  if(busy){
-
    $("authBtn").innerText=text;
    $("profileAuthBtn").innerText=text;
-
  }
 }
-
-
-/* ================= AUTH UI ================= */
 
 function hideAuthLoading(){
 
  const loader=$("authLoading");
 
- if(!loader)
- return;
+ if(!loader)return;
 
  loader.style.opacity="0";
 
  setTimeout(()=>{
-   if(loader)
-   loader.style.display="none";
+   if(loader)loader.style.display="none";
  },250);
-
 }
 
-
-/*
- * सबसे जरूरी हिस्सा:
- * Firebase का onAuthStateChanged आने में कुछ समय लग सकता है।
- * इसलिए currentUser को तुरंत check किया जाता है।
- */
 function initializeExistingUser(){
 
  const immediateUser=auth.currentUser;
 
  if(immediateUser){
-
    currentUser=immediateUser;
-
    updateAuthUI();
-
    loadUserOrders(immediateUser.uid);
-
  }
 }
-
-
-/* ================= AUTH STATE ================= */
 
 auth.onAuthStateChanged(function(user){
 
@@ -874,83 +555,43 @@ auth.onAuthStateChanged(function(user){
  hideAuthLoading();
 
  if(user){
-
    loadUserOrders(user.uid);
-
  }else{
-
    clearOrdersListener();
-
  }
 
 });
 
-
-/*
- * App/WebView खुलते ही पहले से saved Firebase account
- * को तुरंत पढ़ने की कोशिश।
- */
 setTimeout(function(){
-
  initializeExistingUser();
-
 },0);
-
-
-/* ================= REDIRECT RESULT ================= */
 
 auth.getRedirectResult().then(function(result){
 
- if(result && result.user){
-
-   console.log(
-     "Google redirect login successful",
-     result.user
-   );
-
+ if(result&&result.user){
    hideAuthError();
  }
 
 }).catch(function(error){
-
- console.error(
-   "Google redirect result error",
-   error
- );
-
+ console.error("Google redirect result error",error);
  handleAuthError(error);
-
 });
 
 
 /* ================= PROFILE ================= */
 
 function getSavedAvatar(){
-
- return localStorage.getItem(
-   "topperProfileAvatar"
- ) || "u1.png";
-
+ return localStorage.getItem("topperProfileAvatar")||"u1.png";
 }
-
 
 function setProfileAvatar(src){
 
  const img=$("profilePageImg");
+ if(img)img.src=src;
 
- if(img)
- img.src=src;
-
- const topPic=
- document.querySelector(
-   "#authBtn .user-pic"
- );
-
- if(topPic)
- topPic.src=src;
-
+ const topPic=document.querySelector("#authBtn .user-pic");
+ if(topPic)topPic.src=src;
 }
-
 
 function updateAuthUI(){
 
@@ -961,22 +602,13 @@ function updateAuthUI(){
  const profileBtn=$("profileAuthBtn");
  const avatar=getSavedAvatar();
 
-
  if(currentUser){
 
    authBtn.innerHTML=
-     '<img src="'+
-     escapeAttribute(avatar)+
-     '" class="user-pic" alt="Profile"> Logout';
+     '<img src="'+escapeAttribute(avatar)+'" class="user-pic" alt="Profile"> Logout';
 
-   name.textContent=
-     currentUser.displayName ||
-     "Google User";
-
-   email.textContent=
-     currentUser.email ||
-     "";
-
+   name.textContent=currentUser.displayName||"Google User";
+   email.textContent=currentUser.email||"";
    img.src=avatar;
 
    profileBtn.textContent="Logout";
@@ -985,37 +617,21 @@ function updateAuthUI(){
  }else{
 
    authBtn.textContent="Sign In";
-
    name.textContent="Guest User";
-
-   email.textContent=
-     "Google Account Not Connected";
-
+   email.textContent="Google Account Not Connected";
    img.src=avatar;
 
-   profileBtn.textContent=
-     "Google Account से लॉगिन करें";
-
+   profileBtn.textContent="Google Account से लॉगिन करें";
    profileBtn.onclick=googleSignIn;
-
  }
 
  authBusy=false;
-
  authBtn.disabled=false;
  profileBtn.disabled=false;
-
 }
 
-
-/* ================= AUTH ACTION ================= */
-
 function handleAuthAction(){
-
- currentUser
-   ? googleSignOut()
-   : googleSignIn();
-
+ currentUser?googleSignOut():googleSignIn();
 }
 
 
@@ -1023,172 +639,113 @@ function handleAuthAction(){
 
 async function googleSignIn(){
 
- if(currentUser || authBusy)
- return;
+ if(currentUser||authBusy)return;
 
  authBusy=true;
-
  hideAuthError();
 
- setAuthButtonsBusy(
-   true,
-   "Google Login खुल रहा है..."
- );
-
-
- /* ===== ANDROID NATIVE GOOGLE ===== */
+ setAuthButtonsBusy(true,"Google Login खुल रहा है...");
 
  if(
    window.AndroidApp &&
    typeof window.AndroidApp.signIn==="function"
  ){
 
-   console.log(
-     "Starting Native Android Google Login..."
-   );
+   console.log("Starting Native Android Google Login...");
 
-   window.AndroidApp.signIn();
+   try{
+     window.AndroidApp.signIn();
+   }catch(error){
+
+     authBusy=false;
+     updateAuthUI();
+
+     showAuthError(
+       "❌ Google Login नहीं हुआ: "+
+       (error.message||error)
+     );
+   }
 
    return;
  }
 
-
- /* ===== BROWSER GOOGLE ===== */
-
- const provider=
-   new firebase.auth.GoogleAuthProvider();
+ const provider=new firebase.auth.GoogleAuthProvider();
 
  provider.setCustomParameters({
    prompt:"select_account"
  });
 
-
  try{
 
-   const result=
-     await auth.signInWithPopup(provider);
+   const result=await auth.signInWithPopup(provider);
 
-   console.log(
-     "Google Login Successful",
-     result.user
-   );
-
+   console.log("Google Login Successful",result.user);
    hideAuthError();
 
  }catch(error){
 
-   console.error(
-     "Google popup login error",
-     error
-   );
+   console.error("Google popup login error",error);
 
    authBusy=false;
    updateAuthUI();
 
-   if(
-     error &&
-     error.code==="auth/popup-blocked"
-   ){
+   if(error&&error.code==="auth/popup-blocked"){
 
-     showAuthError(
-       "❌ Google popup browser ने block किया।"
-     );
+     showAuthError("❌ Google popup browser ने block किया।");
 
-   }else if(
-     error &&
-     error.code==="auth/popup-closed-by-user"
-   ){
+   }else if(error&&error.code==="auth/popup-closed-by-user"){
 
-     showAuthError(
-       "Google Login window बंद कर दी गई।"
-     );
+     showAuthError("Google Login window बंद कर दी गई।");
 
    }else{
 
      handleAuthError(error);
-
    }
-
  }
-
 }
 
 
 /* ================= NATIVE GOOGLE CALLBACK ================= */
 
-window.nativeGoogleLogin=
-async function(idToken){
+window.nativeGoogleLogin=async function(idToken){
 
  try{
 
-   console.log(
-     "Android Google ID Token received"
-   );
-
    const credential=
-     firebase.auth.GoogleAuthProvider
-       .credential(idToken);
+     firebase.auth.GoogleAuthProvider.credential(idToken);
 
    const result=
-     await auth.signInWithCredential(
-       credential
-     );
-
-   console.log(
-     "Native Google Firebase Login Successful",
-     result.user
-   );
+     await auth.signInWithCredential(credential);
 
    currentUser=result.user;
-
    authBusy=false;
 
    hideAuthError();
-
    updateAuthUI();
-
    hideAuthLoading();
 
  }catch(error){
 
-   console.error(
-     "Native Google Firebase Login Error:",
-     error
-   );
+   console.error("Native Google Firebase Login Error:",error);
 
    authBusy=false;
-
    updateAuthUI();
 
    handleAuthError(error);
-
  }
-
 };
 
+window.nativeGoogleLoginError=function(message){
 
-/* ================= NATIVE GOOGLE ERROR ================= */
-
-window.nativeGoogleLoginError=
-function(message){
-
- console.error(
-   "Native Google Login Error:",
-   message
- );
+ console.error("Native Google Login Error:",message);
 
  authBusy=false;
-
  updateAuthUI();
 
  showAuthError(
    "❌ Google Login नहीं हुआ: "+
-   (
-     message ||
-     "Unknown error"
-   )
+   (message||"Unknown error")
  );
-
 };
 
 
@@ -1201,26 +758,20 @@ function googleSignOut(){
  .then(()=>{
 
    currentUser=null;
-
    updateAuthUI();
 
-   showAppMessage(
-     "Log Out हो गया!",
-     "✅"
-   );
+   showAppMessage("Log Out हो गया!","✅");
 
  })
 
  .catch(error=>{
 
    showAppMessage(
-     "Logout Error: "+
-     error.message,
+     "Logout Error: "+error.message,
      "❌"
    );
 
  });
-
 }
 
 
@@ -1231,60 +782,33 @@ function handleAuthError(error){
  console.error(error);
 
  let msg=
-   error &&
-   error.message
-   ? error.message
-   : "Unknown error";
+   error&&error.message
+   ?error.message
+   :"Unknown error";
 
-
- if(
-   error &&
-   error.code==="auth/unauthorized-domain"
- ){
+ if(error&&error.code==="auth/unauthorized-domain"){
 
    msg=
      "यह domain ("+
      location.hostname+
      ") Firebase Authorized Domains में add नहीं है।";
 
- }
-
- else if(
-   error &&
-   error.code==="auth/operation-not-allowed"
- ){
+ }else if(error&&error.code==="auth/operation-not-allowed"){
 
    msg=
      "Firebase Authentication में Google provider enabled नहीं है।";
 
- }
+ }else if(error&&error.code==="auth/invalid-continue-uri"){
 
- else if(
-   error &&
-   error.code==="auth/invalid-continue-uri"
- ){
+   msg="Google redirect URL invalid है।";
 
-   msg=
-     "Google redirect URL invalid है।";
-
- }
-
- else if(
-   error &&
-   error.code==="auth/account-exists-with-different-credential"
- ){
+ }else if(error&&error.code==="auth/account-exists-with-different-credential"){
 
    msg=
      "इस email से Firebase में पहले किसी दूसरे sign-in method का account बना है।";
-
  }
 
-
- showAuthError(
-   "❌ Google Login नहीं हुआ: "+
-   msg
- );
-
+ showAuthError("❌ Google Login नहीं हुआ: "+msg);
 }
 
 
@@ -1294,55 +818,35 @@ function openAvatarPicker(){
  $("avatarModal").style.display="block";
 }
 
-
 function closeAvatarPicker(){
  $("avatarModal").style.display="none";
 }
 
-
 function selectAvatar(fileName){
 
- localStorage.setItem(
-   "topperProfileAvatar",
-   fileName
- );
+ localStorage.setItem("topperProfileAvatar",fileName);
 
  setProfileAvatar(fileName);
-
  updateAuthUI();
-
  closeAvatarPicker();
-
 }
 
-
-setProfileAvatar(
- getSavedAvatar()
-);
+setProfileAvatar(getSavedAvatar());
 
 
 /* ================= TABS ================= */
 
 function switchTab(viewId,btnEl){
 
- document
- .querySelectorAll('.view-section')
- .forEach(v=>
-   v.classList.remove('active-view')
- );
+ document.querySelectorAll(".view-section")
+ .forEach(v=>v.classList.remove("active-view"));
 
- document
- .querySelectorAll('.nav-item')
- .forEach(b=>
-   b.classList.remove('active')
- );
+ document.querySelectorAll(".nav-item")
+ .forEach(b=>b.classList.remove("active"));
 
- $(viewId)
- .classList.add('active-view');
+ $(viewId).classList.add("active-view");
 
- if(btnEl)
- btnEl.classList.add('active');
-
+ if(btnEl)btnEl.classList.add("active");
 }
 
 
@@ -1355,19 +859,15 @@ if(navigator.geolocation){
    function(pos){
 
      userLocationLink=
-       'https://www.google.com/maps?q='+
+       "https://www.google.com/maps?q="+
        pos.coords.latitude+
-       ','+
+       ","+
        pos.coords.longitude;
 
    },
 
    function(){
-
-     console.log(
-       'GPS permission denied/unavailable'
-     );
-
+     console.log("GPS permission denied/unavailable");
    },
 
    {
@@ -1375,109 +875,116 @@ if(navigator.geolocation){
      timeout:10000,
      maximumAge:0
    }
-
  );
-
 }
 
 
 /* ================= WHATSAPP ================= */
 
-/*
- * Android App:
- * WhatsApp अब WebView के अंदर नहीं खुलेगा।
- * Android native Intent से WhatsApp खुलेगा।
- *
- * Browser:
- * सामान्य wa.me fallback रहेगा।
- */
-
 function openWhatsApp(message){
 
- /* ===== ANDROID NATIVE WHATSAPP ===== */
+ const text=String(message||"");
+
+ if(!text){
+   showAppMessage(
+     "WhatsApp message खाली है।",
+     "⚠️"
+   );
+   return;
+ }
+
+ /* ===== NATIVE ANDROID APP ===== */
 
  if(
    window.AndroidApp &&
    typeof window.AndroidApp.openWhatsApp==="function"
  ){
 
-   console.log(
-     "Opening Native WhatsApp..."
-   );
+   try{
 
-   window.AndroidApp.openWhatsApp(
-     message
-   );
+     window.AndroidApp.openWhatsApp(text);
+
+   }catch(error){
+
+     console.error(
+       "Native WhatsApp Error:",
+       error
+     );
+
+     showAppMessage(
+       "WhatsApp खोलने में समस्या हुई।",
+       "❌"
+     );
+
+   }
 
    return;
  }
 
 
- /* ===== NORMAL WEB FALLBACK ===== */
+ /* ===== BROWSER FALLBACK ===== */
 
  const url=
-   'https://wa.me/919264137710?text='+
-   encodeURIComponent(message);
+   "https://wa.me/919264137710?text="+
+   encodeURIComponent(text);
 
  window.location.href=url;
-
 }
+
+
+window.nativeWhatsAppError=function(){
+
+ showAppMessage(
+   "WhatsApp इस डिवाइस पर उपलब्ध नहीं है। कृपया WhatsApp install करें।",
+   "📱"
+ );
+};
 
 
 function buyNow(productName,price){
 
  openWhatsApp(
 
-   'नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n'+
-
-   '📦 सामान: '+
-   productName+
-
-   '\n💰 कीमत: ₹'+
-   Number(price).toLocaleString('en-IN')+
-
-   '\n\n📍 लाइव लोकेशन: '+
+   "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
+   "📦 सामान: "+productName+
+   "\n💰 कीमत: ₹"+
+   Number(price).toLocaleString("en-IN")+
+   "\n\n📍 लाइव लोकेशन: "+
    userLocationLink+
-
-   '\n\nकृपया डिलीवरी की जानकारी भेजें।'
+   "\n\nकृपया डिलीवरी की जानकारी भेजें।"
 
  );
-
 }
 
 
 /* ================= TABLE SLIDER ================= */
 
 const tableColors=[
- 'Light Wooden',
- 'Grey Wooden',
- 'Light Dark Wooden',
- 'Dark Wooden'
+ "Light Wooden",
+ "Grey Wooden",
+ "Light Dark Wooden",
+ "Dark Wooden"
 ];
 
-const tableSliderTrack=
- $("tableSlider");
+const tableSliderTrack=$("tableSlider");
 
 if(tableSliderTrack)
 
  tableSliderTrack.addEventListener(
-   'scroll',
+   "scroll",
    function(){
 
-     const width=
-       tableSliderTrack.clientWidth||1;
+     const width=tableSliderTrack.clientWidth||1;
 
      const index=
        Math.round(
-         tableSliderTrack.scrollLeft/
-         width
+         tableSliderTrack.scrollLeft/width
        );
 
      if(tableColors[index])
 
-       $("selectedTableColorText")
-       .textContent=
-       tableColors[index];
+       $("selectedTableColorText").textContent=
+         tableColors[index];
 
    }
  );
@@ -1487,39 +994,27 @@ function slideImages(id,direction){
 
  const track=$(id);
 
- if(!track)
- return;
+ if(!track)return;
 
  track.scrollBy({
-
-   left:
-     direction*
-     track.clientWidth,
-
-   behavior:'smooth'
-
+   left:direction*track.clientWidth,
+   behavior:"smooth"
  });
-
 }
 
 
 function getSelectedTableColor(){
 
- const track=
-   $("tableSlider");
+ const track=$("tableSlider");
 
- if(!track)
- return tableColors[0];
+ if(!track)return tableColors[0];
 
  const index=
    Math.round(
-     track.scrollLeft/
-     (track.clientWidth||1)
+     track.scrollLeft/(track.clientWidth||1)
    );
 
- return tableColors[index]||
-        tableColors[0];
-
+ return tableColors[index]||tableColors[0];
 }
 
 
@@ -1527,22 +1022,19 @@ function getSelectedTableColor(){
 
 function requireLogin(){
 
- if(currentUser){
-   return true;
- }
+ if(currentUser)return true;
 
  showAppMessage(
-   'ऑर्डर करने के लिए पहले Google Account से Sign-In करें!',
-   '🔐'
+   "ऑर्डर करने के लिए पहले Google Account से Sign-In करें!",
+   "🔐"
  );
 
  switchTab(
-   'profileView',
-   document.querySelectorAll('.nav-item')[2]
+   "profileView",
+   document.querySelectorAll(".nav-item")[2]
  );
 
  return false;
-
 }
 
 
@@ -1550,67 +1042,51 @@ function requireLogin(){
 
 function openOrderForm(productName,price){
 
- if(!requireLogin())
- return;
+ if(!requireLogin())return;
 
  selectedProduct=productName;
  selectedPrice=String(price);
 
- $("modalProductInfo")
- .textContent=
- selectedProduct+
- ' - ₹'+
- Number(price).toLocaleString('en-IN');
+ $("modalProductInfo").textContent=
+   selectedProduct+
+   " - ₹"+
+   Number(price).toLocaleString("en-IN");
 
- $("upiPayAmount")
- .textContent=
- Number(price).toLocaleString('en-IN');
+ $("upiPayAmount").textContent=
+   Number(price).toLocaleString("en-IN");
 
- $("orderModal")
- .style.display='block';
-
+ $("orderModal").style.display="block";
 }
 
 
 function openTableOrderForm(){
 
- if(!requireLogin())
- return;
+ if(!requireLogin())return;
 
  selectedProduct=
-   'Sewing Machine Top Table ['+
+   "Sewing Machine Top Table ["+
    getSelectedTableColor()+
-   ']';
+   "]";
 
- selectedPrice='550';
+ selectedPrice="550";
 
- $("modalProductInfo")
- .textContent=
- selectedProduct+
- ' - ₹550';
+ $("modalProductInfo").textContent=
+   selectedProduct+" - ₹550";
 
- $("upiPayAmount")
- .textContent='550';
+ $("upiPayAmount").textContent="550";
 
- $("orderModal")
- .style.display='block';
-
+ $("orderModal").style.display="block";
 }
 
 
 function closeOrderForm(){
 
- $("orderModal")
- .style.display='none';
+ $("orderModal").style.display="none";
 
- const btn=
-   $("onlineOrderBtn");
+ const btn=$("onlineOrderBtn");
 
  btn.disabled=false;
-
- btn.textContent=
-   '💬 WhatsApp पर Order भेजें';
-
+ btn.textContent="💬 WhatsApp पर Order भेजें";
 }
 
 
@@ -1618,58 +1094,45 @@ function closeOrderForm(){
 
 function payViaUpiIntent(){
 
- const amount=
-   Number(selectedPrice||0);
+ const amount=Number(selectedPrice||0);
 
  if(!amount){
 
    showAppMessage(
-     'पहले कोई product चुनें।',
-     '⚠️'
+     "पहले कोई product चुनें।",
+     "⚠️"
    );
 
    return;
-
  }
 
- const name=
-   $("custName").value.trim();
-
- const phone=
-   $("custPhone").value.trim();
-
- const address=
-   $("custAddress").value.trim();
-
+ const name=$("custName").value.trim();
+ const phone=$("custPhone").value.trim();
+ const address=$("custAddress").value.trim();
 
  if(!name||!phone||!address){
 
    showAppMessage(
-     'पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।',
-     '📝'
+     "पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।",
+     "📝"
    );
 
    return;
-
  }
-
 
  if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
-     'कृपया 10 अंकों का सही मोबाइल नंबर डालें!',
-     '📱'
+     "कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
+     "📱"
    );
 
    return;
-
  }
 
-
  sessionStorage.setItem(
-   'pendingUpiWhatsApp',
+   "pendingUpiWhatsApp",
    JSON.stringify({
-
      product:selectedProduct,
      price:amount,
      name:name,
@@ -1677,64 +1140,48 @@ function payViaUpiIntent(){
      address:address,
      location:userLocationLink,
      startedAt:Date.now()
-
    })
  );
 
-
  const upiUrl=
-   'upi://pay?pa='+
-   encodeURIComponent(
-     'topperstitching@naviaxis'
-   )+
-   '&pn='+
-   encodeURIComponent(
-     'Ankit Kumar Singh'
-   )+
-   '&am='+
-   encodeURIComponent(
-     amount.toFixed(2)
-   )+
-   '&cu=INR';
-
-
- /* ===== ANDROID NATIVE UPI ===== */
+   "upi://pay?pa="+
+   encodeURIComponent("topperstitching@naviaxis")+
+   "&pn="+
+   encodeURIComponent("Ankit Kumar Singh")+
+   "&am="+
+   encodeURIComponent(amount.toFixed(2))+
+   "&cu=INR";
 
  if(
    window.AndroidApp &&
    typeof window.AndroidApp.openUpi==="function"
  ){
 
-   console.log(
-     "Opening Native Android UPI..."
-   );
+   try{
 
-   window.AndroidApp.openUpi(
-     upiUrl
-   );
+     window.AndroidApp.openUpi(upiUrl);
+
+   }catch(error){
+
+     console.error("Native UPI Error:",error);
+
+     window.nativeUpiError();
+
+   }
 
    return;
-
  }
 
-
- /* ===== BROWSER FALLBACK ===== */
-
  window.location.href=upiUrl;
-
 }
 
 
-/* ================= UPI ERROR ================= */
-
-window.nativeUpiError=
-function(){
+window.nativeUpiError=function(){
 
  showAppMessage(
-   'इस डिवाइस पर कोई UPI app उपलब्ध नहीं मिला। कृपया Google Pay, PhonePe या किसी UPI app को install करके फिर कोशिश करें।',
-   '💳'
+   "इस डिवाइस पर कोई UPI app उपलब्ध नहीं मिला। कृपया Google Pay, PhonePe या किसी UPI app को install करके फिर कोशिश करें।",
+   "💳"
  );
-
 };
 
 
@@ -1743,12 +1190,9 @@ function(){
 function sendPendingUpiOrderToWhatsApp(){
 
  const raw=
-   sessionStorage.getItem(
-     'pendingUpiWhatsApp'
-   );
+   sessionStorage.getItem("pendingUpiWhatsApp");
 
- if(!raw)
- return;
+ if(!raw)return;
 
  let data;
 
@@ -1758,14 +1202,9 @@ function sendPendingUpiOrderToWhatsApp(){
 
  }catch(e){
 
-   sessionStorage.removeItem(
-     'pendingUpiWhatsApp'
-   );
-
+   sessionStorage.removeItem("pendingUpiWhatsApp");
    return;
-
  }
-
 
  if(
    !data||
@@ -1775,63 +1214,37 @@ function sendPendingUpiOrderToWhatsApp(){
    30*60*1000
  ){
 
-   sessionStorage.removeItem(
-     'pendingUpiWhatsApp'
-   );
-
+   sessionStorage.removeItem("pendingUpiWhatsApp");
    return;
-
  }
 
-
- sessionStorage.removeItem(
-   'pendingUpiWhatsApp'
- );
-
+ sessionStorage.removeItem("pendingUpiWhatsApp");
 
  const message=
-
-   '🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n'+
-
-   '📦 *सामान:* '+
-   data.product+
-
-   '\n💰 *कीमत:* ₹'+
-   Number(data.price)
-   .toLocaleString('en-IN')+
-
-   '\n\n👤 *ग्राहक का नाम:* '+
-   data.name+
-
-   '\n📞 *फोन नंबर:* '+
-   data.phone+
-
-   '\n🏠 *पूरा पता:* '+
-   data.address+
-
-   '\n\n📍 *लाइव लोकेशन:* '+
-   (data.location||
-   'उपलब्ध नहीं')+
-
-   '\n\n💳 *Payment:* UPI'+
-
-   '\n🔢 *UTR / Transaction No:* Payment app से UTR भेजें'+
-
-   '\n\n⚠️ *नोट:* UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।';
-
+   "🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n"+
+   "📦 *सामान:* "+data.product+
+   "\n💰 *कीमत:* ₹"+
+   Number(data.price).toLocaleString("en-IN")+
+   "\n\n👤 *ग्राहक का नाम:* "+data.name+
+   "\n📞 *फोन नंबर:* "+data.phone+
+   "\n🏠 *पूरा पता:* "+data.address+
+   "\n\n📍 *लाइव लोकेशन:* "+
+   (data.location||"उपलब्ध नहीं")+
+   "\n\n💳 *Payment:* UPI"+
+   "\n🔢 *UTR / Transaction No:* Payment app से UTR भेजें"+
+   "\n\n⚠️ *नोट:* UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
 
  openWhatsApp(message);
-
 }
 
 
 window.addEventListener(
- 'pageshow',
+ "pageshow",
  function(){
 
    if(
      sessionStorage.getItem(
-       'pendingUpiWhatsApp'
+       "pendingUpiWhatsApp"
      )
    ){
 
@@ -1853,217 +1266,128 @@ async function submitOnlineOrder(){
  if(!currentUser){
 
    showAppMessage(
-     'कृपया पहले Google Account से Login करें!',
-     '🔐'
+     "कृपया पहले Google Account से Login करें!",
+     "🔐"
    );
 
    return;
-
  }
 
-
- const name=
-   $("custName").value.trim();
-
- const phone=
-   $("custPhone").value.trim();
-
- const address=
-   $("custAddress").value.trim();
-
- const utr=
-   $("utrNumber").value.trim();
-
+ const name=$("custName").value.trim();
+ const phone=$("custPhone").value.trim();
+ const address=$("custAddress").value.trim();
+ const utr=$("utrNumber").value.trim();
 
  if(!name||!phone||!address){
 
    showAppMessage(
-     'कृपया अपनी सभी जानकारी भरें!',
-     '📝'
+     "कृपया अपनी सभी जानकारी भरें!",
+     "📝"
    );
 
    return;
-
  }
-
 
  if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
-     'कृपया 10 अंकों का सही मोबाइल नंबर डालें!',
-     '📱'
+     "कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
+     "📱"
    );
 
    return;
-
  }
-
 
  if(!utr){
 
    showAppMessage(
-     'कृपया payment के बाद UTR / Transaction Number डालें!',
-     '💳'
+     "कृपया payment के बाद UTR / Transaction Number डालें!",
+     "💳"
    );
 
    return;
-
  }
 
-
- const btn=
-   $("onlineOrderBtn");
+ const btn=$("onlineOrderBtn");
 
  btn.disabled=true;
-
- btn.textContent=
-   '⏳ Order Firebase में Save हो रहा है...';
-
+ btn.textContent="⏳ Order Firebase में Save हो रहा है...";
 
  const orderData={
 
-   userId:
-     currentUser.uid,
-
-   userEmail:
-     currentUser.email||'',
-
-   customerName:
-     name,
-
-   customerPhone:
-     phone,
-
-   customerPhoto:
-     currentUser.photoURL||'',
-
-   product:
-     selectedProduct,
-
-   price:
-     Number(selectedPrice),
-
-   address:
-     address,
-
-   utrNumber:
-     utr,
-
-   location:
-     userLocationLink,
-
-   status:
-     'pending',
-
-   paymentStatus:
-     'submitted',
-
-   paymentMethod:
-     'UPI',
-
-   createdAt:
-     Date.now(),
-
-   timestamp:
-     new Date().toISOString(),
-
-   date:
-     new Date().toLocaleString(
-       'en-IN',
-       {
-         dateStyle:'medium',
-         timeStyle:'short'
-       }
-     )
-
+   userId:currentUser.uid,
+   userEmail:currentUser.email||"",
+   customerName:name,
+   customerPhone:phone,
+   customerPhoto:currentUser.photoURL||"",
+   product:selectedProduct,
+   price:Number(selectedPrice),
+   address:address,
+   utrNumber:utr,
+   location:userLocationLink,
+   status:"pending",
+   paymentStatus:"submitted",
+   paymentMethod:"UPI",
+   createdAt:Date.now(),
+   timestamp:new Date().toISOString(),
+   date:new Date().toLocaleString(
+     "en-IN",
+     {
+       dateStyle:"medium",
+       timeStyle:"short"
+     }
+   )
  };
-
 
  try{
 
-   const ref=
-     db.ref('orders').push();
+   const ref=db.ref("orders").push();
 
-   orderData.orderId=
-     ref.key;
+   orderData.orderId=ref.key;
 
    await ref.set(orderData);
 
-
    const message=
-
-     '🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n'+
-
-     '🆔 *Order ID:* '+
-     ref.key+
-
-     '\n\n📦 *सामान:* '+
-     selectedProduct+
-
-     '\n💰 *कीमत:* ₹'+
-     Number(selectedPrice)
-     .toLocaleString('en-IN')+
-
-     '\n\n👤 *ग्राहक का नाम:* '+
-     name+
-
-     '\n📞 *फोन नंबर:* '+
-     phone+
-
-     '\n🏠 *पूरा पता:* '+
-     address+
-
-     '\n\n📍 *लाइव लोकेशन:* '+
-     userLocationLink+
-
-     '\n\n💳 *Payment:* UPI'+
-
-     '\n🔢 *UTR / Transaction No:* '+
-     utr+
-
-     '\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।';
-
+     "🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n"+
+     "🆔 *Order ID:* "+ref.key+
+     "\n\n📦 *सामान:* "+selectedProduct+
+     "\n💰 *कीमत:* ₹"+
+     Number(selectedPrice).toLocaleString("en-IN")+
+     "\n\n👤 *ग्राहक का नाम:* "+name+
+     "\n📞 *फोन नंबर:* "+phone+
+     "\n🏠 *पूरा पता:* "+address+
+     "\n\n📍 *लाइव लोकेशन:* "+userLocationLink+
+     "\n\n💳 *Payment:* UPI"+
+     "\n🔢 *UTR / Transaction No:* "+utr+
+     "\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
    $("custName").value="";
    $("custPhone").value="";
    $("custAddress").value="";
    $("utrNumber").value="";
 
-
    closeOrderForm();
 
-
    showAppMessage(
-     'आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n'+
-     ref.key,
-     '✅'
+     "आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+ref.key,
+     "✅"
    );
-
 
    openWhatsApp(message);
 
-
  }catch(error){
 
-   console.error(
-     'Firebase Order Error:',
-     error
-   );
+   console.error("Firebase Order Error:",error);
 
    btn.disabled=false;
-
-   btn.textContent=
-     '💬 WhatsApp पर Order भेजें';
-
+   btn.textContent="💬 WhatsApp पर Order भेजें";
 
    showAppMessage(
-     'Order Save नहीं हो पाया!\n\n'+
+     "Order Save नहीं हो पाया!\n\n"+
      (error.message||error),
-     '❌'
+     "❌"
    );
-
  }
-
 }
 
 
@@ -2074,71 +1398,57 @@ function clearOrdersListener(){
  if(ordersQuery){
 
    ordersQuery.off(
-     'value',
+     "value",
      ordersValueHandler
    );
 
    ordersQuery=null;
-
  }
 
  $("ordersList").innerHTML=
    '<p class="empty-orders">📦 Orders देखने के लिए Google से Sign-In करें।</p>';
-
 }
 
 
 function loadUserOrders(userId){
 
- if(ordersQuery)
+ if(ordersQuery){
 
    ordersQuery.off(
-     'value',
+     "value",
      ordersValueHandler
    );
-
+ }
 
  ordersQuery=
-   db.ref('orders')
-   .orderByChild('userId')
+   db.ref("orders")
+   .orderByChild("userId")
    .equalTo(userId);
-
 
  $("ordersList").innerHTML=
    '<p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>';
 
-
  ordersQuery.on(
-
-   'value',
-
+   "value",
    ordersValueHandler,
-
    function(error){
 
      console.error(error);
 
      $("ordersList").innerHTML=
        '<p class="empty-orders" style="color:#d32f2f">❌ Orders load नहीं हो सके।<br><br>'+
-       escapeHtml(
-         error.message||error
-       )+
-       '</p>';
-
+       escapeHtml(error.message||error)+
+       "</p>";
    }
-
  );
-
 }
 
 
 function ordersValueHandler(snapshot){
 
- const list=
-   $("ordersList");
+ const list=$("ordersList");
 
- list.innerHTML='';
-
+ list.innerHTML="";
 
  if(!snapshot.exists()){
 
@@ -2146,31 +1456,22 @@ function ordersValueHandler(snapshot){
      '<p class="empty-orders">📦 अभी कोई Order नहीं मिला।</p>';
 
    return;
-
  }
-
 
  const orders=[];
 
+ snapshot.forEach(child=>{
 
- snapshot.forEach(
-   child=>{
+   const o=child.val();
 
-     const o=
-       child.val();
+   if(o){
 
-     if(o){
-
-       o._id=
-         child.key;
-
-       orders.push(o);
-
-     }
+     o._id=child.key;
+     orders.push(o);
 
    }
- );
 
+ });
 
  orders.sort(
    (a,b)=>
@@ -2178,148 +1479,89 @@ function ordersValueHandler(snapshot){
      Number(a.createdAt||0)
  );
 
+ orders.forEach(order=>{
 
- orders.forEach(
-   order=>{
+   const status=
+     String(order.status||"pending").toLowerCase();
 
-     const status=
-       String(
-         order.status||'pending'
-       ).toLowerCase();
+   let cls="status-pending";
+   let text="⏳ Pending";
 
+   if(
+     status==="successful"||
+     status==="success"
+   ){
 
-     let cls=
-       'status-pending';
-
-     let text=
-       '⏳ Pending';
-
-
-     if(
-       status==='successful'||
-       status==='success'
-     ){
-
-       cls=
-         'status-success';
-
-       text=
-         '✅ Successful';
-
-     }
-
-
-     if(
-       status==='failed'||
-       status==='failure'
-     ){
-
-       cls=
-         'status-failed';
-
-       text=
-         '❌ Failed';
-
-     }
-
-
-     const card=
-       document.createElement('div');
-
-     card.className=
-       'order-card';
-
-
-     card.innerHTML=
-
-       '<div class="order-header">'+
-       '<b>'+
-       escapeHtml(
-         order.product||
-         'Product'
-       )+
-       '</b>'+
-       '<span class="status-badge '+
-       cls+
-       '">'+
-       text+
-       '</span>'+
-       '</div>'+
-
-       '<div><b>🆔 Order ID:</b> '+
-       escapeHtml(
-         order.orderId||
-         order._id
-       )+
-       '</div>'+
-
-       '<div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+
-       Number(
-         order.price||0
-       ).toLocaleString(
-         'en-IN'
-       )+
-       '</div>'+
-
-       '<div style="margin-top:6px"><b>👤 नाम:</b> '+
-       escapeHtml(
-         order.customerName||''
-       )+
-       '</div>'+
-
-       '<div style="margin-top:6px"><b>📞 मोबाइल:</b> '+
-       escapeHtml(
-         order.customerPhone||''
-       )+
-       '</div>'+
-
-       '<div style="margin-top:6px"><b>🏠 पता:</b> '+
-       escapeHtml(
-         order.address||''
-       )+
-       '</div>'+
-
-       '<div style="margin-top:6px"><b>🕐 तारीख:</b> '+
-       escapeHtml(
-         order.date||''
-       )+
-       '</div>';
-
-
-     if(order.location){
-
-       const a=
-         document.createElement('a');
-
-       a.href=
-         order.location;
-
-       a.target=
-         '_blank';
-
-       a.rel=
-         'noopener noreferrer';
-
-       a.textContent=
-         '📍 Delivery Location देखें';
-
-       a.style.display=
-         'block';
-
-       a.style.marginTop=
-         '8px';
-
-       card.appendChild(a);
-
-     }
-
-
-     list.appendChild(card);
+     cls="status-success";
+     text="✅ Successful";
 
    }
 
- );
+   if(
+     status==="failed"||
+     status==="failure"
+   ){
 
+     cls="status-failed";
+     text="❌ Failed";
+
+   }
+
+   const card=document.createElement("div");
+
+   card.className="order-card";
+
+   card.innerHTML=
+     '<div class="order-header">'+
+     "<b>"+
+     escapeHtml(order.product||"Product")+
+     "</b>"+
+     '<span class="status-badge '+cls+'">'+
+     text+
+     "</span>"+
+     "</div>"+
+
+     "<div><b>🆔 Order ID:</b> "+
+     escapeHtml(order.orderId||order._id)+
+     "</div>"+
+
+     '<div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+
+     Number(order.price||0).toLocaleString("en-IN")+
+     "</div>"+
+
+     '<div style="margin-top:6px"><b>👤 नाम:</b> '+
+     escapeHtml(order.customerName||"")+
+     "</div>"+
+
+     '<div style="margin-top:6px"><b>📞 मोबाइल:</b> '+
+     escapeHtml(order.customerPhone||"")+
+     "</div>"+
+
+     '<div style="margin-top:6px"><b>🏠 पता:</b> '+
+     escapeHtml(order.address||"")+
+     "</div>"+
+
+     '<div style="margin-top:6px"><b>🕐 तारीख:</b> '+
+     escapeHtml(order.date||"")+
+     "</div>";
+
+   if(order.location){
+
+     const a=document.createElement("a");
+
+     a.href=order.location;
+     a.target="_blank";
+     a.rel="noopener noreferrer";
+     a.textContent="📍 Delivery Location देखें";
+     a.style.display="block";
+     a.style.marginTop="8px";
+
+     card.appendChild(a);
+   }
+
+   list.appendChild(card);
+
+ });
 }
 
 
@@ -2328,43 +1570,30 @@ function ordersValueHandler(snapshot){
 function buyTableNow(){
 
  const product=
-   'Sewing Machine Top Table ['+
+   "Sewing Machine Top Table ["+
    getSelectedTableColor()+
-   ']';
-
+   "]";
 
  openWhatsApp(
 
-   'नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n'+
-
-   '📦 सामान: '+
-   product+
-
-   '\n💰 कीमत: ₹550'+
-
-   '\n\n📍 लाइव लोकेशन: '+
-   userLocationLink+
-
-   '\n\nकृपया डिलीवरी की जानकारी भेजें।'
+   "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
+   "📦 सामान: "+product+
+   "\n💰 कीमत: ₹550"+
+   "\n\n📍 लाइव लोकेशन: "+userLocationLink+
+   "\n\nकृपया डिलीवरी की जानकारी भेजें।"
 
  );
-
 }
 
 
 /* ================= MODAL ================= */
 
 window.addEventListener(
- 'click',
+ "click",
  function(e){
 
-   if(
-     e.target===
-     $("orderModal")
-   ){
-
+   if(e.target===$("orderModal")){
      closeOrderForm();
-
    }
 
  }
@@ -2372,12 +1601,12 @@ window.addEventListener(
 
 
 $("custPhone").addEventListener(
- 'input',
+ "input",
  function(){
 
    this.value=
      this.value
-       .replace(/[^0-9]/g,'')
+       .replace(/[^0-9]/g,"")
        .slice(0,10);
 
  }
@@ -2389,25 +1618,21 @@ $("custPhone").addEventListener(
 function escapeHtml(value){
 
  return String(value)
-
-   .replace(/&/g,'&amp;')
-   .replace(/</g,'&lt;')
-   .replace(/>/g,'&gt;')
-   .replace(/"/g,'&quot;')
-   .replace(/'/g,'&#039;');
-
+   .replace(/&/g,"&amp;")
+   .replace(/</g,"&lt;")
+   .replace(/>/g,"&gt;")
+   .replace(/"/g,"&quot;")
+   .replace(/'/g,"&#039;");
 }
 
 
 function escapeAttribute(value){
 
  return String(value)
-
-   .replace(/&/g,'&amp;')
-   .replace(/"/g,'&quot;')
-   .replace(/</g,'&lt;')
-   .replace(/>/g,'&gt;');
-
+   .replace(/&/g,"&amp;")
+   .replace(/"/g,"&quot;")
+   .replace(/</g,"&lt;")
+   .replace(/>/g,"&gt;");
 }
 
 </script>
