@@ -67,6 +67,9 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address{background:#fff;padding:16px;margin:20px 16px;border-radius:10px;text-align:center;border:1px solid #ddd;font-size:13px;color:#555}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}
 
+.location-btn{background:#2e7d32!important;margin-top:12px!important}
+.location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}
+
 .bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px rgba(0,0,0,.08);z-index:100}
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer}
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}
@@ -246,9 +249,11 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="card">
 <div>
 <div class="slider-container">
+
 <button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>
 
 <div class="slider-track" id="tableSlider">
+
 <div class="slide">
 <img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'">
 <div class="slide-name">Light Wooden</div>
@@ -268,9 +273,11 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'">
 <div class="slide-name">Dark Wooden</div>
 </div>
+
 </div>
 
 <button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>
+
 </div>
 
 <div class="card-details">
@@ -307,7 +314,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </div>
 </div>
 </div>
-
 <div>
 <button class="btn-online" onclick="openOrderForm('Anis Scissors (Size 10)','300')">💳 ऑनलाइन पेमेंट करें</button>
 <button class="btn-buy" onclick="buyNow('Anis Scissors (Size 10)','300')">📲 व्हाट्सएप पर खरीदें</button>
@@ -317,12 +323,29 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </div>
 
 <div class="footer-address">
+
 <strong>📍 मुख्य स्टोर का पता:</strong>
 मेन रोड सासामुसा, गोपालगंज, बिहार
+
 <br><br>
+
 संपर्क करें: <b>+91 9264137710</b>
+
 <br>
+
 Gmail: <b>ankitsingh926413@gmail.com</b>
+
+<button
+type="button"
+class="btn-submit location-btn"
+onclick="requestUserLocation()">
+📍 मेरी Live Location अपडेट करें
+</button>
+
+<div id="locationStatus" class="location-status">
+📍 Location प्राप्त की जा रही है...
+</div>
+
 </div>
 
 </div>
@@ -337,6 +360,7 @@ Gmail: <b>ankitsingh926413@gmail.com</b>
 </div>
 
 <div id="profileView" class="view-section">
+
 <div class="profile-container">
 
 <div class="profile-photo-wrap">
@@ -360,25 +384,48 @@ Google Account से लॉगिन करें
 </div>
 
 <div id="avatarModal" class="avatar-modal">
+
 <div class="avatar-box">
 
 <h3>Profile Photo चुनें</h3>
 
 <div class="avatar-grid">
-<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')"><img src="m1.png" alt="m1"></button>
-<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')"><img src="m2.png" alt="m2"></button>
-<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')"><img src="m3.png" alt="m3"></button>
-<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')"><img src="m4.png" alt="m4"></button>
-<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')"><img src="f1.png" alt="f1"></button>
-<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')"><img src="f2.png" alt="f2"></button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
+<img src="m1.png" alt="m1">
+</button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
+<img src="m2.png" alt="m2">
+</button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
+<img src="m3.png" alt="m3">
+</button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
+<img src="m4.png" alt="m4">
+</button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
+<img src="f1.png" alt="f1">
+</button>
+
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
+<img src="f2.png" alt="f2">
+</button>
+
 </div>
 
-<button class="avatar-close" type="button" onclick="closeAvatarPicker()">बंद करें</button>
+<button class="avatar-close" type="button" onclick="closeAvatarPicker()">
+बंद करें
+</button>
 
 </div>
 </div>
 
 <div id="orderModal" class="modal">
+
 <div class="modal-content">
 
 <h3>🛒 ऑनलाइन आर्डर और पेमेंट</h3>
@@ -431,7 +478,9 @@ Payment के बाद वापस ऐप में आने पर WhatsApp
 💬 WhatsApp पर Order भेजें
 </button>
 
-<button class="btn-close" onclick="closeOrderForm()">रद्द करें</button>
+<button class="btn-close" onclick="closeOrderForm()">
+रद्द करें
+</button>
 
 </div>
 </div>
@@ -486,6 +535,11 @@ let ordersQuery=null;
 let authBusy=false;
 let authStateReady=false;
 let whatsappOpening=false;
+
+let locationRequestBusy=false;
+let locationReady=false;
+let pendingLocationAction=null;
+let locationActionTimer=null;
 
 const $=id=>document.getElementById(id);
 
@@ -1000,37 +1054,261 @@ function switchTab(viewId,btnEl){
 }
 
 
-/* ================= GPS ================= */
+/* ================= LOCATION ================= */
 
-if(navigator.geolocation){
+function updateLocationStatus(text){
 
- navigator.geolocation.getCurrentPosition(
+ const el=$("locationStatus");
 
-   function(pos){
+ if(el){
+   el.textContent=text;
+ }
+}
 
-     userLocationLink=
-       "https://www.google.com/maps?q="+
-       pos.coords.latitude+
-       ","+
-       pos.coords.longitude;
+function setUserLocation(lat,lon){
 
-   },
+ userLocationLink=
+   "https://www.google.com/maps?q="+
+   encodeURIComponent(lat)+
+   ","+
+   encodeURIComponent(lon);
 
-   function(){
+ locationReady=true;
+ locationRequestBusy=false;
 
-     console.log(
-       "GPS permission denied/unavailable"
+ updateLocationStatus(
+   "✅ Live Location मिल गई"
+ );
+
+ if(pendingLocationAction){
+
+   const action=pendingLocationAction;
+
+   pendingLocationAction=null;
+
+   if(locationActionTimer){
+     clearTimeout(locationActionTimer);
+     locationActionTimer=null;
+   }
+
+   setTimeout(function(){
+     action();
+   },100);
+ }
+}
+
+function finishLocationActionWithoutLocation(){
+
+ locationRequestBusy=false;
+
+ updateLocationStatus(
+   "⚠️ Location उपलब्ध नहीं है"
+ );
+
+ if(pendingLocationAction){
+
+   const action=pendingLocationAction;
+
+   pendingLocationAction=null;
+
+   if(locationActionTimer){
+     clearTimeout(locationActionTimer);
+     locationActionTimer=null;
+   }
+
+   setTimeout(function(){
+     action();
+   },100);
+ }
+}
+
+function requestUserLocation(){
+
+ if(locationRequestBusy){
+   return;
+ }
+
+ locationRequestBusy=true;
+
+ updateLocationStatus(
+   "📍 Location permission / GPS check हो रहा है..."
+ );
+
+ if(
+   window.AndroidApp &&
+   typeof window.AndroidApp.getLocation==="function"
+ ){
+
+   try{
+
+     window.AndroidApp.getLocation();
+
+   }catch(error){
+
+     console.error(
+       "Native location error:",
+       error
      );
 
-   },
+     locationRequestBusy=false;
 
-   {
-     enableHighAccuracy:true,
-     timeout:10000,
-     maximumAge:0
+     updateLocationStatus(
+       "❌ Location प्राप्त नहीं हो सकी"
+     );
+
    }
- );
+
+   return;
+ }
+
+
+ /* ===== BROWSER FALLBACK ===== */
+
+ if(navigator.geolocation){
+
+   navigator.geolocation.getCurrentPosition(
+
+     function(pos){
+
+       setUserLocation(
+         pos.coords.latitude,
+         pos.coords.longitude
+       );
+
+     },
+
+     function(error){
+
+       console.error(
+         "Browser GPS Error:",
+         error
+       );
+
+       locationRequestBusy=false;
+
+       updateLocationStatus(
+         "⚠️ GPS permission नहीं मिली"
+       );
+
+       if(pendingLocationAction){
+         finishLocationActionWithoutLocation();
+       }
+
+     },
+
+     {
+       enableHighAccuracy:true,
+       timeout:15000,
+       maximumAge:60000
+     }
+
+   );
+
+ }else{
+
+   locationRequestBusy=false;
+
+   updateLocationStatus(
+     "❌ इस device पर Location उपलब्ध नहीं है"
+   );
+
+   if(pendingLocationAction){
+     finishLocationActionWithoutLocation();
+   }
+ }
 }
+
+
+/* ===== NATIVE LOCATION SUCCESS ===== */
+
+window.nativeLocationSuccess=function(lat,lon){
+
+ const latitude=Number(lat);
+ const longitude=Number(lon);
+
+ if(
+   !Number.isFinite(latitude)||
+   !Number.isFinite(longitude)
+ ){
+   window.nativeLocationError(
+     "Invalid location received"
+   );
+   return;
+ }
+
+ setUserLocation(
+   latitude,
+   longitude
+ );
+};
+
+
+/* ===== NATIVE LOCATION ERROR ===== */
+
+window.nativeLocationError=function(message){
+
+ console.error(
+   "Native Location Error:",
+   message
+ );
+
+ locationRequestBusy=false;
+
+ updateLocationStatus(
+   "⚠️ Location नहीं मिली"
+ );
+
+ if(pendingLocationAction){
+   finishLocationActionWithoutLocation();
+ }
+};
+
+
+/* ===== LOCATION ACTION QUEUE ===== */
+
+function runWithLocation(action){
+
+ if(locationReady){
+
+   action();
+   return;
+ }
+
+ pendingLocationAction=action;
+
+ requestUserLocation();
+
+ if(locationActionTimer){
+   clearTimeout(locationActionTimer);
+ }
+
+ locationActionTimer=setTimeout(function(){
+
+   if(pendingLocationAction===action){
+
+     pendingLocationAction=null;
+
+     action();
+   }
+
+   locationActionTimer=null;
+
+ },7000);
+}
+
+
+/* ===== PAGE LOAD LOCATION ===== */
+
+window.addEventListener(
+ "load",
+ function(){
+
+   setTimeout(function(){
+     requestUserLocation();
+   },1000);
+
+ }
+);
 
 
 /* ================= WHATSAPP ================= */
@@ -1155,18 +1433,22 @@ function buyNow(
  price
 ){
 
- openWhatsApp(
+ runWithLocation(function(){
 
-   "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
-   "📦 सामान: "+
-   productName+
-   "\n💰 कीमत: ₹"+
-   Number(price).toLocaleString("en-IN")+
-   "\n\n📍 लाइव लोकेशन: "+
-   userLocationLink+
-   "\n\nकृपया डिलीवरी की जानकारी भेजें।"
+   openWhatsApp(
 
- );
+     "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
+     "📦 सामान: "+
+     productName+
+     "\n💰 कीमत: ₹"+
+     Number(price).toLocaleString("en-IN")+
+     "\n\n📍 लाइव लोकेशन: "+
+     userLocationLink+
+     "\n\nकृपया डिलीवरी की जानकारी भेजें।"
+
+   );
+
+ });
 }
 
 
@@ -1307,6 +1589,8 @@ function openOrderForm(
 
  $("orderModal")
  .style.display="block";
+
+ requestUserLocation();
 }
 
 
@@ -1333,6 +1617,8 @@ function openTableOrderForm(){
 
  $("orderModal")
  .style.display="block";
+
+ requestUserLocation();
 }
 
 
@@ -1560,6 +1846,8 @@ function sendPendingUpiOrderToWhatsApp(){
 window.addEventListener(
  "pageshow",
  function(){
+
+   requestUserLocation();
 
    if(
      sessionStorage.getItem(
@@ -2002,17 +2290,21 @@ function buyTableNow(){
    getSelectedTableColor()+
    "]";
 
- openWhatsApp(
+ runWithLocation(function(){
 
-   "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
-   "📦 सामान: "+
-   product+
-   "\n💰 कीमत: ₹550"+
-   "\n\n📍 लाइव लोकेशन: "+
-   userLocationLink+
-   "\n\nकृपया डिलीवरी की जानकारी भेजें।"
+   openWhatsApp(
 
- );
+     "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
+     "📦 सामान: "+
+     product+
+     "\n💰 कीमत: ₹550"+
+     "\n\n📍 लाइव लोकेशन: "+
+     userLocationLink+
+     "\n\nकृपया डिलीवरी की जानकारी भेजें।"
+
+   );
+
+ });
 }
 
 
@@ -2105,4 +2397,4 @@ function escapeAttribute(value){
 </script>
 
 </body>
-                 </html>
+ </html>
