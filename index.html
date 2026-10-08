@@ -111,7 +111,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
 
-#authLoading{position:fixed;inset:0;z-index:999998;background:rgba(255,255,255,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .25s ease}
+/* LOGIN LOADING - केवल already logged-in user के लिए */
+#authLoading{
+position:fixed;
+inset:0;
+z-index:999998;
+background:rgba(255,255,255,.97);
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+transition:opacity .2s ease
+}
 .auth-loader{width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 .auth-loading-text{margin-top:12px;color:#1a237e;font-size:14px;font-weight:bold;text-align:center;padding:0 20px}
@@ -127,9 +138,21 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <body>
 
+<!--
+पहली बार Guest User:
+कोई loading screen नहीं।
+
+पहले से Google Login है:
+छोटा loading screen दिखेगा और account restore होते ही हट जाएगा।
+
+Location:
+पूरी तरह background में silently चलेगी।
+Location का कोई loading text नहीं दिखेगा।
+-->
+
 <div id="authLoading">
 <div class="auth-loader"></div>
-<div id="authLoadingText" class="auth-loading-text">📍 Live Location प्राप्त की जा रही है...</div>
+<div class="auth-loading-text">Account लोड हो रहा है...</div>
 </div>
 
 <header>
@@ -343,9 +366,7 @@ onclick="requestUserLocation()">
 📍 मेरी Live Location अपडेट करें
 </button>
 
-<div id="locationStatus" class="location-status">
-📍 Live Location प्राप्त की जा रही है...
-</div>
+<div id="locationStatus" class="location-status"></div>
 
 </div>
 
@@ -539,9 +560,8 @@ let whatsappOpening=false;
 
 let locationRequestBusy=false;
 let locationReady=false;
-let locationFailed=false;
-let pendingLocationActions=[];
 let locationRetryTimer=null;
+let pendingLocationActions=[];
 
 const $=id=>document.getElementById(id);
 
@@ -551,9 +571,13 @@ const $=id=>document.getElementById(id);
 function showAppMessage(message,icon="⚠️"){
 
  const old=$("appMessageBox");
- if(old)old.remove();
+
+ if(old){
+   old.remove();
+ }
 
  const box=document.createElement("div");
+
  box.id="appMessageBox";
 
  box.innerHTML=
@@ -575,7 +599,7 @@ function showAppMessage(message,icon="⚠️"){
 }
 
 
-/* ================= AUTH ================= */
+/* ================= AUTH ERROR ================= */
 
 function showAuthError(message){
 
@@ -585,7 +609,9 @@ function showAuthError(message){
  el.style.display="block";
 
  setTimeout(function(){
+
    el.style.display="none";
+
  },7000);
 }
 
@@ -596,6 +622,9 @@ function hideAuthError(){
  el.style.display="none";
  el.textContent="";
 }
+
+
+/* ================= AUTH BUTTON BUSY ================= */
 
 function setAuthButtonsBusy(busy,text){
 
@@ -610,54 +639,19 @@ function setAuthButtonsBusy(busy,text){
 }
 
 
-/* ================= STARTUP LOADING ================= */
+/* ================= AUTH LOADING ================= */
 
-function updateStartupLoading(){
+function showAuthLoading(){
 
  const loader=$("authLoading");
- const text=$("authLoadingText");
 
  if(!loader)return;
 
- if(!authStateReady){
-
-   if(text){
-     text.textContent="🔐 Account लोड हो रहा है...";
-   }
-
-   return;
- }
-
- if(!locationReady){
-
-   if(text){
-
-     if(locationRequestBusy){
-       text.textContent="📍 Live Location प्राप्त की जा रही है...";
-     }else if(locationFailed){
-       text.textContent="📍 Live Location फिर से प्राप्त की जा रही है...";
-     }else{
-       text.textContent="📍 Live Location प्राप्त की जा रही है...";
-     }
-
-   }
-
-   return;
- }
-
- if(text){
-   text.textContent="✅ App तैयार हो रहा है...";
- }
-
- hideAuthLoading();
+ loader.style.display="flex";
+ loader.style.opacity="1";
 }
 
 function hideAuthLoading(){
-
- if(!authStateReady||!locationReady){
-   updateStartupLoading();
-   return;
- }
 
  const loader=$("authLoading");
 
@@ -671,7 +665,31 @@ function hideAuthLoading(){
      loader.style.display="none";
    }
 
- },250);
+ },200);
+}
+
+
+/*
+पहली बार app खुलने पर:
+Guest को तुरंत app दिखेगा।
+
+अगर Firebase ने पहले से logged-in account restore कर लिया है:
+Account loading थोड़ी देर दिखेगी।
+
+Location कभी भी इस loading screen को block नहीं करेगी।
+*/
+
+const startupUser=auth.currentUser;
+
+if(startupUser){
+
+ currentUser=startupUser;
+ showAuthLoading();
+
+}else{
+
+ hideAuthLoading();
+
 }
 
 
@@ -687,33 +705,56 @@ function initializeExistingUser(){
 
    updateAuthUI();
    loadUserOrders(immediateUser.uid);
+
+   showAuthLoading();
+
+ }else{
+
+   currentUser=null;
+
+   updateAuthUI();
+
+   hideAuthLoading();
  }
 }
 
 auth.onAuthStateChanged(function(user){
 
  currentUser=user||null;
+
  authStateReady=true;
 
  updateAuthUI();
 
  if(user){
-   loadUserOrders(user.uid);
- }else{
-   clearOrdersListener();
- }
 
- updateStartupLoading();
+   loadUserOrders(user.uid);
+
+   hideAuthLoading();
+
+ }else{
+
+   clearOrdersListener();
+
+   hideAuthLoading();
+ }
 
 });
 
+
 setTimeout(function(){
+
  initializeExistingUser();
+
 },0);
+
+
+/* ================= GOOGLE REDIRECT ================= */
 
 auth.getRedirectResult().then(function(result){
 
  if(result&&result.user){
+
    hideAuthError();
  }
 
@@ -731,8 +772,12 @@ auth.getRedirectResult().then(function(result){
 /* ================= PROFILE ================= */
 
 function getSavedAvatar(){
- return localStorage.getItem("topperProfileAvatar")||"u1.png";
+
+ return localStorage.getItem(
+   "topperProfileAvatar"
+ )||"u1.png";
 }
+
 
 function setProfileAvatar(src){
 
@@ -742,14 +787,16 @@ function setProfileAvatar(src){
    img.src=src;
  }
 
- const topPic=document.querySelector(
-   "#authBtn .user-pic"
- );
+ const topPic=
+   document.querySelector(
+     "#authBtn .user-pic"
+   );
 
  if(topPic){
    topPic.src=src;
  }
 }
+
 
 function updateAuthUI(){
 
@@ -768,7 +815,8 @@ function updateAuthUI(){
      '" class="user-pic" alt="Profile"> Logout';
 
    name.textContent=
-     currentUser.displayName||"Google User";
+     currentUser.displayName||
+     "Google User";
 
    email.textContent=
      currentUser.email||"";
@@ -776,13 +824,16 @@ function updateAuthUI(){
    img.src=avatar;
 
    profileBtn.textContent="Logout";
-   profileBtn.onclick=googleSignOut;
+
+   profileBtn.onclick=
+     googleSignOut;
 
  }else{
 
    authBtn.textContent="Sign In";
 
-   name.textContent="Guest User";
+   name.textContent=
+     "Guest User";
 
    email.textContent=
      "Google Account Not Connected";
@@ -792,7 +843,8 @@ function updateAuthUI(){
    profileBtn.textContent=
      "Google Account से लॉगिन करें";
 
-   profileBtn.onclick=googleSignIn;
+   profileBtn.onclick=
+     googleSignIn;
  }
 
  authBusy=false;
@@ -801,12 +853,17 @@ function updateAuthUI(){
  profileBtn.disabled=false;
 }
 
+
 function handleAuthAction(){
 
  if(currentUser){
+
    googleSignOut();
+
  }else{
+
    googleSignIn();
+
  }
 }
 
@@ -815,7 +872,9 @@ function handleAuthAction(){
 
 async function googleSignIn(){
 
- if(currentUser||authBusy)return;
+ if(currentUser||authBusy){
+   return;
+ }
 
  authBusy=true;
 
@@ -838,6 +897,7 @@ async function googleSignIn(){
    }catch(error){
 
      authBusy=false;
+
      updateAuthUI();
 
      showAuthError(
@@ -849,12 +909,14 @@ async function googleSignIn(){
    return;
  }
 
+
  const provider=
    new firebase.auth.GoogleAuthProvider();
 
  provider.setCustomParameters({
    prompt:"select_account"
  });
+
 
  try{
 
@@ -870,6 +932,7 @@ async function googleSignIn(){
    );
 
    authBusy=false;
+
    updateAuthUI();
 
    if(
@@ -919,7 +982,10 @@ window.nativeGoogleLogin=async function(idToken){
    authBusy=false;
 
    hideAuthError();
+
    updateAuthUI();
+
+   hideAuthLoading();
 
  }catch(error){
 
@@ -929,11 +995,13 @@ window.nativeGoogleLogin=async function(idToken){
    );
 
    authBusy=false;
+
    updateAuthUI();
 
    handleAuthError(error);
  }
 };
+
 
 window.nativeGoogleLoginError=function(message){
 
@@ -943,6 +1011,7 @@ window.nativeGoogleLoginError=function(message){
  );
 
  authBusy=false;
+
  updateAuthUI();
 
  showAuthError(
@@ -962,6 +1031,8 @@ function googleSignOut(){
    currentUser=null;
 
    updateAuthUI();
+
+   hideAuthLoading();
 
    showAppMessage(
      "Log Out हो गया!",
@@ -991,6 +1062,7 @@ function handleAuthError(error){
    error&&error.message
    ?error.message
    :"Unknown error";
+
 
  if(
    error&&
@@ -1027,6 +1099,7 @@ function handleAuthError(error){
      "इस email से Firebase में पहले किसी दूसरे sign-in method का account बना है।";
  }
 
+
  showAuthError(
    "❌ Google Login नहीं हुआ: "+
    msg
@@ -1037,10 +1110,12 @@ function handleAuthError(error){
 /* ================= AVATAR ================= */
 
 function openAvatarPicker(){
+
  $("avatarModal").style.display="block";
 }
 
 function closeAvatarPicker(){
+
  $("avatarModal").style.display="none";
 }
 
@@ -1052,7 +1127,9 @@ function selectAvatar(fileName){
  );
 
  setProfileAvatar(fileName);
+
  updateAuthUI();
+
  closeAvatarPicker();
 }
 
@@ -1088,12 +1165,14 @@ function switchTab(viewId,btnEl){
  const view=$(viewId);
 
  if(view){
+
    view.classList.add(
      "active-view"
    );
  }
 
  if(btnEl){
+
    btnEl.classList.add(
      "active"
    );
@@ -1103,14 +1182,39 @@ function switchTab(viewId,btnEl){
 
 /* ================= LOCATION ================= */
 
+/*
+Location पूरी तरह background में चलेगी।
+
+कोई:
+❌ Live Location प्राप्त की जा रही है
+❌ Location loading
+❌ Location loading screen
+
+नहीं दिखेगा।
+*/
+
 function updateLocationStatus(text){
 
  const el=$("locationStatus");
 
- if(el){
+ if(!el)return;
+
+ /*
+ केवल user के manually "मेरी Live Location अपडेट करें"
+ button दबाने पर status दिखाया जा सकता है।
+ Background location के दौरान कोई text नहीं।
+ */
+
+ if(text){
+
    el.textContent=text;
+
+ }else{
+
+   el.textContent="";
  }
 }
+
 
 function setUserLocation(lat,lon){
 
@@ -1121,29 +1225,34 @@ function setUserLocation(lat,lon){
    !Number.isFinite(latitude)||
    !Number.isFinite(longitude)
  ){
+
    return;
  }
 
  userLocationLink=
    "https://www.google.com/maps?q="+
-   encodeURIComponent(latitude)+
-   ","+
-   encodeURIComponent(longitude);
+   encodeURIComponent(
+     latitude+
+     ","+
+     longitude
+   );
 
  locationReady=true;
- locationFailed=false;
  locationRequestBusy=false;
 
- updateLocationStatus(
-   "✅ Live Location मिल गई"
- );
-
  if(locationRetryTimer){
-   clearTimeout(locationRetryTimer);
+
+   clearTimeout(
+     locationRetryTimer
+   );
+
    locationRetryTimer=null;
  }
 
- updateStartupLoading();
+ updateLocationStatus(
+   "✅ Live Location उपलब्ध है"
+ );
+
 
  const actions=
    pendingLocationActions.slice();
@@ -1153,18 +1262,24 @@ function setUserLocation(lat,lon){
  actions.forEach(function(action){
 
    setTimeout(function(){
+
      try{
+
        action();
+
      }catch(error){
+
        console.error(
          "Location action error:",
          error
        );
      }
-   },50);
+
+   },0);
 
  });
 }
+
 
 function requestUserLocation(){
 
@@ -1174,23 +1289,18 @@ function requestUserLocation(){
      "✅ Live Location उपलब्ध है"
    );
 
-   updateStartupLoading();
-
    return;
  }
 
  if(locationRequestBusy){
+
    return;
  }
 
  locationRequestBusy=true;
- locationFailed=false;
 
- updateLocationStatus(
-   "📍 Live Location प्राप्त की जा रही है..."
- );
 
- updateStartupLoading();
+ /* ================= NATIVE ANDROID ================= */
 
  if(
    window.AndroidApp &&
@@ -1209,23 +1319,15 @@ function requestUserLocation(){
      );
 
      locationRequestBusy=false;
-     locationFailed=true;
-
-     updateLocationStatus(
-       "⚠️ Location फिर से प्राप्त की जा रही है..."
-     );
-
-     updateStartupLoading();
 
      scheduleLocationRetry();
-
    }
 
    return;
  }
 
 
- /* ===== BROWSER FALLBACK ===== */
+ /* ================= BROWSER FALLBACK ================= */
 
  if(navigator.geolocation){
 
@@ -1248,13 +1350,6 @@ function requestUserLocation(){
        );
 
        locationRequestBusy=false;
-       locationFailed=true;
-
-       updateLocationStatus(
-         "⚠️ GPS permission / Location Service check करें"
-       );
-
-       updateStartupLoading();
 
        scheduleLocationRetry();
 
@@ -1271,37 +1366,36 @@ function requestUserLocation(){
  }else{
 
    locationRequestBusy=false;
-   locationFailed=true;
-
-   updateLocationStatus(
-     "❌ इस device पर Location उपलब्ध नहीं है"
-   );
-
-   updateStartupLoading();
 
    scheduleLocationRetry();
  }
 }
 
+
 function scheduleLocationRetry(){
 
  if(locationRetryTimer){
-   clearTimeout(locationRetryTimer);
+
+   clearTimeout(
+     locationRetryTimer
+   );
  }
 
- locationRetryTimer=setTimeout(function(){
+ locationRetryTimer=
+   setTimeout(function(){
 
-   locationRetryTimer=null;
+     locationRetryTimer=null;
 
-   if(!locationReady){
-     requestUserLocation();
-   }
+     if(!locationReady){
 
- },3000);
+       requestUserLocation();
+     }
+
+   },3000);
 }
 
 
-/* ===== NATIVE LOCATION SUCCESS ===== */
+/* ================= NATIVE LOCATION SUCCESS ================= */
 
 window.nativeLocationSuccess=function(lat,lon){
 
@@ -1312,9 +1406,11 @@ window.nativeLocationSuccess=function(lat,lon){
    !Number.isFinite(latitude)||
    !Number.isFinite(longitude)
  ){
+
    window.nativeLocationError(
      "Invalid location received"
    );
+
    return;
  }
 
@@ -1325,7 +1421,7 @@ window.nativeLocationSuccess=function(lat,lon){
 };
 
 
-/* ===== NATIVE LOCATION ERROR ===== */
+/* ================= NATIVE LOCATION ERROR ================= */
 
 window.nativeLocationError=function(message){
 
@@ -1335,27 +1431,28 @@ window.nativeLocationError=function(message){
  );
 
  locationRequestBusy=false;
- locationFailed=true;
 
- updateLocationStatus(
-   "⚠️ Live Location प्राप्त नहीं हुई, फिर कोशिश हो रही है..."
- );
-
- updateStartupLoading();
+ /*
+ कोई error text नहीं।
+ Location silently दोबारा try होगी।
+ */
 
  scheduleLocationRetry();
 };
 
 
-/* ===== LOCATION ACTION QUEUE ===== */
+/* ================= LOCATION ACTION QUEUE ================= */
 
 function runWithLocation(action){
 
  if(locationReady){
 
    try{
+
      action();
+
    }catch(error){
+
      console.error(
        "Location action error:",
        error
@@ -1365,15 +1462,27 @@ function runWithLocation(action){
    return;
  }
 
- pendingLocationActions.push(action);
+
+ pendingLocationActions.push(
+   action
+ );
 
  requestUserLocation();
 }
 
 
-/* ===== START LOCATION IMMEDIATELY ===== */
+/* ================= START LOCATION SILENTLY ================= */
 
-requestUserLocation();
+/*
+App खुलते ही location background में शुरू होगी।
+लेकिन screen पर कोई location loading नहीं आएगी।
+*/
+
+setTimeout(function(){
+
+ requestUserLocation();
+
+},100);
 
 
 /* ================= WHATSAPP ================= */
@@ -1394,13 +1503,16 @@ function openWhatsApp(message){
  }
 
  if(whatsappOpening){
+
    return;
  }
 
  whatsappOpening=true;
 
+
  const bridge=
    window.AndroidApp;
+
 
  if(
    bridge&&
@@ -1412,8 +1524,10 @@ function openWhatsApp(message){
      bridge.openWhatsApp(text);
 
      setTimeout(function(){
+
        whatsappOpening=false;
-     },800);
+
+     },500);
 
      return;
 
@@ -1436,7 +1550,7 @@ function openWhatsApp(message){
  }
 
 
- /* ===== BROWSER FALLBACK ===== */
+ /* ================= BROWSER FALLBACK ================= */
 
  const url=
    "https://wa.me/919264137710?text="+
@@ -1460,14 +1574,13 @@ function openWhatsApp(message){
      "WhatsApp खोलने में समस्या हुई।",
      "❌"
    );
-
  }
 
  setTimeout(function(){
 
    whatsappOpening=false;
 
- },800);
+ },500);
 }
 
 
@@ -1486,7 +1599,6 @@ window.nativeWhatsAppError=function(message){
 window.nativeWhatsAppOpened=function(){
 
  whatsappOpening=false;
-
 };
 
 
@@ -1499,7 +1611,10 @@ function buyNow(
 
  runWithLocation(function(){
 
-   if(!locationReady||!userLocationLink){
+   if(
+     !locationReady||
+     !userLocationLink
+   ){
 
      return;
    }
@@ -1532,6 +1647,7 @@ const tableColors=[
 
 const tableSliderTrack=
  $("tableSlider");
+
 
 if(tableSliderTrack){
 
@@ -1587,6 +1703,7 @@ function getSelectedTableColor(){
    $("tableSlider");
 
  if(!track){
+
    return tableColors[0];
  }
 
@@ -1606,6 +1723,7 @@ function getSelectedTableColor(){
 function requireLogin(){
 
  if(currentUser){
+
    return true;
  }
 
@@ -1633,6 +1751,7 @@ function openOrderForm(
 ){
 
  if(!requireLogin()){
+
    return;
  }
 
@@ -1659,6 +1778,9 @@ function openOrderForm(
  $("orderModal")
  .style.display="block";
 
+ /*
+ Location background में पहले से चल रही होगी।
+ */
  requestUserLocation();
 }
 
@@ -1666,6 +1788,7 @@ function openOrderForm(
 function openTableOrderForm(){
 
  if(!requireLogin()){
+
    return;
  }
 
@@ -1732,6 +1855,7 @@ function payViaUpiIntent(){
  const address=
    $("custAddress").value.trim();
 
+
  if(
    !name||
    !phone||
@@ -1746,6 +1870,7 @@ function payViaUpiIntent(){
    return;
  }
 
+
  if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
@@ -1756,17 +1881,17 @@ function payViaUpiIntent(){
    return;
  }
 
+
  runWithLocation(function(){
 
-   if(!locationReady||!userLocationLink){
-
-     showAppMessage(
-       "Live Location अभी प्राप्त हो रही है। कृपया एक क्षण रुकें।",
-       "📍"
-     );
+   if(
+     !locationReady||
+     !userLocationLink
+   ){
 
      return;
    }
+
 
    sessionStorage.setItem(
      "pendingUpiWhatsApp",
@@ -1783,6 +1908,7 @@ function payViaUpiIntent(){
      })
    );
 
+
    const upiUrl=
      "upi://pay?pa="+
      encodeURIComponent(
@@ -1797,6 +1923,7 @@ function payViaUpiIntent(){
        amount.toFixed(2)
      )+
      "&cu=INR";
+
 
    if(
      window.AndroidApp&&
@@ -1824,11 +1951,11 @@ function payViaUpiIntent(){
 
          window.nativeUpiError();
        }
-
      }
 
      return;
    }
+
 
    try{
 
@@ -1846,7 +1973,6 @@ function payViaUpiIntent(){
    }
 
  });
-
 }
 
 
@@ -1868,7 +1994,11 @@ function sendPendingUpiOrderToWhatsApp(){
      "pendingUpiWhatsApp"
    );
 
- if(!raw)return;
+ if(!raw){
+
+   return;
+ }
+
 
  let data;
 
@@ -1885,6 +2015,7 @@ function sendPendingUpiOrderToWhatsApp(){
    return;
  }
 
+
  if(
    !data||
    !data.product||
@@ -1900,24 +2031,38 @@ function sendPendingUpiOrderToWhatsApp(){
    return;
  }
 
- if(!locationReady){
 
-   requestUserLocation();
+ /*
+ Location अभी नहीं मिली है तो action queue में डालें।
+ */
 
-   setTimeout(function(){
+ if(
+   !locationReady||
+   !userLocationLink
+ ){
 
-     if(locationReady){
-       sendPendingUpiOrderToWhatsApp();
-     }
+   runWithLocation(function(){
 
-   },300);
+     sendPendingUpiOrderToWhatsApp();
+
+   });
 
    return;
  }
 
+
+ /*
+ हमेशा current fresh location इस्तेमाल होगी।
+ */
+
+ const freshLocation=
+   userLocationLink;
+
+
  sessionStorage.removeItem(
    "pendingUpiWhatsApp"
  );
+
 
  const message=
    "🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n"+
@@ -1933,20 +2078,31 @@ function sendPendingUpiOrderToWhatsApp(){
    "\n🏠 *पूरा पता:* "+
    data.address+
    "\n\n📍 *लाइव लोकेशन:* "+
-   userLocationLink+
+   freshLocation+
    "\n\n💳 *Payment:* UPI"+
    "\n🔢 *UTR / Transaction No:* Payment app से UTR भेजें"+
    "\n\n⚠️ *नोट:* UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
+
 
  openWhatsApp(message);
 }
 
 
+/* ================= PAGE SHOW ================= */
+
 window.addEventListener(
  "pageshow",
  function(){
 
-   requestUserLocation();
+   /*
+   Location background में silently refresh होगी।
+   */
+
+   if(!locationReady){
+
+     requestUserLocation();
+   }
+
 
    if(
      sessionStorage.getItem(
@@ -1954,10 +2110,7 @@ window.addEventListener(
      )
    ){
 
-     setTimeout(
-       sendPendingUpiOrderToWhatsApp,
-       300
-     );
+     sendPendingUpiOrderToWhatsApp();
 
    }
 
@@ -1979,6 +2132,7 @@ async function submitOnlineOrder(){
    return;
  }
 
+
  const name=
    $("custName").value.trim();
 
@@ -1990,6 +2144,7 @@ async function submitOnlineOrder(){
 
  const utr=
    $("utrNumber").value.trim();
+
 
  if(
    !name||
@@ -2005,6 +2160,7 @@ async function submitOnlineOrder(){
    return;
  }
 
+
  if(!/^\d{10}$/.test(phone)){
 
    showAppMessage(
@@ -2014,6 +2170,7 @@ async function submitOnlineOrder(){
 
    return;
  }
+
 
  if(!utr){
 
@@ -2025,17 +2182,21 @@ async function submitOnlineOrder(){
    return;
  }
 
- if(!locationReady){
 
-   showAppMessage(
-     "Live Location अभी प्राप्त हो रही है। कृपया एक क्षण रुकें।",
-     "📍"
-   );
+ if(
+   !locationReady||
+   !userLocationLink
+ ){
 
-   requestUserLocation();
+   runWithLocation(function(){
+
+     submitOnlineOrder();
+
+   });
 
    return;
  }
+
 
  const btn=
    $("onlineOrderBtn");
@@ -2045,37 +2206,50 @@ async function submitOnlineOrder(){
  btn.textContent=
    "⏳ Order Firebase में Save हो रहा है...";
 
+
  const orderData={
 
-   userId:currentUser.uid,
+   userId:
+     currentUser.uid,
 
    userEmail:
      currentUser.email||"",
 
-   customerName:name,
+   customerName:
+     name,
 
-   customerPhone:phone,
+   customerPhone:
+     phone,
 
    customerPhoto:
      currentUser.photoURL||"",
 
-   product:selectedProduct,
+   product:
+     selectedProduct,
 
-   price:Number(selectedPrice),
+   price:
+     Number(selectedPrice),
 
-   address:address,
+   address:
+     address,
 
-   utrNumber:utr,
+   utrNumber:
+     utr,
 
-   location:userLocationLink,
+   location:
+     userLocationLink,
 
-   status:"pending",
+   status:
+     "pending",
 
-   paymentStatus:"submitted",
+   paymentStatus:
+     "submitted",
 
-   paymentMethod:"UPI",
+   paymentMethod:
+     "UPI",
 
-   createdAt:Date.now(),
+   createdAt:
+     Date.now(),
 
    timestamp:
      new Date().toISOString(),
@@ -2090,6 +2264,7 @@ async function submitOnlineOrder(){
      )
  };
 
+
  try{
 
    const ref=
@@ -2101,6 +2276,7 @@ async function submitOnlineOrder(){
    await ref.set(
      orderData
    );
+
 
    const message=
      "🌟 *नया ऑनलाइन पेमेंट आर्डर* 🌟\n\n"+
@@ -2124,12 +2300,15 @@ async function submitOnlineOrder(){
      utr+
      "\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
+
    $("custName").value="";
    $("custPhone").value="";
    $("custAddress").value="";
    $("utrNumber").value="";
 
+
    closeOrderForm();
+
 
    showAppMessage(
      "आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+
@@ -2137,11 +2316,13 @@ async function submitOnlineOrder(){
      "✅"
    );
 
+
    setTimeout(function(){
 
      openWhatsApp(message);
 
    },300);
+
 
  }catch(error){
 
@@ -2154,6 +2335,7 @@ async function submitOnlineOrder(){
 
    btn.textContent=
      "💬 WhatsApp पर Order भेजें";
+
 
    showAppMessage(
      "Order Save नहीं हो पाया!\n\n"+
@@ -2193,13 +2375,16 @@ function loadUserOrders(userId){
    );
  }
 
+
  ordersQuery=
    db.ref("orders")
    .orderByChild("userId")
    .equalTo(userId);
 
+
  $("ordersList").innerHTML=
    '<p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>';
+
 
  ordersQuery.on(
    "value",
@@ -2226,6 +2411,7 @@ function ordersValueHandler(snapshot){
 
  list.innerHTML="";
 
+
  if(!snapshot.exists()){
 
    list.innerHTML=
@@ -2234,7 +2420,9 @@ function ordersValueHandler(snapshot){
    return;
  }
 
+
  const orders=[];
+
 
  snapshot.forEach(function(child){
 
@@ -2243,11 +2431,12 @@ function ordersValueHandler(snapshot){
    if(o){
 
      o._id=child.key;
-     orders.push(o);
 
+     orders.push(o);
    }
 
  });
+
 
  orders.sort(function(a,b){
 
@@ -2260,6 +2449,7 @@ function ordersValueHandler(snapshot){
 
  });
 
+
  orders.forEach(function(order){
 
    const status=
@@ -2267,11 +2457,13 @@ function ordersValueHandler(snapshot){
        order.status||"pending"
      ).toLowerCase();
 
+
    let cls=
      "status-pending";
 
    let text=
      "⏳ Pending";
+
 
    if(
      status==="successful"||
@@ -2285,6 +2477,7 @@ function ordersValueHandler(snapshot){
        "✅ Successful";
    }
 
+
    if(
      status==="failed"||
      status==="failure"
@@ -2297,13 +2490,16 @@ function ordersValueHandler(snapshot){
        "❌ Failed";
    }
 
+
    const card=
      document.createElement(
        "div"
      );
 
+
    card.className=
      "order-card";
+
 
    card.innerHTML=
      '<div class="order-header">'+
@@ -2359,12 +2555,14 @@ function ordersValueHandler(snapshot){
      )+
      "</div>";
 
+
    if(order.location){
 
      const a=
        document.createElement(
          "a"
        );
+
 
      a.href=
        order.location;
@@ -2383,8 +2581,10 @@ function ordersValueHandler(snapshot){
      a.style.marginTop=
        "8px";
 
+
      card.appendChild(a);
    }
+
 
    list.appendChild(card);
 
@@ -2401,11 +2601,17 @@ function buyTableNow(){
    getSelectedTableColor()+
    "]";
 
+
  runWithLocation(function(){
 
-   if(!locationReady||!userLocationLink){
+   if(
+     !locationReady||
+     !userLocationLink
+   ){
+
      return;
    }
+
 
    openWhatsApp(
 
@@ -2440,6 +2646,8 @@ window.addEventListener(
  }
 );
 
+
+/* ================= PHONE INPUT ================= */
 
 $("custPhone").addEventListener(
  "input",
@@ -2512,4 +2720,4 @@ function escapeAttribute(value){
 </script>
 
 </body>
- </html>
+</html>
