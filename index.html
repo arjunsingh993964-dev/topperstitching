@@ -727,20 +727,28 @@ transform:rotate(360deg)
 }
 }
 
-/* REAL CONFERBOT */
-#conferbot-real-drag-helper{
+/* =========================================================
+   REAL CONFERBOT DRAG HANDLE
+   ========================================================= */
+
+#topperConferbotDragHandle{
 position:fixed;
 display:none;
-z-index:99980;
-pointer-events:none;
-border-radius:50%;
-background:transparent
+width:28px;
+height:60px;
+background:transparent;
+z-index:2147483647;
+cursor:grab;
+touch-action:none;
+user-select:none;
+-webkit-user-select:none;
+-webkit-tap-highlight-color:transparent;
 }
 
-/*
-   Conferbot का अपना real launcher ही दिखेगा।
-   कोई fake 🤖 / 💬 button नहीं बनाया गया है।
-*/
+#topperConferbotDragHandle.dragging{
+cursor:grabbing;
+}
+
 </style>
 </head>
 
@@ -3349,221 +3357,46 @@ restorePaymentStateFromLocalStorage();
 1000
 );
 
-/* ==================================================
-   REAL CONFERBOT POSITION MEMORY + DRAG
-   ================================================== */
+
+/* =========================================================
+   REAL CONFERBOT
+   IMPORTANT:
+   Conferbot launcher is an iframe on many devices.
+   Pointer events inside an iframe do NOT reach this page.
+   Therefore a transparent REAL drag handle is placed
+   over the left edge of the actual Conferbot iframe.
+   ========================================================= */
 
 const CONFERBOT_POSITION_KEY=
-"topper_real_conferbot_position_v2";
+"topper_real_conferbot_position_v4";
 
 let realConferbotElement=null;
+let realConferbotDragHandle=null;
 let realConferbotDragging=false;
 let realConferbotMoved=false;
+
 let realConferbotPointerId=null;
+
 let realConferbotStartX=0;
 let realConferbotStartY=0;
+
 let realConferbotStartLeft=0;
 let realConferbotStartTop=0;
-let realConferbotDragTarget=null;
 
-function getRealConferbotCandidates(){
+let realConferbotInitialized=false;
 
-const all=
-Array.from(
-document.body.querySelectorAll(
-"button,div,a,iframe"
-)
-);
 
-return all.filter(function(el){
+/* ---------- SAVE ---------- */
 
-if(
-el.id==="authLoading"||
-el.id==="authError"||
-el.id==="orderModal"||
-el.id==="avatarModal"||
-el.id==="appMessageBox"||
-el.classList.contains("bottom-nav")
-){
-return false;
-}
-
-const r=el.getBoundingClientRect();
-
-if(
-r.width<38||
-r.width>110||
-r.height<38||
-r.height>110
-){
-return false;
-}
-
-const style=
-window.getComputedStyle(el);
-
-if(
-style.display==="none"||
-style.visibility==="hidden"||
-style.opacity==="0"
-){
-return false;
-}
-
-if(style.position!=="fixed"){
-return false;
-}
-
-if(
-r.left<0||
-r.top<0||
-r.right>window.innerWidth+5||
-r.bottom>window.innerHeight+5
-){
-return false;
-}
-
-const nearRight=
-window.innerWidth-r.right<120;
-
-const nearBottom=
-window.innerHeight-r.bottom<150;
-
-const nearLeft=
-r.left<120;
-
-return nearRight&&nearBottom||nearLeft&&nearBottom;
-
-});
-
-}
-
-function isLikelyConferbot(el){
-
-if(!el){
-return false;
-}
-
-const id=
-String(el.id||"").toLowerCase();
-
-const cls=
-String(el.className||"").toLowerCase();
-
-const aria=
-String(
-el.getAttribute("aria-label")||""
-).toLowerCase();
-
-const title=
-String(
-el.getAttribute("title")||""
-).toLowerCase();
-
-const src=
-String(
-el.getAttribute("src")||""
-).toLowerCase();
-
-const text=
-String(el.innerText||"").toLowerCase();
-
-const combined=
-id+" "+
-cls+" "+
-aria+" "+
-title+" "+
-src+" "+
-text;
-
-if(
-combined.includes("conferbot")||
-combined.includes("confer bot")
-){
-return true;
-}
-
-if(
-el.tagName==="IFRAME" &&
-(
-src.includes("conferbot")||
-src.includes("wdt.conferbot")||
-src.includes("chat")
-)
-){
-return true;
-}
-
-return false;
-
-}
-
-function findRealConferbot(){
-
-const marked=
-Array.from(
-document.querySelectorAll(
-'[id*="conferbot" i],[class*="conferbot" i],[aria-label*="chat" i],[title*="chat" i]'
-)
-);
-
-for(
-const el of marked
-){
-
-if(isLikelyConferbot(el)){
-return el;
-}
-
-}
-
-const candidates=
-getRealConferbotCandidates();
-
-for(
-const el of candidates
-){
-
-if(isLikelyConferbot(el)){
-return el;
-}
-
-}
-
-return null;
-
-}
-
-function getElementPosition(el){
-
-const r=
-el.getBoundingClientRect();
-
-return{
-left:r.left,
-top:r.top,
-width:r.width,
-height:r.height
-};
-
-}
-
-function saveRealConferbotPosition(el){
-
-if(!el){
-return;
-}
-
-const p=
-getElementPosition(el);
+function saveRealConferbotPosition(left,top){
 
 try{
 
 localStorage.setItem(
 CONFERBOT_POSITION_KEY,
 JSON.stringify({
-left:Math.round(p.left),
-top:Math.round(p.top),
+left:Number(left),
+top:Number(top),
 savedAt:Date.now()
 })
 );
@@ -3579,101 +3412,10 @@ error
 
 }
 
-function clampRealConferbotPosition(
-el,
-left,
-top
-){
 
-const r=
-getElementPosition(el);
+/* ---------- READ ---------- */
 
-const width=r.width||56;
-const height=r.height||56;
-
-const margin=8;
-
-const maxLeft=
-Math.max(
-margin,
-window.innerWidth-width-margin
-);
-
-const maxTop=
-Math.max(
-margin,
-window.innerHeight-height-margin
-);
-
-return{
-left:Math.min(
-Math.max(margin,Number(left)||0),
-maxLeft
-),
-top:Math.min(
-Math.max(margin,Number(top)||0),
-maxTop
-)
-};
-
-}
-
-function applyRealConferbotPosition(
-el,
-left,
-top
-){
-
-if(!el){
-return;
-}
-
-const p=
-clampRealConferbotPosition(
-el,
-left,
-top
-);
-
-el.style.setProperty(
-"left",
-p.left+"px",
-"important"
-);
-
-el.style.setProperty(
-"top",
-p.top+"px",
-"important"
-);
-
-el.style.setProperty(
-"right",
-"auto",
-"important"
-);
-
-el.style.setProperty(
-"bottom",
-"auto",
-"important"
-);
-
-el.style.setProperty(
-"margin",
-"0",
-"important"
-);
-
-}
-
-function loadSavedRealConferbotPosition(el){
-
-if(!el){
-return;
-}
-
-let data=null;
+function getSavedRealConferbotPosition(){
 
 try{
 
@@ -3682,131 +3424,647 @@ localStorage.getItem(
 CONFERBOT_POSITION_KEY
 );
 
-if(raw){
-data=JSON.parse(raw);
+if(!raw){
+return null;
 }
+
+const data=JSON.parse(raw);
+
+if(
+!Number.isFinite(Number(data.left))||
+!Number.isFinite(Number(data.top))
+){
+
+return null;
+
+}
+
+return{
+left:Number(data.left),
+top:Number(data.top)
+};
 
 }catch(error){
 
 console.error(
-"Conferbot saved position read error:",
+"Conferbot position read error:",
 error
 );
 
+return null;
+
+}
+
+}
+
+
+/* ---------- CHECK ELEMENT ---------- */
+
+function isVisibleElement(el){
+
+if(!el){
+return false;
+}
+
+const rect=
+el.getBoundingClientRect();
+
+if(
+rect.width<35||
+rect.height<35
+){
+return false;
 }
 
 if(
-data &&
-Number.isFinite(Number(data.left)) &&
-Number.isFinite(Number(data.top))
+rect.width>140||
+rect.height>140
 ){
+return false;
+}
 
-applyRealConferbotPosition(
-el,
-Number(data.left),
-Number(data.top)
+const style=
+window.getComputedStyle(el);
+
+if(
+style.display==="none"||
+style.visibility==="hidden"||
+Number(style.opacity)===0
+){
+return false;
+}
+
+return true;
+
+}
+
+
+/* ---------- REAL CONFERBOT MARKER ---------- */
+
+function elementHasConferbotName(el){
+
+if(!el){
+return false;
+}
+
+const text=[
+el.id||"",
+el.className||"",
+el.getAttribute("aria-label")||"",
+el.getAttribute("title")||"",
+el.getAttribute("data-testid")||"",
+el.getAttribute("src")||"",
+el.getAttribute("name")||""
+]
+.join(" ")
+.toLowerCase();
+
+return(
+text.includes("conferbot")||
+text.includes("confer-bot")
 );
 
 }
 
+
+/* ---------- FIND REAL WIDGET ---------- */
+
+function findRealConferbot(){
+
+const selectors=[
+
+"iframe[src*='conferbot']",
+"iframe[src*='chat']",
+"iframe[title*='chat' i]",
+"[id*='conferbot' i]",
+"[class*='conferbot' i]",
+"[data-conferbot]",
+"[data-conferbot-widget]"
+
+];
+
+for(
+const selector of selectors
+){
+
+let elements=[];
+
+try{
+
+elements=
+Array.from(
+document.querySelectorAll(selector)
+);
+
+}catch(error){
+
+continue;
+
 }
 
-function snapRealConferbot(el){
+for(
+const el of elements
+){
 
-if(!el){
+if(!isVisibleElement(el)){
+continue;
+}
+
+return el;
+
+}
+
+}
+
+
+/* ---------- SECONDARY SCAN ---------- */
+
+const all=
+Array.from(
+document.querySelectorAll(
+"iframe,button,div,a"
+)
+);
+
+const candidates=[];
+
+for(
+const el of all
+){
+
+if(!isVisibleElement(el)){
+continue;
+}
+
+if(
+el.closest(".bottom-nav")||
+el.closest("#orderModal")||
+el.closest("#avatarModal")||
+el.closest("#appMessageBox")||
+el.closest("#authLoading")
+){
+continue;
+}
+
+const rect=
+el.getBoundingClientRect();
+
+const style=
+window.getComputedStyle(el);
+
+const fixed=
+style.position==="fixed"||
+style.position==="absolute";
+
+if(!fixed){
+continue;
+}
+
+const nearBottom=
+window.innerHeight-
+rect.bottom<
+220;
+
+const nearRight=
+window.innerWidth-
+rect.right<
+220;
+
+const nearLeft=
+rect.left<
+220;
+
+if(
+!nearBottom||
+(!nearRight&&!nearLeft)
+){
+continue;
+}
+
+let score=0;
+
+if(el.tagName==="IFRAME"){
+score+=50;
+}
+
+if(elementHasConferbotName(el)){
+score+=200;
+}
+
+if(
+rect.width>=45&&
+rect.width<=90&&
+rect.height>=45&&
+rect.height<=90
+){
+score+=30;
+}
+
+if(
+nearRight&&
+nearBottom
+){
+score+=10;
+}
+
+candidates.push({
+el:el,
+score:score
+});
+
+}
+
+candidates.sort(
+function(a,b){
+return b.score-a.score;
+}
+);
+
+if(candidates.length){
+return candidates[0].el;
+}
+
+return null;
+
+}
+
+
+/* ---------- GET RECT ---------- */
+
+function getRealConferbotRect(){
+
+if(!realConferbotElement){
+return null;
+}
+
+return realConferbotElement.getBoundingClientRect();
+
+}
+
+
+/* ---------- CLAMP ---------- */
+
+function clampConferbotPosition(
+left,
+top
+){
+
+const rect=
+getRealConferbotRect();
+
+if(!rect){
+return{
+left:left,
+top:top
+};
+}
+
+const margin=8;
+
+const width=
+Math.max(40,rect.width);
+
+const height=
+Math.max(40,rect.height);
+
+const maxLeft=
+Math.max(
+margin,
+window.innerWidth-
+width-
+margin
+);
+
+const maxTop=
+Math.max(
+margin,
+window.innerHeight-
+height-
+margin
+);
+
+let finalLeft=
+Number(left);
+
+let finalTop=
+Number(top);
+
+if(!Number.isFinite(finalLeft)){
+finalLeft=margin;
+}
+
+if(!Number.isFinite(finalTop)){
+finalTop=margin;
+}
+
+finalLeft=
+Math.max(
+margin,
+Math.min(
+finalLeft,
+maxLeft
+)
+);
+
+finalTop=
+Math.max(
+margin,
+Math.min(
+finalTop,
+maxTop
+)
+);
+
+return{
+left:finalLeft,
+top:finalTop
+};
+
+}
+
+
+/* ---------- MOVE REAL WIDGET ---------- */
+
+function moveRealConferbot(
+left,
+top
+){
+
+if(!realConferbotElement){
 return;
 }
 
 const p=
-getElementPosition(el);
-
-const margin=8;
-
-const distanceLeft=p.left;
-const distanceRight=
-window.innerWidth-p.left-p.width;
-
-let left;
-
-if(distanceLeft<=distanceRight){
-
-left=margin;
-
-}else{
-
-left=
-window.innerWidth-p.width-margin;
-
-}
-
-applyRealConferbotPosition(
-el,
+clampConferbotPosition(
 left,
-p.top
+top
 );
 
-saveRealConferbotPosition(el);
+realConferbotElement.style.setProperty(
+"position",
+"fixed",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"left",
+p.left+"px",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"top",
+p.top+"px",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"right",
+"auto",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"bottom",
+"auto",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"margin",
+"0",
+"important"
+);
+
+realConferbotElement.style.setProperty(
+"transform",
+"none",
+"important"
+);
+
+return p;
 
 }
 
-function attachRealConferbotDrag(el){
 
-if(!el){
-return;
-}
+/* ---------- UPDATE HANDLE ---------- */
+
+function updateConferbotDragHandle(){
 
 if(
-realConferbotDragTarget===el
+!realConferbotElement||
+!realConferbotDragHandle
 ){
 return;
 }
 
-realConferbotDragTarget=el;
-realConferbotElement=el;
-
-loadSavedRealConferbotPosition(el);
-
-el.style.cursor="grab";
-el.style.touchAction="none";
-el.style.userSelect="none";
-el.style.webkitUserSelect="none";
-
-el.addEventListener(
-"pointerdown",
-function(e){
+const rect=
+realConferbotElement.getBoundingClientRect();
 
 if(
-e.pointerType==="mouse" &&
+rect.width<=0||
+rect.height<=0
+){
+realConferbotDragHandle.style.display="none";
+return;
+}
+
+
+/*
+   Handle सिर्फ bubble के बायें हिस्से पर रहेगा।
+   इससे bubble का बाकी हिस्सा normal click/open कर सकता है।
+*/
+
+const handleWidth=
+Math.min(
+32,
+Math.max(
+22,
+rect.width*0.40
+)
+);
+
+const handleHeight=
+Math.min(
+70,
+Math.max(
+45,
+rect.height
+)
+);
+
+realConferbotDragHandle.style.display=
+"block";
+
+realConferbotDragHandle.style.width=
+handleWidth+"px";
+
+realConferbotDragHandle.style.height=
+handleHeight+"px";
+
+realConferbotDragHandle.style.left=
+rect.left+"px";
+
+realConferbotDragHandle.style.top=
+(
+rect.top+
+(rect.height-handleHeight)/2
+)+"px";
+
+}
+
+
+/* ---------- DEFAULT / SAVED POSITION ---------- */
+
+function applyInitialConferbotPosition(){
+
+if(!realConferbotElement){
+return;
+}
+
+const rect=
+realConferbotElement.getBoundingClientRect();
+
+if(
+rect.width<=0||
+rect.height<=0
+){
+return;
+}
+
+const saved=
+getSavedRealConferbotPosition();
+
+let left;
+let top;
+
+if(saved){
+
+left=saved.left;
+top=saved.top;
+
+}else{
+
+/*
+   First opening:
+   Bottom-right,
+   Profile button से ऊपर।
+*/
+
+left=
+window.innerWidth-
+rect.width-
+18;
+
+top=
+window.innerHeight-
+rect.height-
+88;
+
+}
+
+const p=
+moveRealConferbot(
+left,
+top
+);
+
+saveRealConferbotPosition(
+p.left,
+p.top
+);
+
+updateConferbotDragHandle();
+
+}
+
+
+/* ---------- CREATE HANDLE ---------- */
+
+function createConferbotDragHandle(){
+
+if(!realConferbotElement){
+return;
+}
+
+if(!realConferbotDragHandle){
+
+realConferbotDragHandle=
+document.createElement("div");
+
+realConferbotDragHandle.id=
+"topperConferbotDragHandle";
+
+document.body.appendChild(
+realConferbotDragHandle
+);
+
+setupConferbotDragEvents();
+
+}
+
+updateConferbotDragHandle();
+
+}
+
+
+/* ---------- DRAG START ---------- */
+
+function startConferbotDrag(e){
+
+if(!realConferbotElement){
+return;
+}
+
+if(
+e.pointerType==="mouse"&&
 e.button!==0
 ){
 return;
 }
 
+e.preventDefault();
+e.stopPropagation();
+
 realConferbotDragging=true;
 realConferbotMoved=false;
-realConferbotPointerId=e.pointerId;
 
-const p=
-getElementPosition(el);
+realConferbotPointerId=
+e.pointerId;
 
-realConferbotStartX=e.clientX;
-realConferbotStartY=e.clientY;
-realConferbotStartLeft=p.left;
-realConferbotStartTop=p.top;
+const rect=
+realConferbotElement.getBoundingClientRect();
 
-el.style.cursor="grabbing";
+realConferbotStartX=
+e.clientX;
 
-try{
-el.setPointerCapture(e.pointerId);
-}catch(error){}
+realConferbotStartY=
+e.clientY;
 
-},
-true
+realConferbotStartLeft=
+rect.left;
+
+realConferbotStartTop=
+rect.top;
+
+realConferbotDragHandle.classList.add(
+"dragging"
 );
 
-el.addEventListener(
-"pointermove",
-function(e){
+try{
+
+realConferbotDragHandle.setPointerCapture(
+e.pointerId
+);
+
+}catch(error){}
+
+}
+
+
+/* ---------- DRAG MOVE ---------- */
+
+function moveConferbotDrag(e){
 
 if(
 !realConferbotDragging||
@@ -3815,126 +4073,326 @@ e.pointerId!==realConferbotPointerId
 return;
 }
 
+e.preventDefault();
+e.stopPropagation();
+
 const dx=
-e.clientX-realConferbotStartX;
+e.clientX-
+realConferbotStartX;
 
 const dy=
-e.clientY-realConferbotStartY;
+e.clientY-
+realConferbotStartY;
 
 if(
-Math.abs(dx)>5||
-Math.abs(dy)>5
+Math.abs(dx)>4||
+Math.abs(dy)>4
 ){
 
 realConferbotMoved=true;
 
 }
 
-const next=
-clampRealConferbotPosition(
-el,
+const p=
+moveRealConferbot(
 realConferbotStartLeft+dx,
 realConferbotStartTop+dy
 );
 
-applyRealConferbotPosition(
-el,
-next.left,
-next.top
-);
+updateConferbotDragHandle();
 
-e.preventDefault();
+}
 
-},
-true
-);
 
-el.addEventListener(
-"pointerup",
-function(e){
+/* ---------- DRAG END ---------- */
+
+function endConferbotDrag(e){
 
 if(
-!realConferbotDragging||
+!realConferbotDragging
+){
+return;
+}
+
+if(
+e&&
+realConferbotPointerId!==null&&
 e.pointerId!==realConferbotPointerId
 ){
 return;
 }
 
 realConferbotDragging=false;
-realConferbotPointerId=null;
 
-el.style.cursor="grab";
+realConferbotDragHandle.classList.remove(
+"dragging"
+);
 
 if(realConferbotMoved){
 
-snapRealConferbot(el);
+snapRealConferbot();
 
 }
+
+realConferbotPointerId=null;
 
 try{
-el.releasePointerCapture(e.pointerId);
+
+if(e){
+
+realConferbotDragHandle.releasePointerCapture(
+e.pointerId
+);
+
+}
+
 }catch(error){}
 
-},
-true
-);
-
-el.addEventListener(
-"pointercancel",
-function(){
-
-realConferbotDragging=false;
-realConferbotPointerId=null;
-el.style.cursor="grab";
-
-},
-true
-);
-
 }
 
-function setupRealConferbotWatcher(){
 
-let attempts=0;
+/* ---------- SNAP LEFT / RIGHT ---------- */
 
-function scan(){
+function snapRealConferbot(){
 
-attempts++;
-
-const el=findRealConferbot();
-
-if(el){
-
-attachRealConferbotDrag(el);
-
+if(!realConferbotElement){
 return;
+}
+
+const rect=
+realConferbotElement.getBoundingClientRect();
+
+const margin=8;
+
+const distanceLeft=
+rect.left;
+
+const distanceRight=
+window.innerWidth-
+rect.right;
+
+let left;
+
+if(
+distanceLeft<=distanceRight
+){
+
+left=margin;
+
+}else{
+
+left=
+window.innerWidth-
+rect.width-
+margin;
 
 }
 
-if(attempts<120){
+const p=
+moveRealConferbot(
+left,
+rect.top
+);
+
+saveRealConferbotPosition(
+p.left,
+p.top
+);
+
+updateConferbotDragHandle();
+
+}
+
+
+/* ---------- DRAG EVENTS ---------- */
+
+function setupConferbotDragEvents(){
+
+if(!realConferbotDragHandle){
+return;
+}
+
+realConferbotDragHandle.addEventListener(
+"pointerdown",
+startConferbotDrag,
+{
+passive:false
+}
+);
+
+realConferbotDragHandle.addEventListener(
+"pointermove",
+moveConferbotDrag,
+{
+passive:false
+}
+);
+
+realConferbotDragHandle.addEventListener(
+"pointerup",
+endConferbotDrag,
+{
+passive:false
+}
+);
+
+realConferbotDragHandle.addEventListener(
+"pointercancel",
+endConferbotDrag,
+{
+passive:false
+}
+);
+
+
+/*
+   Touch devices पर document level move/up भी रखें।
+*/
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+if(
+realConferbotDragging
+){
+moveConferbotDrag(e);
+}
+
+},
+{
+passive:false
+}
+);
+
+document.addEventListener(
+"pointerup",
+function(e){
+
+if(
+realConferbotDragging
+){
+endConferbotDrag(e);
+}
+
+},
+{
+passive:false
+}
+);
+
+}
+
+
+/* ---------- INITIALIZE REAL WIDGET ---------- */
+
+function initializeRealConferbot(){
+
+const el=
+findRealConferbot();
+
+if(!el){
+return false;
+}
+
+if(
+realConferbotElement!==el
+){
+
+realConferbotElement=el;
+realConferbotInitialized=false;
+
+}
+
+createConferbotDragHandle();
+
+if(!realConferbotInitialized){
+
+realConferbotInitialized=true;
 
 setTimeout(
-scan,
+function(){
+
+if(
+realConferbotElement&&
+document.body.contains(
+realConferbotElement
+)
+){
+
+applyInitialConferbotPosition();
+
+}
+
+},
+150
+);
+
+}
+
+return true;
+
+}
+
+
+/* ---------- WATCHER ---------- */
+
+function startConferbotWatcher(){
+
+let tries=0;
+
+const timer=
+setInterval(
+function(){
+
+tries++;
+
+const found=
+initializeRealConferbot();
+
+if(found||tries>=120){
+
+clearInterval(timer);
+
+}
+
+},
 500
 );
 
-}
 
-}
-
-scan();
+/*
+   Conferbot async load होने के बाद DOM बदलता है।
+*/
 
 const observer=
 new MutationObserver(
 function(){
 
-const el=findRealConferbot();
+if(
+realConferbotElement&&
+!document.body.contains(
+realConferbotElement
+)
+){
 
-if(el){
+realConferbotElement=null;
 
-attachRealConferbotDrag(el);
+if(realConferbotDragHandle){
+
+realConferbotDragHandle.style.display=
+"none";
 
 }
+
+}
+
+setTimeout(
+function(){
+initializeRealConferbot();
+},
+100
+);
 
 }
 );
@@ -3943,40 +4401,111 @@ observer.observe(
 document.body,
 {
 childList:true,
-subtree:true,
-attributes:true
+subtree:true
 }
 );
+
+
+/*
+   Conferbot कभी-कभी अपने style को दोबारा लिख देता है।
+   Drag करते समय नहीं छेड़ना।
+*/
+
+setInterval(
+function(){
+
+if(
+!realConferbotElement||
+realConferbotDragging
+){
+return;
+}
+
+if(
+!document.body.contains(
+realConferbotElement
+)
+){
+return;
+}
+
+const saved=
+getSavedRealConferbotPosition();
+
+if(!saved){
+return;
+}
+
+const rect=
+realConferbotElement.getBoundingClientRect();
+
+const wantedLeft=
+saved.left;
+
+const wantedTop=
+saved.top;
+
+if(
+Math.abs(rect.left-wantedLeft)>4||
+Math.abs(rect.top-wantedTop)>4
+){
+
+moveRealConferbot(
+wantedLeft,
+wantedTop
+);
+
+updateConferbotDragHandle();
+
+}
+
+},
+1200
+);
+
+}
+
+
+/* ---------- RESIZE ---------- */
 
 window.addEventListener(
 "resize",
 function(){
 
-if(realConferbotElement){
+if(!realConferbotElement){
+return;
+}
+
+if(realConferbotDragging){
+return;
+}
+
+const rect=
+realConferbotElement.getBoundingClientRect();
 
 const p=
-getElementPosition(
-realConferbotElement
+moveRealConferbot(
+rect.left,
+rect.top
 );
 
-applyRealConferbotPosition(
-realConferbotElement,
+saveRealConferbotPosition(
 p.left,
 p.top
 );
 
-saveRealConferbotPosition(
-realConferbotElement
-);
-
-}
+updateConferbotDragHandle();
 
 }
 );
 
-}
 
-setupRealConferbotWatcher();
+/* ---------- START WATCHER ---------- */
+
+startConferbotWatcher();
+
+
+/* ---------- ESCAPE HELPERS ---------- */
 
 function escapeHtml(value){
 
@@ -3998,28 +4527,39 @@ return String(value)
 .replace(/>/g,"&gt;");
 
 }
+
 </script>
 
-<!-- ==================================================
-     REAL CONFERBOT
-     ================================================== -->
+
+<!-- =========================================================
+     REAL CONFERBOT SCRIPT
+     ========================================================= -->
+
 <script type="text/javascript">
 (function(d,s,id){
 
-var js,el=d.getElementsByTagName(s)[0];
+var js;
+var el=d.getElementsByTagName(s)[0];
 
 if(d.getElementById(id)){
 return;
 }
 
 js=d.createElement(s);
+
 js.async=true;
+
 js.src=
 "https://cdn.conferbot.com/dist/v1/widget.min.js";
+
 js.id=id;
+
 js.charset="UTF-8";
 
-el.parentNode.insertBefore(js,el);
+el.parentNode.insertBefore(
+js,
+el
+);
 
 js.onload=function(){
 
@@ -4033,6 +4573,29 @@ window.ConferbotWidget(
 
 console.log(
 "Real Conferbot loaded successfully."
+);
+
+
+/*
+   Widget को DOM में आने का समय देते हैं।
+*/
+
+setTimeout(
+function(){
+
+initializeRealConferbot();
+
+},
+800
+);
+
+setTimeout(
+function(){
+
+initializeRealConferbot();
+
+},
+2000
 );
 
 }catch(error){
