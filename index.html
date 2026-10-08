@@ -100,6 +100,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .avatar-close{width:100%;margin-top:15px;padding:10px;border:0;border-radius:7px;background:#d32f2f;color:#fff;font-weight:bold;font-size:14px;cursor:pointer}
 
 .auth-error{display:none;background:#ffebee;color:#b71c1c;padding:10px;margin:12px 16px;border-radius:8px;font-size:12px;text-align:center}
+
 .empty-orders{text-align:center;color:#777;margin-top:30px}
 
 #appMessageBox{position:fixed;inset:0;z-index:999999}
@@ -110,10 +111,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
 
-#authLoading{position:fixed;inset:0;z-index:999998;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .25s ease}
+#authLoading{position:fixed;inset:0;z-index:999998;background:rgba(255,255,255,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .25s ease}
 .auth-loader{width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
 @keyframes authSpin{to{transform:rotate(360deg)}}
-.auth-loading-text{margin-top:12px;color:#1a237e;font-size:14px;font-weight:bold}
+.auth-loading-text{margin-top:12px;color:#1a237e;font-size:14px;font-weight:bold;text-align:center;padding:0 20px}
 
 @media(max-width:500px){
 .brand-title{font-size:18px}
@@ -128,7 +129,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <div id="authLoading">
 <div class="auth-loader"></div>
-<div class="auth-loading-text">Account लोड हो रहा है...</div>
+<div id="authLoadingText" class="auth-loading-text">📍 Live Location प्राप्त की जा रही है...</div>
 </div>
 
 <header>
@@ -343,7 +344,7 @@ onclick="requestUserLocation()">
 </button>
 
 <div id="locationStatus" class="location-status">
-📍 Location प्राप्त की जा रही है...
+📍 Live Location प्राप्त की जा रही है...
 </div>
 
 </div>
@@ -530,7 +531,7 @@ auth.setPersistence(
 let currentUser=null;
 let selectedProduct="";
 let selectedPrice="";
-let userLocationLink="उपलब्ध नहीं (GPS अनुमति दें)";
+let userLocationLink="";
 let ordersQuery=null;
 let authBusy=false;
 let authStateReady=false;
@@ -538,8 +539,9 @@ let whatsappOpening=false;
 
 let locationRequestBusy=false;
 let locationReady=false;
-let pendingLocationAction=null;
-let locationActionTimer=null;
+let locationFailed=false;
+let pendingLocationActions=[];
+let locationRetryTimer=null;
 
 const $=id=>document.getElementById(id);
 
@@ -607,7 +609,55 @@ function setAuthButtonsBusy(busy,text){
  }
 }
 
+
+/* ================= STARTUP LOADING ================= */
+
+function updateStartupLoading(){
+
+ const loader=$("authLoading");
+ const text=$("authLoadingText");
+
+ if(!loader)return;
+
+ if(!authStateReady){
+
+   if(text){
+     text.textContent="🔐 Account लोड हो रहा है...";
+   }
+
+   return;
+ }
+
+ if(!locationReady){
+
+   if(text){
+
+     if(locationRequestBusy){
+       text.textContent="📍 Live Location प्राप्त की जा रही है...";
+     }else if(locationFailed){
+       text.textContent="📍 Live Location फिर से प्राप्त की जा रही है...";
+     }else{
+       text.textContent="📍 Live Location प्राप्त की जा रही है...";
+     }
+
+   }
+
+   return;
+ }
+
+ if(text){
+   text.textContent="✅ App तैयार हो रहा है...";
+ }
+
+ hideAuthLoading();
+}
+
 function hideAuthLoading(){
+
+ if(!authStateReady||!locationReady){
+   updateStartupLoading();
+   return;
+ }
 
  const loader=$("authLoading");
 
@@ -623,6 +673,9 @@ function hideAuthLoading(){
 
  },250);
 }
+
+
+/* ================= AUTH INITIALIZE ================= */
 
 function initializeExistingUser(){
 
@@ -643,13 +696,14 @@ auth.onAuthStateChanged(function(user){
  authStateReady=true;
 
  updateAuthUI();
- hideAuthLoading();
 
  if(user){
    loadUserOrders(user.uid);
  }else{
    clearOrdersListener();
  }
+
+ updateStartupLoading();
 
 });
 
@@ -804,13 +858,7 @@ async function googleSignIn(){
 
  try{
 
-   const result=
-     await auth.signInWithPopup(provider);
-
-   console.log(
-     "Google Login Successful",
-     result.user
-   );
+   await auth.signInWithPopup(provider);
 
    hideAuthError();
 
@@ -872,7 +920,6 @@ window.nativeGoogleLogin=async function(idToken){
 
    hideAuthError();
    updateAuthUI();
-   hideAuthLoading();
 
  }catch(error){
 
@@ -1067,72 +1114,83 @@ function updateLocationStatus(text){
 
 function setUserLocation(lat,lon){
 
+ const latitude=Number(lat);
+ const longitude=Number(lon);
+
+ if(
+   !Number.isFinite(latitude)||
+   !Number.isFinite(longitude)
+ ){
+   return;
+ }
+
  userLocationLink=
    "https://www.google.com/maps?q="+
-   encodeURIComponent(lat)+
+   encodeURIComponent(latitude)+
    ","+
-   encodeURIComponent(lon);
+   encodeURIComponent(longitude);
 
  locationReady=true;
+ locationFailed=false;
  locationRequestBusy=false;
 
  updateLocationStatus(
    "✅ Live Location मिल गई"
  );
 
- if(pendingLocationAction){
+ if(locationRetryTimer){
+   clearTimeout(locationRetryTimer);
+   locationRetryTimer=null;
+ }
 
-   const action=pendingLocationAction;
+ updateStartupLoading();
 
-   pendingLocationAction=null;
+ const actions=
+   pendingLocationActions.slice();
 
-   if(locationActionTimer){
-     clearTimeout(locationActionTimer);
-     locationActionTimer=null;
-   }
+ pendingLocationActions=[];
+
+ actions.forEach(function(action){
 
    setTimeout(function(){
-     action();
-   },100);
- }
-}
+     try{
+       action();
+     }catch(error){
+       console.error(
+         "Location action error:",
+         error
+       );
+     }
+   },50);
 
-function finishLocationActionWithoutLocation(){
-
- locationRequestBusy=false;
-
- updateLocationStatus(
-   "⚠️ Location उपलब्ध नहीं है"
- );
-
- if(pendingLocationAction){
-
-   const action=pendingLocationAction;
-
-   pendingLocationAction=null;
-
-   if(locationActionTimer){
-     clearTimeout(locationActionTimer);
-     locationActionTimer=null;
-   }
-
-   setTimeout(function(){
-     action();
-   },100);
- }
+ });
 }
 
 function requestUserLocation(){
+
+ if(locationReady){
+
+   updateLocationStatus(
+     "✅ Live Location उपलब्ध है"
+   );
+
+   updateStartupLoading();
+
+   return;
+ }
 
  if(locationRequestBusy){
    return;
  }
 
  locationRequestBusy=true;
+ locationFailed=false;
 
  updateLocationStatus(
-   "📍 Location permission / GPS check हो रहा है..."
+   "📍 Live Location प्राप्त की जा रही है..."
  );
+
+ updateStartupLoading();
 
  if(
    window.AndroidApp &&
@@ -1151,10 +1209,15 @@ function requestUserLocation(){
      );
 
      locationRequestBusy=false;
+     locationFailed=true;
 
      updateLocationStatus(
-       "❌ Location प्राप्त नहीं हो सकी"
+       "⚠️ Location फिर से प्राप्त की जा रही है..."
      );
+
+     updateStartupLoading();
+
+     scheduleLocationRetry();
 
    }
 
@@ -1185,21 +1248,22 @@ function requestUserLocation(){
        );
 
        locationRequestBusy=false;
+       locationFailed=true;
 
        updateLocationStatus(
-         "⚠️ GPS permission नहीं मिली"
+         "⚠️ GPS permission / Location Service check करें"
        );
 
-       if(pendingLocationAction){
-         finishLocationActionWithoutLocation();
-       }
+       updateStartupLoading();
+
+       scheduleLocationRetry();
 
      },
 
      {
        enableHighAccuracy:true,
-       timeout:15000,
-       maximumAge:60000
+       timeout:20000,
+       maximumAge:0
      }
 
    );
@@ -1207,15 +1271,33 @@ function requestUserLocation(){
  }else{
 
    locationRequestBusy=false;
+   locationFailed=true;
 
    updateLocationStatus(
      "❌ इस device पर Location उपलब्ध नहीं है"
    );
 
-   if(pendingLocationAction){
-     finishLocationActionWithoutLocation();
-   }
+   updateStartupLoading();
+
+   scheduleLocationRetry();
  }
+}
+
+function scheduleLocationRetry(){
+
+ if(locationRetryTimer){
+   clearTimeout(locationRetryTimer);
+ }
+
+ locationRetryTimer=setTimeout(function(){
+
+   locationRetryTimer=null;
+
+   if(!locationReady){
+     requestUserLocation();
+   }
+
+ },3000);
 }
 
 
@@ -1253,14 +1335,15 @@ window.nativeLocationError=function(message){
  );
 
  locationRequestBusy=false;
+ locationFailed=true;
 
  updateLocationStatus(
-   "⚠️ Location नहीं मिली"
+   "⚠️ Live Location प्राप्त नहीं हुई, फिर कोशिश हो रही है..."
  );
 
- if(pendingLocationAction){
-   finishLocationActionWithoutLocation();
- }
+ updateStartupLoading();
+
+ scheduleLocationRetry();
 };
 
 
@@ -1270,45 +1353,27 @@ function runWithLocation(action){
 
  if(locationReady){
 
-   action();
+   try{
+     action();
+   }catch(error){
+     console.error(
+       "Location action error:",
+       error
+     );
+   }
+
    return;
  }
 
- pendingLocationAction=action;
+ pendingLocationActions.push(action);
 
  requestUserLocation();
-
- if(locationActionTimer){
-   clearTimeout(locationActionTimer);
- }
-
- locationActionTimer=setTimeout(function(){
-
-   if(pendingLocationAction===action){
-
-     pendingLocationAction=null;
-
-     action();
-   }
-
-   locationActionTimer=null;
-
- },7000);
 }
 
 
-/* ===== PAGE LOAD LOCATION ===== */
+/* ===== START LOCATION IMMEDIATELY ===== */
 
-window.addEventListener(
- "load",
- function(){
-
-   setTimeout(function(){
-     requestUserLocation();
-   },1000);
-
- }
-);
+requestUserLocation();
 
 
 /* ================= WHATSAPP ================= */
@@ -1347,10 +1412,8 @@ function openWhatsApp(message){
      bridge.openWhatsApp(text);
 
      setTimeout(function(){
-
        whatsappOpening=false;
-
-     },2000);
+     },800);
 
      return;
 
@@ -1404,15 +1467,16 @@ function openWhatsApp(message){
 
    whatsappOpening=false;
 
- },2000);
+ },800);
 }
 
 
-window.nativeWhatsAppError=function(){
+window.nativeWhatsAppError=function(message){
 
  whatsappOpening=false;
 
  showAppMessage(
+   message||
    "WhatsApp इस डिवाइस पर उपलब्ध नहीं है। कृपया WhatsApp install करके फिर कोशिश करें।",
    "📱"
  );
@@ -1434,6 +1498,11 @@ function buyNow(
 ){
 
  runWithLocation(function(){
+
+   if(!locationReady||!userLocationLink){
+
+     return;
+   }
 
    openWhatsApp(
 
@@ -1687,82 +1756,97 @@ function payViaUpiIntent(){
    return;
  }
 
- sessionStorage.setItem(
-   "pendingUpiWhatsApp",
-   JSON.stringify({
+ runWithLocation(function(){
 
-     product:selectedProduct,
-     price:amount,
-     name:name,
-     phone:phone,
-     address:address,
-     location:userLocationLink,
-     startedAt:Date.now()
+   if(!locationReady||!userLocationLink){
 
-   })
- );
+     showAppMessage(
+       "Live Location अभी प्राप्त हो रही है। कृपया एक क्षण रुकें।",
+       "📍"
+     );
 
- const upiUrl=
-   "upi://pay?pa="+
-   encodeURIComponent(
-     "topperstitching@naviaxis"
-   )+
-   "&pn="+
-   encodeURIComponent(
-     "Ankit Kumar Singh"
-   )+
-   "&am="+
-   encodeURIComponent(
-     amount.toFixed(2)
-   )+
-   "&cu=INR";
+     return;
+   }
 
- if(
-   window.AndroidApp&&
-   typeof window.AndroidApp.openUpi===
-   "function"
- ){
+   sessionStorage.setItem(
+     "pendingUpiWhatsApp",
+     JSON.stringify({
+
+       product:selectedProduct,
+       price:amount,
+       name:name,
+       phone:phone,
+       address:address,
+       location:userLocationLink,
+       startedAt:Date.now()
+
+     })
+   );
+
+   const upiUrl=
+     "upi://pay?pa="+
+     encodeURIComponent(
+       "topperstitching@naviaxis"
+     )+
+     "&pn="+
+     encodeURIComponent(
+       "Ankit Kumar Singh"
+     )+
+     "&am="+
+     encodeURIComponent(
+       amount.toFixed(2)
+     )+
+     "&cu=INR";
+
+   if(
+     window.AndroidApp&&
+     typeof window.AndroidApp.openUpi===
+     "function"
+   ){
+
+     try{
+
+       window.AndroidApp.openUpi(
+         upiUrl
+       );
+
+     }catch(error){
+
+       console.error(
+         "Native UPI Error:",
+         error
+       );
+
+       if(
+         typeof window.nativeUpiError===
+         "function"
+       ){
+
+         window.nativeUpiError();
+       }
+
+     }
+
+     return;
+   }
 
    try{
 
-     window.AndroidApp.openUpi(
-       upiUrl
-     );
+     window.location.href=
+       upiUrl;
 
    }catch(error){
 
      console.error(
-       "Native UPI Error:",
+       "UPI Error:",
        error
      );
 
-     if(
-       typeof window.nativeUpiError===
-       "function"
-     ){
-
-       window.nativeUpiError();
-     }
-
+     window.nativeUpiError();
    }
 
-   return;
- }
+ });
 
- try{
-
-   window.location.href=
-     upiUrl;
-
- }catch(error){
-
-   console.error(
-     "UPI Error:",
-     error
-   );
-
-   window.nativeUpiError();
- }
 }
 
 
@@ -1816,6 +1900,21 @@ function sendPendingUpiOrderToWhatsApp(){
    return;
  }
 
+ if(!locationReady){
+
+   requestUserLocation();
+
+   setTimeout(function(){
+
+     if(locationReady){
+       sendPendingUpiOrderToWhatsApp();
+     }
+
+   },300);
+
+   return;
+ }
+
  sessionStorage.removeItem(
    "pendingUpiWhatsApp"
  );
@@ -1834,7 +1933,7 @@ function sendPendingUpiOrderToWhatsApp(){
    "\n🏠 *पूरा पता:* "+
    data.address+
    "\n\n📍 *लाइव लोकेशन:* "+
-   (data.location||"उपलब्ध नहीं")+
+   userLocationLink+
    "\n\n💳 *Payment:* UPI"+
    "\n🔢 *UTR / Transaction No:* Payment app से UTR भेजें"+
    "\n\n⚠️ *नोट:* UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
@@ -1857,7 +1956,7 @@ window.addEventListener(
 
      setTimeout(
        sendPendingUpiOrderToWhatsApp,
-       700
+       300
      );
 
    }
@@ -1922,6 +2021,18 @@ async function submitOnlineOrder(){
      "कृपया payment के बाद UTR / Transaction Number डालें!",
      "💳"
    );
+
+   return;
+ }
+
+ if(!locationReady){
+
+   showAppMessage(
+     "Live Location अभी प्राप्त हो रही है। कृपया एक क्षण रुकें।",
+     "📍"
+   );
+
+   requestUserLocation();
 
    return;
  }
@@ -2291,6 +2402,10 @@ function buyTableNow(){
    "]";
 
  runWithLocation(function(){
+
+   if(!locationReady||!userLocationLink){
+     return;
+   }
 
    openWhatsApp(
 
