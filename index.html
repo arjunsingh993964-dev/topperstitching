@@ -736,7 +736,72 @@ text-align:center;
 padding:0 20px
 }
 
+/* ================================
+   DRAGGABLE CONFERBOT LAUNCHER
+   ================================ */
+
+#conferbotLauncher{
+position:fixed;
+right:16px;
+bottom:82px;
+width:58px;
+height:58px;
+border-radius:50%;
+border:0;
+background:linear-gradient(135deg,#1565c0,#1a237e);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:27px;
+box-shadow:0 5px 18px rgba(0,0,0,.30);
+z-index:99990;
+cursor:grab;
+touch-action:none;
+user-select:none;
+-webkit-user-select:none;
+-webkit-tap-highlight-color:transparent;
+transition:box-shadow .2s ease,transform .15s ease;
+}
+
+#conferbotLauncher:active{
+cursor:grabbing;
+transform:scale(.96)
+}
+
+#conferbotLauncher.dragging{
+cursor:grabbing;
+box-shadow:0 8px 25px rgba(0,0,0,.38);
+transition:none
+}
+
+#conferbotLauncher .chat-icon{
+line-height:1;
+pointer-events:none
+}
+
+#conferbotLauncher .chat-dot{
+position:absolute;
+right:2px;
+top:2px;
+width:13px;
+height:13px;
+background:#25d366;
+border:2px solid #fff;
+border-radius:50%;
+pointer-events:none
+}
+
+/* Hide Conferbot's default launcher if its common launcher classes are used */
+.conferbot-widget-button,
+.conferbot-launcher,
+#conferbot-button,
+.conferbot-button{
+z-index:99980!important
+}
+
 @media(max-width:500px){
+
 .brand-title{
 font-size:18px
 }
@@ -754,6 +819,23 @@ padding:15px
 width:200px;
 height:200px
 }
+
+#conferbotLauncher{
+width:56px;
+height:56px;
+right:14px;
+bottom:82px
+}
+
+}
+
+@media(min-width:501px){
+
+#conferbotLauncher{
+right:20px;
+bottom:82px
+}
+
 }
 </style>
 </head>
@@ -1338,6 +1420,17 @@ Profile
 </button>
 
 </div>
+
+<!-- Custom draggable chatbot launcher -->
+<button
+id="conferbotLauncher"
+type="button"
+aria-label="Chatbot खोलें"
+title="Topper Help"
+>
+<span class="chat-icon">🤖</span>
+<span class="chat-dot"></span>
+</button>
 
 <script>
 const firebaseConfig={
@@ -2581,7 +2674,7 @@ return;
 }
 
 const url=
-"https://wa.me/919264137710?text="+
+"https://wa.me/9192641377710?text="+
 encodeURIComponent(text);
 
 try{
@@ -3607,6 +3700,473 @@ restorePaymentStateFromLocalStorage();
 1000
 );
 
+/* =========================================
+   DRAGGABLE CHATBOT POSITION
+   ========================================= */
+
+const CHAT_POSITION_KEY="topper_conferbot_position_v1";
+const chatLauncher=$("conferbotLauncher");
+
+let chatDragging=false;
+let chatMoved=false;
+let chatStartX=0;
+let chatStartY=0;
+let chatStartLeft=0;
+let chatStartTop=0;
+
+function getChatButtonSize(){
+
+return{
+width:chatLauncher.offsetWidth||58,
+height:chatLauncher.offsetHeight||58
+};
+
+}
+
+function getDefaultChatPosition(){
+
+const size=getChatButtonSize();
+
+return{
+left:Math.max(
+8,
+window.innerWidth-size.width-16
+),
+top:Math.max(
+8,
+window.innerHeight-size.height-82
+)
+};
+
+}
+
+function saveChatPosition(){
+
+if(!chatLauncher){
+return;
+}
+
+const rect=chatLauncher.getBoundingClientRect();
+
+const data={
+left:Math.round(rect.left),
+top:Math.round(rect.top),
+savedAt:Date.now()
+};
+
+try{
+
+localStorage.setItem(
+CHAT_POSITION_KEY,
+JSON.stringify(data)
+);
+
+}catch(error){
+
+console.error(
+"Chatbot position save error:",
+error
+);
+
+}
+
+}
+
+function clampChatPosition(left,top){
+
+const size=getChatButtonSize();
+
+const maxLeft=
+Math.max(
+8,
+window.innerWidth-size.width-8
+);
+
+const maxTop=
+Math.max(
+8,
+window.innerHeight-size.height-8
+);
+
+return{
+left:Math.min(
+Math.max(8,left),
+maxLeft
+),
+top:Math.min(
+Math.max(8,top),
+maxTop
+)
+};
+
+}
+
+function applyChatPosition(left,top){
+
+const p=
+clampChatPosition(
+Number(left),
+Number(top)
+);
+
+chatLauncher.style.left=p.left+"px";
+chatLauncher.style.top=p.top+"px";
+chatLauncher.style.right="auto";
+chatLauncher.style.bottom="auto";
+
+}
+
+function loadChatPosition(){
+
+let saved=null;
+
+try{
+
+const raw=
+localStorage.getItem(
+CHAT_POSITION_KEY
+);
+
+if(raw){
+saved=JSON.parse(raw);
+}
+
+}catch(error){
+
+console.error(
+"Chatbot position read error:",
+error
+);
+
+}
+
+if(
+saved &&
+Number.isFinite(Number(saved.left)) &&
+Number.isFinite(Number(saved.top))
+){
+
+applyChatPosition(
+Number(saved.left),
+Number(saved.top)
+);
+
+return;
+
+}
+
+const defaultPosition=
+getDefaultChatPosition();
+
+applyChatPosition(
+defaultPosition.left,
+defaultPosition.top
+);
+
+}
+
+function snapChatToNearestEdge(){
+
+if(!chatLauncher){
+return;
+}
+
+const rect=
+chatLauncher.getBoundingClientRect();
+
+const size=
+getChatButtonSize();
+
+const margin=8;
+
+const distanceLeft=
+rect.left;
+
+const distanceRight=
+window.innerWidth-
+rect.right;
+
+let targetLeft;
+
+if(distanceLeft<=distanceRight){
+
+targetLeft=margin;
+
+}else{
+
+targetLeft=
+window.innerWidth-
+size.width-
+margin;
+
+}
+
+const targetTop=
+Math.min(
+Math.max(
+margin,
+rect.top
+),
+Math.max(
+margin,
+window.innerHeight-size.height-margin
+)
+);
+
+applyChatPosition(
+targetLeft,
+targetTop
+);
+
+saveChatPosition();
+
+}
+
+function startChatDrag(clientX,clientY){
+
+if(!chatLauncher){
+return;
+}
+
+const rect=
+chatLauncher.getBoundingClientRect();
+
+chatDragging=true;
+chatMoved=false;
+
+chatStartX=clientX;
+chatStartY=clientY;
+chatStartLeft=rect.left;
+chatStartTop=rect.top;
+
+chatLauncher.classList.add("dragging");
+
+}
+
+function moveChatDrag(clientX,clientY){
+
+if(!chatDragging){
+return;
+}
+
+const dx=clientX-chatStartX;
+const dy=clientY-chatStartY;
+
+if(
+Math.abs(dx)>5||
+Math.abs(dy)>5
+){
+
+chatMoved=true;
+
+}
+
+const p=
+clampChatPosition(
+chatStartLeft+dx,
+chatStartTop+dy
+);
+
+applyChatPosition(
+p.left,
+p.top
+);
+
+}
+
+function finishChatDrag(){
+
+if(!chatDragging){
+return;
+}
+
+chatDragging=false;
+
+chatLauncher.classList.remove(
+"dragging"
+);
+
+if(chatMoved){
+
+snapChatToNearestEdge();
+
+}else{
+
+openConferbot();
+
+}
+
+}
+
+function openConferbot(){
+
+try{
+
+if(
+window.conferbotInstance &&
+typeof window.conferbotInstance.open==="function"
+){
+
+window.conferbotInstance.open();
+return;
+
+}
+
+if(
+window.conferbotInstance &&
+typeof window.conferbotInstance.show==="function"
+){
+
+window.conferbotInstance.show();
+return;
+
+}
+
+if(
+window.conferbotInstance &&
+typeof window.conferbotInstance.toggle==="function"
+){
+
+window.conferbotInstance.toggle();
+return;
+
+}
+
+const possibleButtons=
+document.querySelectorAll(
+'.conferbot-widget-button,.conferbot-launcher,#conferbot-button,.conferbot-button'
+);
+
+if(possibleButtons.length){
+
+possibleButtons[0].click();
+return;
+
+}
+
+console.warn(
+"Conferbot launcher अभी तैयार नहीं है।"
+);
+
+}catch(error){
+
+console.error(
+"Conferbot open error:",
+error
+);
+
+}
+
+}
+
+if(chatLauncher){
+
+chatLauncher.addEventListener(
+"pointerdown",
+function(e){
+
+if(e.pointerType==="mouse" && e.button!==0){
+return;
+}
+
+e.preventDefault();
+
+try{
+chatLauncher.setPointerCapture(e.pointerId);
+}catch(error){}
+
+startChatDrag(
+e.clientX,
+e.clientY
+);
+
+}
+);
+
+chatLauncher.addEventListener(
+"pointermove",
+function(e){
+
+if(!chatDragging){
+return;
+}
+
+e.preventDefault();
+
+moveChatDrag(
+e.clientX,
+e.clientY
+);
+
+}
+);
+
+chatLauncher.addEventListener(
+"pointerup",
+function(e){
+
+e.preventDefault();
+
+try{
+chatLauncher.releasePointerCapture(e.pointerId);
+}catch(error){}
+
+finishChatDrag();
+
+}
+);
+
+chatLauncher.addEventListener(
+"pointercancel",
+function(){
+
+finishChatDrag();
+
+}
+);
+
+chatLauncher.addEventListener(
+"contextmenu",
+function(e){
+
+if(chatMoved){
+e.preventDefault();
+}
+
+}
+);
+
+loadChatPosition();
+
+}
+
+window.addEventListener(
+"resize",
+function(){
+
+if(!chatLauncher){
+return;
+}
+
+const rect=
+chatLauncher.getBoundingClientRect();
+
+const p=
+clampChatPosition(
+rect.left,
+rect.top
+);
+
+applyChatPosition(
+p.left,
+p.top
+);
+
+saveChatPosition();
+
+}
+);
+
 function escapeHtml(value){
 
 return String(value)
@@ -3629,32 +4189,37 @@ return String(value)
 }
 </script>
 
-<!--Start of Conferbot Script-->
+<!-- Start of Conferbot Script -->
 <script type="text/javascript">
-(function (d, s, id) {
+(function(d,s,id){
 
-var js, el = d.getElementsByTagName(s)[0];
+var js,el=d.getElementsByTagName(s)[0];
 
-if (d.getElementById(id)) return;
+if(d.getElementById(id)){
+return;
+}
 
-js = d.createElement(s);
-js.async = true;
-js.src = 'https://cdn.conferbot.com/dist/v1/widget.min.js';
-js.id = id;
-js.charset = 'UTF-8';
+js=d.createElement(s);
+js.async=true;
+js.src="https://cdn.conferbot.com/dist/v1/widget.min.js";
+js.id=id;
+js.charset="UTF-8";
 
-el.parentNode.insertBefore(js, el);
+el.parentNode.insertBefore(js,el);
 
-js.onload = function () {
+js.onload=function(){
 
-try {
+try{
 
+window.conferbotInstance=
 window.ConferbotWidget(
 "6ac78c5dbb3336663970841b",
 "live_chat"
 );
 
-} catch (error) {
+console.log("Conferbot loaded successfully.");
+
+}catch(error){
 
 console.error(
 "Conferbot Error:",
@@ -3665,9 +4230,17 @@ error
 
 };
 
-})(document, 'script', 'conferbot-js');
+js.onerror=function(){
+
+console.error(
+"Conferbot script load failed."
+);
+
+};
+
+})(document,"script","conferbot-js");
 </script>
-<!--End of Conferbot Script-->
+<!-- End of Conferbot Script -->
 
 </body>
 </html>
