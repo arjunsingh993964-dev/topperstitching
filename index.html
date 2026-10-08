@@ -720,6 +720,16 @@ to{
 transform:rotate(360deg)
 }
 }
+
+/* Talksilo Widget Custom Floating & Edge Snapping Styles */
+#talksilo-widget, .talksilo-bubble, iframe[src*="talksilo"] {
+position: fixed !important;
+bottom: 100px !important;
+right: 20px !important;
+z-index: 99999 !important;
+transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+touch-action: none;
+}
 </style>  
 </head>  
 <body>  
@@ -1725,6 +1735,90 @@ return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&g
 }
 function escapeAttribute(value){
 return String(value).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// Draggable & Edge Snapping Logic for TalkSilo Widget
+document.addEventListener("DOMContentLoaded", function(){
+let widgetEl = null;
+const checkWidgetInterval = setInterval(function(){
+widgetEl = document.querySelector("#talksilo-widget") || document.querySelector(".talksilo-bubble") || document.querySelector("iframe[src*='talksilo']");
+if(widgetEl){
+clearInterval(checkWidgetInterval);
+makeDraggableAndSnap(widgetEl);
+}
+}, 500);
+});
+
+function makeDraggableAndSnap(el){
+let isDragging = false;
+let startX, startY, initialX, initialY;
+
+el.addEventListener("mousedown", dragStart);
+el.addEventListener("touchstart", dragStart, {passive: true});
+
+function dragStart(e){
+isDragging = true;
+const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+startX = clientX;
+startY = clientY;
+const rect = el.getBoundingClientRect();
+initialX = rect.left;
+initialY = rect.top;
+
+el.style.bottom = "auto";
+el.style.right = "auto";
+el.style.left = initialX + "px";
+el.style.top = initialY + "px";
+
+document.addEventListener("mousemove", drag);
+document.addEventListener("touchmove", drag, {passive: true});
+document.addEventListener("mouseup", dragEnd);
+document.addEventListener("touchend", dragEnd);
+}
+
+function drag(e){
+if(!isDragging) return;
+const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+const dx = clientX - startX;
+const dy = clientY - startY;
+el.style.left = (initialX + dx) + "px";
+el.style.top = (initialY + dy) + "px";
+}
+
+function dragEnd(){
+if(!isDragging) return;
+isDragging = false;
+document.removeEventListener("mousemove", drag);
+document.removeEventListener("touchmove", drag);
+document.removeEventListener("mouseup", dragEnd);
+document.removeEventListener("touchend", dragEnd);
+
+// Edge Snapping
+const rect = el.getBoundingClientRect();
+const winWidth = window.innerWidth;
+const winHeight = window.innerHeight;
+
+let targetLeft = rect.left;
+let targetTop = rect.top;
+
+// Snap to Left or Right Edge
+if(rect.left + rect.width / 2 < winWidth / 2){
+targetLeft = 15; // Left margin
+} else {
+targetLeft = winWidth - rect.width - 15; // Right margin
+}
+
+// Keep within vertical bounds
+if(targetTop < 15) targetTop = 15;
+if(targetTop > winHeight - rect.height - 15) targetTop = winHeight - rect.height - 15;
+
+el.style.transition = "all 0.3s ease";
+el.style.left = targetLeft + "px";
+el.style.top = targetTop + "px";
+setTimeout(() => { el.style.transition = "none"; }, 300);
+}
 }
 </script>  
 
