@@ -100,7 +100,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .avatar-close{width:100%;margin-top:15px;padding:10px;border:0;border-radius:7px;background:#d32f2f;color:#fff;font-weight:bold;font-size:14px;cursor:pointer}
 
 .auth-error{display:none;background:#ffebee;color:#b71c1c;padding:10px;margin:12px 16px;border-radius:8px;font-size:12px;text-align:center}
-
 .empty-orders{text-align:center;color:#777;margin-top:30px}
 
 #appMessageBox{position:fixed;inset:0;z-index:999999}
@@ -111,7 +110,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
 
-/* ================= LOGIN RESTORE LOADING ================= */
 #authLoading{
 position:fixed;
 inset:0;
@@ -121,7 +119,7 @@ display:none;
 align-items:center;
 justify-content:center;
 flex-direction:column;
-transition:opacity .2s ease;
+transition:opacity .2s ease
 }
 .auth-loader{
 width:44px;
@@ -129,7 +127,7 @@ height:44px;
 border:4px solid #e0e0e0;
 border-top-color:#1565c0;
 border-radius:50%;
-animation:authSpin .8s linear infinite;
+animation:authSpin .8s linear infinite
 }
 @keyframes authSpin{to{transform:rotate(360deg)}}
 .auth-loading-text{
@@ -138,7 +136,7 @@ color:#1a237e;
 font-size:14px;
 font-weight:bold;
 text-align:center;
-padding:0 20px;
+padding:0 20px
 }
 
 @media(max-width:500px){
@@ -402,35 +400,16 @@ Google Account से लॉगिन करें
 
 <div class="avatar-grid">
 
-<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
-<img src="m1.png" alt="m1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
-<img src="m2.png" alt="m2">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
-<img src="m3.png" alt="m3">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
-<img src="m4.png" alt="m4">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
-<img src="f1.png" alt="f1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
-<img src="f2.png" alt="f2">
-</button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')"><img src="m1.png" alt="m1"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')"><img src="m2.png" alt="m2"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')"><img src="m3.png" alt="m3"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')"><img src="m4.png" alt="m4"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')"><img src="f1.png" alt="f1"></button>
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')"><img src="f2.png" alt="f2"></button>
 
 </div>
 
-<button class="avatar-close" type="button" onclick="closeAvatarPicker">
-बंद करें
-</button>
+<button class="avatar-close" type="button" onclick="closeAvatarPicker()">बंद करें</button>
 
 </div>
 </div>
@@ -551,19 +530,308 @@ let locationReady=false;
 let locationRetryTimer=null;
 let pendingLocationActions=[];
 
+
+/* =========================================================
+   PAYMENT DETAILS PERSISTENCE
+   ========================================================= */
+
+const PAYMENT_STATE_KEY="topper_active_payment_state";
+
+/*
+  जब तक Order Confirm नहीं होता,
+  product + नाम + मोबाइल + पता + UTR सुरक्षित रहेगा।
+
+  इसे दो जगह save किया जा रहा है:
+  1. localStorage
+  2. AndroidApp.savePaymentState()
+
+  इसलिए ऐप बंद/दोबारा खोलने पर भी data वापस आ सकता है।
+*/
+
+
+function getPaymentState(){
+
+ return {
+   version:1,
+   product:selectedProduct||"",
+   price:String(selectedPrice||""),
+   name:$("custName") ? $("custName").value.trim() : "",
+   phone:$("custPhone") ? $("custPhone").value.trim() : "",
+   address:$("custAddress") ? $("custAddress").value.trim() : "",
+   utr:$("utrNumber") ? $("utrNumber").value.trim() : "",
+   modalOpen:$("orderModal") ? $("orderModal").style.display==="block" : false,
+   savedAt:Date.now()
+ };
+}
+
+
+function savePaymentState(){
+
+ if(
+   !selectedProduct||
+   !selectedPrice
+ ){
+   return;
+ }
+
+ const state=getPaymentState();
+
+ try{
+
+   localStorage.setItem(
+     PAYMENT_STATE_KEY,
+     JSON.stringify(state)
+   );
+
+ }catch(error){
+
+   console.error(
+     "Payment localStorage save error:",
+     error
+   );
+ }
+
+
+ if(
+   window.AndroidApp&&
+   typeof window.AndroidApp.savePaymentState==="function"
+ ){
+
+   try{
+
+     window.AndroidApp.savePaymentState(
+       JSON.stringify(state)
+     );
+
+   }catch(error){
+
+     console.error(
+       "Native payment state save error:",
+       error
+     );
+   }
+ }
+}
+
+
+function clearPaymentState(){
+
+ try{
+
+   localStorage.removeItem(
+     PAYMENT_STATE_KEY
+   );
+
+ }catch(error){
+
+   console.error(
+     "Payment localStorage clear error:",
+     error
+   );
+ }
+
+
+ if(
+   window.AndroidApp&&
+   typeof window.AndroidApp.clearPaymentState==="function"
+ ){
+
+   try{
+
+     window.AndroidApp.clearPaymentState();
+
+   }catch(error){
+
+     console.error(
+       "Native payment state clear error:",
+       error
+     );
+   }
+ }
+}
+
+
+function applyPaymentState(state){
+
+ if(!state||!state.product){
+   return;
+ }
+
+ selectedProduct=
+   String(state.product||"");
+
+ selectedPrice=
+   String(state.price||"");
+
+
+ if($("custName")){
+   $("custName").value=
+     String(state.name||"");
+ }
+
+ if($("custPhone")){
+   $("custPhone").value=
+     String(state.phone||"");
+ }
+
+ if($("custAddress")){
+   $("custAddress").value=
+     String(state.address||"");
+ }
+
+ if($("utrNumber")){
+   $("utrNumber").value=
+     String(state.utr||"");
+ }
+
+
+ $("modalProductInfo").textContent=
+   selectedProduct+
+   " - ₹"+
+   Number(selectedPrice||0).toLocaleString("en-IN");
+
+
+ $("upiPayAmount").textContent=
+   Number(selectedPrice||0).toLocaleString("en-IN");
+
+
+ /*
+   Saved order/payment page हमेशा वापस खुलेगा।
+   User ने Confirm नहीं किया है, इसलिए इसे बंद नहीं करेंगे।
+ */
+
+ $("orderModal").style.display="block";
+
+ requestUserLocation();
+}
+
+
+function restorePaymentStateFromLocalStorage(){
+
+ let raw=null;
+
+ try{
+
+   raw=
+     localStorage.getItem(
+       PAYMENT_STATE_KEY
+     );
+
+ }catch(error){
+
+   console.error(
+     "Payment localStorage read error:",
+     error
+   );
+ }
+
+ if(!raw){
+   return;
+ }
+
+ try{
+
+   const state=
+     JSON.parse(raw);
+
+   applyPaymentState(state);
+
+ }catch(error){
+
+   console.error(
+     "Payment state restore error:",
+     error
+   );
+
+   try{
+     localStorage.removeItem(
+       PAYMENT_STATE_KEY
+     );
+   }catch(e){}
+ }
+}
+
+
+/*
+  MainActivity.kt पहले से saved native state
+  page load होने के बाद यहाँ भेज सकता है।
+*/
+window.nativeRestorePaymentState=function(raw){
+
+ try{
+
+   const state=
+     typeof raw==="string"
+     ?JSON.parse(raw)
+     :raw;
+
+   if(!state||!state.product){
+     return;
+   }
+
+   try{
+
+     localStorage.setItem(
+       PAYMENT_STATE_KEY,
+       JSON.stringify(state)
+     );
+
+   }catch(e){}
+
+   applyPaymentState(state);
+
+ }catch(error){
+
+   console.error(
+     "Native payment state restore error:",
+     error
+   );
+ }
+};
+
+
+/*
+  Page के अंदर user कोई भी detail बदले,
+  state तुरंत save होता रहेगा।
+*/
+
+function setupPaymentAutoSave(){
+
+ [
+   "custName",
+   "custPhone",
+   "custAddress",
+   "utrNumber"
+ ].forEach(function(id){
+
+   const el=$(id);
+
+   if(!el){
+     return;
+   }
+
+   ["input","change","blur"].forEach(function(eventName){
+
+     el.addEventListener(
+       eventName,
+       function(){
+         savePaymentState();
+       }
+     );
+
+   });
+
+ });
+
+}
+
+
 const $=id=>document.getElementById(id);
 
 
 /* ================= AUTH RESTORE LOADING ================= */
 
 const LOGIN_MEMORY_KEY="topper_has_logged_in_before";
-
-/*
-अगर इस device/app में पहले कभी login हुआ है,
-तो Firebase पुराने account को restore करने तक loading दिखेगी।
-
-पहली बार बिल्कुल नया guest है तो loading नहीं दिखेगी।
-*/
 
 const hasLoggedInBefore=
  localStorage.getItem(LOGIN_MEMORY_KEY)==="1";
@@ -622,6 +890,7 @@ function showAuthError(message){
  },7000);
 }
 
+
 function hideAuthError(){
 
  const el=$("authError");
@@ -642,6 +911,7 @@ function showAuthLoading(){
  loader.style.display="flex";
  loader.style.opacity="1";
 }
+
 
 function hideAuthLoading(){
 
@@ -682,21 +952,10 @@ auth.onAuthStateChanged(function(user){
  currentUser=user||null;
  authStateReady=true;
 
- /*
- Firebase ने अब अपना पहला result दे दिया है।
- चाहे account मिला हो या guest हो,
- अब loading हट सकती है।
- */
-
  updateAuthUI();
  hideAuthLoading();
 
  if(user){
-
-   /*
-   याद रखो कि इस device पर login हो चुका है।
-   अगली बार app open होने पर restore loading दिखाई जाएगी।
-   */
 
    localStorage.setItem(
      LOGIN_MEMORY_KEY,
@@ -708,6 +967,7 @@ auth.onAuthStateChanged(function(user){
  }else{
 
    clearOrdersListener();
+
  }
 
 });
@@ -1003,11 +1263,6 @@ function googleSignOut(){
 
    currentUser=null;
 
-   /*
-   Logout के बाद अगली opening को नया Guest माना जाएगा।
-   इसलिए loading screen नहीं आएगी।
-   */
-
    localStorage.removeItem(
      LOGIN_MEMORY_KEY
    );
@@ -1045,7 +1300,6 @@ function handleAuthError(error){
    ?error.message
    :"Unknown error";
 
-
  if(
    error&&
    error.code==="auth/unauthorized-domain"
@@ -1080,7 +1334,6 @@ function handleAuthError(error){
    msg=
      "इस email से Firebase में पहले किसी दूसरे sign-in method का account बना है।";
  }
-
 
  showAuthError(
    "❌ Google Login नहीं हुआ: "+
@@ -1221,7 +1474,6 @@ function requestUserLocation(){
  }
 
  locationRequestBusy=true;
-
 
  if(
    window.AndroidApp &&
@@ -1536,6 +1788,7 @@ if(tableSliderTrack){
        );
 
      if(tableColors[index]){
+
        $("selectedTableColorText")
        .textContent=
          tableColors[index];
@@ -1612,6 +1865,12 @@ function openOrderForm(productName,price){
    return;
  }
 
+ /*
+   नया product चुना गया है।
+   पुराने pending order को जानबूझकर तभी बदला जाएगा
+   जब user किसी दूसरे product पर click करेगा।
+ */
+
  selectedProduct=productName;
  selectedPrice=String(price);
 
@@ -1625,7 +1884,20 @@ function openOrderForm(productName,price){
  .textContent=
    Number(price).toLocaleString("en-IN");
 
+ /*
+   अगर नया product चुना है तो नई details के लिए
+   पुराने product की fields साफ करें।
+   लेकिन save तुरंत होगा।
+ */
+
+ $("custName").value="";
+ $("custPhone").value="";
+ $("custAddress").value="";
+ $("utrNumber").value="";
+
  $("orderModal").style.display="block";
+
+ savePaymentState();
 
  requestUserLocation();
 }
@@ -1652,13 +1924,28 @@ function openTableOrderForm(){
  $("upiPayAmount")
  .textContent="550";
 
+ $("custName").value="";
+ $("custPhone").value="";
+ $("custAddress").value="";
+ $("utrNumber").value="";
+
  $("orderModal").style.display="block";
+
+ savePaymentState();
 
  requestUserLocation();
 }
 
 
 function closeOrderForm(){
+
+ /*
+   महत्वपूर्ण:
+   यहाँ Payment Details DELETE नहीं होंगी।
+
+   User सिर्फ modal बंद कर रहा है।
+   Confirm होने तक data saved रहेगा।
+ */
 
  $("orderModal").style.display="none";
 
@@ -1668,6 +1955,8 @@ function closeOrderForm(){
 
  btn.textContent=
    "💬 WhatsApp पर Order भेजें";
+
+ savePaymentState();
 }
 
 
@@ -1699,6 +1988,8 @@ function payViaUpiIntent(){
 
  if(!name||!phone||!address){
 
+   savePaymentState();
+
    showAppMessage(
      "पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।",
      "📝"
@@ -1709,6 +2000,8 @@ function payViaUpiIntent(){
 
  if(!/^\d{10}$/.test(phone)){
 
+   savePaymentState();
+
    showAppMessage(
      "कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
      "📱"
@@ -1716,6 +2009,11 @@ function payViaUpiIntent(){
 
    return;
  }
+
+ /*
+   UPI खोलने से पहले पूरा state सुरक्षित।
+ */
+ savePaymentState();
 
  runWithLocation(function(){
 
@@ -1738,6 +2036,8 @@ function payViaUpiIntent(){
        startedAt:Date.now()
      })
    );
+
+   savePaymentState();
 
    const upiUrl=
      "upi://pay?pa="+
@@ -1796,6 +2096,12 @@ function payViaUpiIntent(){
 
 window.nativeUpiError=function(){
 
+ /*
+   Payment fail होने पर भी saved details नहीं हटेंगे।
+ */
+
+ savePaymentState();
+
  showAppMessage(
    "इस डिवाइस पर कोई UPI app उपलब्ध नहीं मिला। कृपया Google Pay, PhonePe या किसी UPI app को install करके फिर कोशिश करें।",
    "💳"
@@ -1830,6 +2136,11 @@ function sendPendingUpiOrderToWhatsApp(){
 
    return;
  }
+
+ /*
+   30 मिनट के बाद WhatsApp pending message हट सकता है,
+   लेकिन Payment Details state delete नहीं होगा।
+ */
 
  if(
    !data||
@@ -1909,11 +2220,13 @@ window.addEventListener(
 );
 
 
-/* ================= SAVE ORDER ================= */
+/* ================= SAVE ORDER / CONFIRM ================= */
 
 async function submitOnlineOrder(){
 
  if(!currentUser){
+
+   savePaymentState();
 
    showAppMessage(
      "कृपया पहले Google Account से Login करें!",
@@ -1934,6 +2247,11 @@ async function submitOnlineOrder(){
 
  const utr=
    $("utrNumber").value.trim();
+
+ /*
+   Confirm से पहले हमेशा latest data save।
+ */
+ savePaymentState();
 
  if(!name||!phone||!address){
 
@@ -2055,12 +2373,42 @@ async function submitOnlineOrder(){
      utr+
      "\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
+
+   /*
+     =====================================================
+     CONFIRM SUCCESS
+     =====================================================
+
+     Firebase में Order सफलतापूर्वक save होने के बाद ही
+     saved payment/details state हटेगा।
+
+     इससे पहले किसी भी हालत में delete नहीं होगा।
+   */
+
+   clearPaymentState();
+
+   sessionStorage.removeItem(
+     "pendingUpiWhatsApp"
+   );
+
+
    $("custName").value="";
    $("custPhone").value="";
    $("custAddress").value="";
    $("utrNumber").value="";
 
-   closeOrderForm();
+   selectedProduct="";
+   selectedPrice="";
+
+   $("modalProductInfo").textContent="";
+   $("upiPayAmount").textContent="0";
+
+   $("orderModal").style.display="none";
+
+   btn.disabled=false;
+
+   btn.textContent=
+     "💬 WhatsApp पर Order भेजें";
 
    showAppMessage(
      "आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+
@@ -2078,6 +2426,13 @@ async function submitOnlineOrder(){
      "Firebase Order Error:",
      error
    );
+
+   /*
+     Firebase save fail हुआ तो state delete नहीं होगा।
+     इसलिए user बाद में उसी page/details पर वापस आ सकता है।
+   */
+
+   savePaymentState();
 
    btn.disabled=false;
 
@@ -2364,8 +2719,30 @@ $("custPhone").addEventListener(
          10
        );
 
+   savePaymentState();
+
  }
 );
+
+
+/* ================= PAYMENT INPUT AUTO SAVE ================= */
+
+setupPaymentAutoSave();
+
+
+/*
+  Page पूरी तरह load होने के बाद:
+  पहले localStorage से pending payment restore करो।
+
+  MainActivity.kt का native restore भी बाद में आएगा,
+  और अगर native state मौजूद है तो वही apply हो जाएगा।
+*/
+
+setTimeout(function(){
+
+ restorePaymentStateFromLocalStorage();
+
+},300);
 
 
 /* ================= ESCAPE ================= */
