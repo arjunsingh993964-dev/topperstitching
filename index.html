@@ -111,7 +111,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
 
-/* LOGIN LOADING - केवल already logged-in user के लिए */
 #authLoading{
 position:fixed;
 inset:0;
@@ -137,18 +136,6 @@ transition:opacity .2s ease
 </head>
 
 <body>
-
-<!--
-पहली बार Guest User:
-कोई loading screen नहीं।
-
-पहले से Google Login है:
-छोटा loading screen दिखेगा और account restore होते ही हट जाएगा।
-
-Location:
-पूरी तरह background में silently चलेगी।
-Location का कोई loading text नहीं दिखेगा।
--->
 
 <div id="authLoading">
 <div class="auth-loader"></div>
@@ -467,12 +454,12 @@ Google Account से लॉगिन करें
 
 <div class="form-group">
 <label>मोबाइल नंबर:</label>
-<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
+<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10" autocomplete="tel">
 </div>
 
 <div class="form-group">
 <label>पूरा पता:</label>
-<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>
+<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज" autocomplete="street-address"></textarea>
 </div>
 
 <div class="qr-box">
@@ -486,7 +473,7 @@ Google Account से लॉगिन करें
 </button>
 
 <p style="font-size:12px;color:#777;margin-top:8px">
-Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
+Payment के बाद वापस ऐप में आने पर आपकी order details सुरक्षित रहेंगी।
 </p>
 
 </div>
@@ -552,6 +539,7 @@ auth.setPersistence(
 let currentUser=null;
 let selectedProduct="";
 let selectedPrice="";
+let selectedPaymentKey="";
 let userLocationLink="";
 let ordersQuery=null;
 let authBusy=false;
@@ -562,6 +550,11 @@ let locationRequestBusy=false;
 let locationReady=false;
 let locationRetryTimer=null;
 let pendingLocationActions=[];
+
+let paymentStateRestoring=false;
+
+const PAYMENT_STORAGE_KEY="topperPaymentStates_v2";
+const ACTIVE_PAYMENT_KEY="topperActivePayment_v2";
 
 const $=id=>document.getElementById(id);
 
@@ -609,9 +602,7 @@ function showAuthError(message){
  el.style.display="block";
 
  setTimeout(function(){
-
    el.style.display="none";
-
  },7000);
 }
 
@@ -632,7 +623,6 @@ function setAuthButtonsBusy(busy,text){
  $("profileAuthBtn").disabled=busy;
 
  if(busy){
-
    $("authBtn").innerText=text;
    $("profileAuthBtn").innerText=text;
  }
@@ -668,16 +658,6 @@ function hideAuthLoading(){
  },200);
 }
 
-
-/*
-पहली बार app खुलने पर:
-Guest को तुरंत app दिखेगा।
-
-अगर Firebase ने पहले से logged-in account restore कर लिया है:
-Account loading थोड़ी देर दिखेगी।
-
-Location कभी भी इस loading screen को block नहीं करेगी।
-*/
 
 const startupUser=auth.currentUser;
 
@@ -732,6 +712,10 @@ auth.onAuthStateChanged(function(user){
 
    hideAuthLoading();
 
+   setTimeout(function(){
+     restoreActivePaymentState();
+   },150);
+
  }else{
 
    clearOrdersListener();
@@ -743,9 +727,7 @@ auth.onAuthStateChanged(function(user){
 
 
 setTimeout(function(){
-
  initializeExistingUser();
-
 },0);
 
 
@@ -754,7 +736,6 @@ setTimeout(function(){
 auth.getRedirectResult().then(function(result){
 
  if(result&&result.user){
-
    hideAuthError();
  }
 
@@ -832,8 +813,7 @@ function updateAuthUI(){
 
    authBtn.textContent="Sign In";
 
-   name.textContent=
-     "Guest User";
+   name.textContent="Guest User";
 
    email.textContent=
      "Google Account Not Connected";
@@ -857,13 +837,9 @@ function updateAuthUI(){
 function handleAuthAction(){
 
  if(currentUser){
-
    googleSignOut();
-
  }else{
-
    googleSignIn();
-
  }
 }
 
@@ -986,6 +962,10 @@ window.nativeGoogleLogin=async function(idToken){
    updateAuthUI();
 
    hideAuthLoading();
+
+   setTimeout(function(){
+     restoreActivePaymentState();
+   },150);
 
  }catch(error){
 
@@ -1110,12 +1090,10 @@ function handleAuthError(error){
 /* ================= AVATAR ================= */
 
 function openAvatarPicker(){
-
  $("avatarModal").style.display="block";
 }
 
 function closeAvatarPicker(){
-
  $("avatarModal").style.display="none";
 }
 
@@ -1146,9 +1124,7 @@ function switchTab(viewId,btnEl){
    ".view-section"
  ).forEach(function(v){
 
-   v.classList.remove(
-     "active-view"
-   );
+   v.classList.remove("active-view");
 
  });
 
@@ -1156,42 +1132,399 @@ function switchTab(viewId,btnEl){
    ".nav-item"
  ).forEach(function(b){
 
-   b.classList.remove(
-     "active"
-   );
+   b.classList.remove("active");
 
  });
 
  const view=$(viewId);
 
  if(view){
-
-   view.classList.add(
-     "active-view"
-   );
+   view.classList.add("active-view");
  }
 
  if(btnEl){
+   btnEl.classList.add("active");
+ }
+}
 
-   btnEl.classList.add(
-     "active"
+
+/* =========================================================
+   PAYMENT DETAILS PERSISTENCE
+   ========================================================= */
+
+/*
+हर product की details अलग key में सेव होंगी।
+
+उदाहरण:
+
+Topper SV Tailor
+Topper SV Tailor Deluxe
+
+दोनों की details कभी आपस में mix नहीं होंगी।
+
+App पूरी तरह बंद होने के बाद भी localStorage रहेगा।
+इसलिए app दोबारा खोलने पर वही payment page वापस आ सकता है।
+*/
+
+
+function makePaymentKey(productName,price){
+
+ return String(productName||"")
+   .trim()
+   .toLowerCase()
+   .replace(/\s+/g,"_")
+   .replace(/[^a-z0-9_\u0900-\u097f\[\]-]/gi,"")+
+   "__"+
+   String(price||"");
+}
+
+
+function getPaymentStates(){
+
+ try{
+
+   const raw=
+     localStorage.getItem(
+       PAYMENT_STORAGE_KEY
+     );
+
+   if(!raw){
+     return {};
+   }
+
+   const data=
+     JSON.parse(raw);
+
+   if(
+     data&&
+     typeof data==="object"
+   ){
+
+     return data;
+   }
+
+ }catch(error){
+
+   console.error(
+     "Payment state read error:",
+     error
+   );
+ }
+
+ return {};
+}
+
+
+function savePaymentStates(states){
+
+ try{
+
+   localStorage.setItem(
+     PAYMENT_STORAGE_KEY,
+     JSON.stringify(states)
+   );
+
+ }catch(error){
+
+   console.error(
+     "Payment state save error:",
+     error
    );
  }
 }
 
 
+function getCurrentPaymentFormData(){
+
+ if(!selectedPaymentKey){
+   return null;
+ }
+
+ return {
+
+   key:selectedPaymentKey,
+
+   product:selectedProduct,
+
+   price:String(selectedPrice),
+
+   name:$("custName").value.trim(),
+
+   phone:$("custPhone").value.trim(),
+
+   address:$("custAddress").value.trim(),
+
+   utr:$("utrNumber").value.trim(),
+
+   modalOpen:
+     $("orderModal").style.display==="block",
+
+   savedAt:Date.now()
+
+ };
+}
+
+
+function saveCurrentPaymentState(){
+
+ if(
+   !selectedPaymentKey||
+   paymentStateRestoring
+ ){
+
+   return;
+ }
+
+ const data=
+   getCurrentPaymentFormData();
+
+ if(!data){
+   return;
+ }
+
+ const states=
+   getPaymentStates();
+
+ states[selectedPaymentKey]=data;
+
+ savePaymentStates(states);
+
+ try{
+
+   localStorage.setItem(
+     ACTIVE_PAYMENT_KEY,
+     selectedPaymentKey
+   );
+
+ }catch(error){
+
+   console.error(
+     "Active payment key save error:",
+     error
+   );
+ }
+}
+
+
+function loadPaymentStateForCurrentProduct(){
+
+ if(!selectedPaymentKey){
+   return false;
+ }
+
+ const states=
+   getPaymentStates();
+
+ const data=
+   states[selectedPaymentKey];
+
+ /*
+ पहले सभी fields clear करें।
+ इससे दूसरे product की details
+ इस product में नहीं आएंगी।
+ */
+
+ $("custName").value="";
+ $("custPhone").value="";
+ $("custAddress").value="";
+ $("utrNumber").value="";
+
+
+ if(
+   !data||
+   data.product!==selectedProduct||
+   String(data.price)!==String(selectedPrice)
+ ){
+
+   return false;
+ }
+
+
+ $("custName").value=
+   data.name||"";
+
+ $("custPhone").value=
+   data.phone||"";
+
+ $("custAddress").value=
+   data.address||"";
+
+ $("utrNumber").value=
+   data.utr||"";
+
+
+ return true;
+}
+
+
+function clearPaymentState(paymentKey){
+
+ const key=
+   paymentKey||
+   selectedPaymentKey;
+
+ if(!key){
+   return;
+ }
+
+ const states=
+   getPaymentStates();
+
+ delete states[key];
+
+ savePaymentStates(states);
+
+ let activeKey="";
+
+ try{
+
+   activeKey=
+     localStorage.getItem(
+       ACTIVE_PAYMENT_KEY
+     )||"";
+
+ }catch(error){}
+
+ if(activeKey===key){
+
+   localStorage.removeItem(
+     ACTIVE_PAYMENT_KEY
+   );
+ }
+}
+
+
+function clearAllPaymentState(){
+
+ try{
+
+   localStorage.removeItem(
+     PAYMENT_STORAGE_KEY
+   );
+
+   localStorage.removeItem(
+     ACTIVE_PAYMENT_KEY
+   );
+
+ }catch(error){
+
+   console.error(
+     "Clear payment state error:",
+     error
+   );
+}
+
+
+function restoreActivePaymentState(){
+
+ if(!currentUser){
+   return;
+ }
+
+ if(paymentStateRestoring){
+   return;
+ }
+
+ let activeKey="";
+
+ try{
+
+   activeKey=
+     localStorage.getItem(
+       ACTIVE_PAYMENT_KEY
+     )||"";
+
+ }catch(error){
+
+   console.error(
+     "Active payment read error:",
+     error
+   );
+
+   return;
+ }
+
+ if(!activeKey){
+   return;
+ }
+
+ const states=
+   getPaymentStates();
+
+ const data=
+   states[activeKey];
+
+ if(
+   !data||
+   !data.product||
+   !data.price
+ ){
+
+   localStorage.removeItem(
+     ACTIVE_PAYMENT_KEY
+   );
+
+   return;
+ }
+
+ /*
+ अगर state बहुत पुरानी हो तो भी
+ user की details नहीं हटाई जाएंगी।
+ */
+
+ paymentStateRestoring=true;
+
+ selectedProduct=
+   data.product;
+
+ selectedPrice=
+   String(data.price);
+
+ selectedPaymentKey=
+   activeKey;
+
+ $("modalProductInfo")
+ .textContent=
+   selectedProduct+
+   " - ₹"+
+   Number(selectedPrice)
+   .toLocaleString("en-IN");
+
+ $("upiPayAmount")
+ .textContent=
+   Number(selectedPrice)
+   .toLocaleString("en-IN");
+
+ $("custName").value=
+   data.name||"";
+
+ $("custPhone").value=
+   data.phone||"";
+
+ $("custAddress").value=
+   data.address||"";
+
+ $("utrNumber").value=
+   data.utr||"";
+
+ $("orderModal").style.display=
+   "block";
+
+ paymentStateRestoring=false;
+
+ /*
+ UPI pending state भी check होगी।
+ */
+
+ setTimeout(function(){
+
+   sendPendingUpiOrderToWhatsApp();
+
+ },500);
+}
+
+
 /* ================= LOCATION ================= */
-
-/*
-Location पूरी तरह background में चलेगी।
-
-कोई:
-❌ Live Location प्राप्त की जा रही है
-❌ Location loading
-❌ Location loading screen
-
-नहीं दिखेगा।
-*/
 
 function updateLocationStatus(text){
 
@@ -1199,18 +1532,9 @@ function updateLocationStatus(text){
 
  if(!el)return;
 
- /*
- केवल user के manually "मेरी Live Location अपडेट करें"
- button दबाने पर status दिखाया जा सकता है।
- Background location के दौरान कोई text नहीं।
- */
-
  if(text){
-
    el.textContent=text;
-
  }else{
-
    el.textContent="";
  }
 }
@@ -1225,7 +1549,6 @@ function setUserLocation(lat,lon){
    !Number.isFinite(latitude)||
    !Number.isFinite(longitude)
  ){
-
    return;
  }
 
@@ -1253,7 +1576,6 @@ function setUserLocation(lat,lon){
    "✅ Live Location उपलब्ध है"
  );
 
-
  const actions=
    pendingLocationActions.slice();
 
@@ -1264,11 +1586,8 @@ function setUserLocation(lat,lon){
    setTimeout(function(){
 
      try{
-
        action();
-
      }catch(error){
-
        console.error(
          "Location action error:",
          error
@@ -1276,7 +1595,6 @@ function setUserLocation(lat,lon){
      }
 
    },0);
-
  });
 }
 
@@ -1284,10 +1602,6 @@ function setUserLocation(lat,lon){
 function requestUserLocation(){
 
  if(locationReady){
-
-   updateLocationStatus(
-     "✅ Live Location उपलब्ध है"
-   );
 
    return;
  }
@@ -1298,9 +1612,6 @@ function requestUserLocation(){
  }
 
  locationRequestBusy=true;
-
-
- /* ================= NATIVE ANDROID ================= */
 
  if(
    window.AndroidApp &&
@@ -1326,8 +1637,6 @@ function requestUserLocation(){
    return;
  }
 
-
- /* ================= BROWSER FALLBACK ================= */
 
  if(navigator.geolocation){
 
@@ -1387,15 +1696,12 @@ function scheduleLocationRetry(){
      locationRetryTimer=null;
 
      if(!locationReady){
-
        requestUserLocation();
      }
 
    },3000);
 }
 
-
-/* ================= NATIVE LOCATION SUCCESS ================= */
 
 window.nativeLocationSuccess=function(lat,lon){
 
@@ -1421,8 +1727,6 @@ window.nativeLocationSuccess=function(lat,lon){
 };
 
 
-/* ================= NATIVE LOCATION ERROR ================= */
-
 window.nativeLocationError=function(message){
 
  console.error(
@@ -1432,27 +1736,17 @@ window.nativeLocationError=function(message){
 
  locationRequestBusy=false;
 
- /*
- कोई error text नहीं।
- Location silently दोबारा try होगी।
- */
-
  scheduleLocationRetry();
 };
 
-
-/* ================= LOCATION ACTION QUEUE ================= */
 
 function runWithLocation(action){
 
  if(locationReady){
 
    try{
-
      action();
-
    }catch(error){
-
      console.error(
        "Location action error:",
        error
@@ -1462,26 +1756,14 @@ function runWithLocation(action){
    return;
  }
 
-
- pendingLocationActions.push(
-   action
- );
+ pendingLocationActions.push(action);
 
  requestUserLocation();
 }
 
 
-/* ================= START LOCATION SILENTLY ================= */
-
-/*
-App खुलते ही location background में शुरू होगी।
-लेकिन screen पर कोई location loading नहीं आएगी।
-*/
-
 setTimeout(function(){
-
  requestUserLocation();
-
 },100);
 
 
@@ -1503,16 +1785,13 @@ function openWhatsApp(message){
  }
 
  if(whatsappOpening){
-
    return;
  }
 
  whatsappOpening=true;
 
-
  const bridge=
    window.AndroidApp;
-
 
  if(
    bridge&&
@@ -1524,9 +1803,7 @@ function openWhatsApp(message){
      bridge.openWhatsApp(text);
 
      setTimeout(function(){
-
        whatsappOpening=false;
-
      },500);
 
      return;
@@ -1548,9 +1825,6 @@ function openWhatsApp(message){
      return;
    }
  }
-
-
- /* ================= BROWSER FALLBACK ================= */
 
  const url=
    "https://wa.me/919264137710?text="+
@@ -1577,9 +1851,7 @@ function openWhatsApp(message){
  }
 
  setTimeout(function(){
-
    whatsappOpening=false;
-
  },500);
 }
 
@@ -1597,17 +1869,13 @@ window.nativeWhatsAppError=function(message){
 
 
 window.nativeWhatsAppOpened=function(){
-
  whatsappOpening=false;
 };
 
 
 /* ================= BUY NOW ================= */
 
-function buyNow(
- productName,
- price
-){
+function buyNow(productName,price){
 
  runWithLocation(function(){
 
@@ -1615,7 +1883,6 @@ function buyNow(
      !locationReady||
      !userLocationLink
    ){
-
      return;
    }
 
@@ -1676,10 +1943,7 @@ if(tableSliderTrack){
 }
 
 
-function slideImages(
- id,
- direction
-){
+function slideImages(id,direction){
 
  const track=$(id);
 
@@ -1703,7 +1967,6 @@ function getSelectedTableColor(){
    $("tableSlider");
 
  if(!track){
-
    return tableColors[0];
  }
 
@@ -1723,7 +1986,6 @@ function getSelectedTableColor(){
 function requireLogin(){
 
  if(currentUser){
-
    return true;
  }
 
@@ -1745,13 +2007,9 @@ function requireLogin(){
 
 /* ================= ORDER FORM ================= */
 
-function openOrderForm(
- productName,
- price
-){
+function openOrderForm(productName,price){
 
  if(!requireLogin()){
-
    return;
  }
 
@@ -1760,6 +2018,12 @@ function openOrderForm(
 
  selectedPrice=
    String(price);
+
+ selectedPaymentKey=
+   makePaymentKey(
+     selectedProduct,
+     selectedPrice
+   );
 
  $("modalProductInfo")
  .textContent=
@@ -1775,12 +2039,35 @@ function openOrderForm(
      "en-IN"
    );
 
+ /*
+ पहले इसी product की saved details
+ load होंगी।
+
+ दूसरे product की details नहीं आएंगी।
+ */
+
+ loadPaymentStateForCurrentProduct();
+
+ try{
+
+   localStorage.setItem(
+     ACTIVE_PAYMENT_KEY,
+     selectedPaymentKey
+   );
+
+ }catch(error){
+
+   console.error(
+     "Active payment save error:",
+     error
+   );
+ }
+
  $("orderModal")
  .style.display="block";
 
- /*
- Location background में पहले से चल रही होगी।
- */
+ saveCurrentPaymentState();
+
  requestUserLocation();
 }
 
@@ -1788,7 +2075,6 @@ function openOrderForm(
 function openTableOrderForm(){
 
  if(!requireLogin()){
-
    return;
  }
 
@@ -1799,6 +2085,12 @@ function openTableOrderForm(){
 
  selectedPrice="550";
 
+ selectedPaymentKey=
+   makePaymentKey(
+     selectedProduct,
+     selectedPrice
+   );
+
  $("modalProductInfo")
  .textContent=
    selectedProduct+
@@ -1807,8 +2099,27 @@ function openTableOrderForm(){
  $("upiPayAmount")
  .textContent="550";
 
+ loadPaymentStateForCurrentProduct();
+
+ try{
+
+   localStorage.setItem(
+     ACTIVE_PAYMENT_KEY,
+     selectedPaymentKey
+   );
+
+ }catch(error){
+
+   console.error(
+     "Active payment save error:",
+     error
+   );
+ }
+
  $("orderModal")
  .style.display="block";
+
+ saveCurrentPaymentState();
 
  requestUserLocation();
 }
@@ -1816,8 +2127,22 @@ function openTableOrderForm(){
 
 function closeOrderForm(){
 
+ /*
+ Cancel = इस product की saved details
+ पूरी तरह हट जाएंगी।
+ */
+
+ clearPaymentState(
+   selectedPaymentKey
+ );
+
  $("orderModal")
  .style.display="none";
+
+ $("custName").value="";
+ $("custPhone").value="";
+ $("custAddress").value="";
+ $("utrNumber").value="";
 
  const btn=
    $("onlineOrderBtn");
@@ -1826,6 +2151,10 @@ function closeOrderForm(){
 
  btn.textContent=
    "💬 WhatsApp पर Order भेजें";
+
+ selectedProduct="";
+ selectedPrice="";
+ selectedPaymentKey="";
 }
 
 
@@ -1882,18 +2211,30 @@ function payViaUpiIntent(){
  }
 
 
+ /*
+ Payment से पहले details तुरंत save।
+ */
+
+ saveCurrentPaymentState();
+
+
  runWithLocation(function(){
 
    if(
      !locationReady||
      !userLocationLink
    ){
-
      return;
    }
 
 
-   sessionStorage.setItem(
+   /*
+   sessionStorage की जगह localStorage।
+   इसलिए app process बंद होने के बाद भी
+   pending payment state बची रहेगी।
+   */
+
+   localStorage.setItem(
      "pendingUpiWhatsApp",
      JSON.stringify({
 
@@ -1903,10 +2244,14 @@ function payViaUpiIntent(){
        phone:phone,
        address:address,
        location:userLocationLink,
+       paymentKey:selectedPaymentKey,
        startedAt:Date.now()
 
      })
    );
+
+
+   saveCurrentPaymentState();
 
 
    const upiUrl=
@@ -1990,12 +2335,11 @@ window.nativeUpiError=function(){
 function sendPendingUpiOrderToWhatsApp(){
 
  const raw=
-   sessionStorage.getItem(
+   localStorage.getItem(
      "pendingUpiWhatsApp"
    );
 
  if(!raw){
-
    return;
  }
 
@@ -2008,7 +2352,7 @@ function sendPendingUpiOrderToWhatsApp(){
 
  }catch(e){
 
-   sessionStorage.removeItem(
+   localStorage.removeItem(
      "pendingUpiWhatsApp"
    );
 
@@ -2024,7 +2368,7 @@ function sendPendingUpiOrderToWhatsApp(){
    30*60*1000
  ){
 
-   sessionStorage.removeItem(
+   localStorage.removeItem(
      "pendingUpiWhatsApp"
    );
 
@@ -2033,7 +2377,8 @@ function sendPendingUpiOrderToWhatsApp(){
 
 
  /*
- Location अभी नहीं मिली है तो action queue में डालें।
+ अगर app फिर से खुला और location अभी नहीं आई,
+ तो पहले location प्राप्त होगी।
  */
 
  if(
@@ -2052,16 +2397,50 @@ function sendPendingUpiOrderToWhatsApp(){
 
 
  /*
- हमेशा current fresh location इस्तेमाल होगी।
+ हमेशा current location।
  */
 
  const freshLocation=
    userLocationLink;
 
 
- sessionStorage.removeItem(
-   "pendingUpiWhatsApp"
- );
+ /*
+ WhatsApp खोलने से पहले payment details
+ फिर से save कर देते हैं।
+ */
+
+ if(data.paymentKey){
+
+   const states=
+     getPaymentStates();
+
+   if(!states[data.paymentKey]){
+
+     states[data.paymentKey]={
+
+       key:data.paymentKey,
+
+       product:data.product,
+
+       price:String(data.price),
+
+       name:data.name||"",
+
+       phone:data.phone||"",
+
+       address:data.address||"",
+
+       utr:"",
+
+       modalOpen:true,
+
+       savedAt:Date.now()
+
+     };
+
+     savePaymentStates(states);
+   }
+ }
 
 
  const message=
@@ -2084,7 +2463,19 @@ function sendPendingUpiOrderToWhatsApp(){
    "\n\n⚠️ *नोट:* UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
 
 
+ /*
+ WhatsApp खुलने के बाद pending flag हटेगा।
+ */
+
  openWhatsApp(message);
+
+ setTimeout(function(){
+
+   localStorage.removeItem(
+     "pendingUpiWhatsApp"
+   );
+
+ },1000);
 }
 
 
@@ -2094,24 +2485,30 @@ window.addEventListener(
  "pageshow",
  function(){
 
-   /*
-   Location background में silently refresh होगी।
-   */
-
    if(!locationReady){
-
      requestUserLocation();
    }
 
-
    if(
-     sessionStorage.getItem(
+     localStorage.getItem(
        "pendingUpiWhatsApp"
      )
    ){
 
-     sendPendingUpiOrderToWhatsApp();
+     setTimeout(function(){
 
+       sendPendingUpiOrderToWhatsApp();
+
+     },300);
+   }
+
+   if(currentUser){
+
+     setTimeout(function(){
+
+       restoreActivePaymentState();
+
+     },200);
    }
 
  }
@@ -2152,6 +2549,8 @@ async function submitOnlineOrder(){
    !address
  ){
 
+   saveCurrentPaymentState();
+
    showAppMessage(
      "कृपया अपनी सभी जानकारी भरें!",
      "📝"
@@ -2163,6 +2562,8 @@ async function submitOnlineOrder(){
 
  if(!/^\d{10}$/.test(phone)){
 
+   saveCurrentPaymentState();
+
    showAppMessage(
      "कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
      "📱"
@@ -2173,6 +2574,8 @@ async function submitOnlineOrder(){
 
 
  if(!utr){
+
+   saveCurrentPaymentState();
 
    showAppMessage(
      "कृपया payment के बाद UTR / Transaction Number डालें!",
@@ -2187,6 +2590,8 @@ async function submitOnlineOrder(){
    !locationReady||
    !userLocationLink
  ){
+
+   saveCurrentPaymentState();
 
    runWithLocation(function(){
 
@@ -2205,6 +2610,9 @@ async function submitOnlineOrder(){
 
  btn.textContent=
    "⏳ Order Firebase में Save हो रहा है...";
+
+
+ saveCurrentPaymentState();
 
 
  const orderData={
@@ -2301,13 +2709,42 @@ async function submitOnlineOrder(){
      "\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
 
+   /*
+   Order सफल हो गया।
+   अब इसी product की saved details भी clear।
+   */
+
+   clearPaymentState(
+     selectedPaymentKey
+   );
+
+   localStorage.removeItem(
+     "pendingUpiWhatsApp"
+   );
+
+
    $("custName").value="";
    $("custPhone").value="";
    $("custAddress").value="";
    $("utrNumber").value="";
 
 
-   closeOrderForm();
+   $("orderModal")
+   .style.display="none";
+
+
+   btn.disabled=false;
+
+   btn.textContent=
+     "💬 WhatsApp पर Order भेजें";
+
+
+   const completedProduct=
+     selectedProduct;
+
+   selectedProduct="";
+   selectedPrice="";
+   selectedPaymentKey="";
 
 
    showAppMessage(
@@ -2335,6 +2772,9 @@ async function submitOnlineOrder(){
 
    btn.textContent=
      "💬 WhatsApp पर Order भेजें";
+
+
+   saveCurrentPaymentState();
 
 
    showAppMessage(
@@ -2563,7 +3003,6 @@ function ordersValueHandler(snapshot){
          "a"
        );
 
-
      a.href=
        order.location;
 
@@ -2580,7 +3019,6 @@ function ordersValueHandler(snapshot){
 
      a.style.marginTop=
        "8px";
-
 
      card.appendChild(a);
    }
@@ -2608,7 +3046,6 @@ function buyTableNow(){
      !locationReady||
      !userLocationLink
    ){
-
      return;
    }
 
@@ -2647,25 +3084,54 @@ window.addEventListener(
 );
 
 
-/* ================= PHONE INPUT ================= */
+/* ================= FORM AUTO SAVE ================= */
 
-$("custPhone").addEventListener(
- "input",
- function(){
+[
+ "custName",
+ "custPhone",
+ "custAddress",
+ "utrNumber"
+].forEach(function(id){
 
-   this.value=
-     this.value
-       .replace(
-         /[^0-9]/g,
-         ""
-       )
-       .slice(
-         0,
-         10
-       );
+ const el=$(id);
 
- }
-);
+ if(!el)return;
+
+ el.addEventListener(
+   "input",
+   function(){
+
+     if(
+       id==="custPhone"
+     ){
+
+       this.value=
+         this.value
+           .replace(
+             /[^0-9]/g,
+             ""
+           )
+           .slice(
+             0,
+             10
+           );
+     }
+
+     saveCurrentPaymentState();
+
+   }
+ );
+
+ el.addEventListener(
+   "change",
+   function(){
+
+     saveCurrentPaymentState();
+
+   }
+ );
+
+});
 
 
 /* ================= ESCAPE ================= */
