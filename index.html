@@ -1091,7 +1091,7 @@ onclick="showOutOfStock()">
 </div>
 
 
-<!-- PRODUCT 7 TOPPER SV TAILOR 7200 -->
+<!-- PRODUCT 7 -->
 
 <div class="card">
 <div>
@@ -1250,45 +1250,27 @@ Google Account से लॉगिन करें
 
 <div class="avatar-grid">
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m1.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
 <img src="m1.png" alt="m1">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m2.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
 <img src="m2.png" alt="m2">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m3.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
 <img src="m3.png" alt="m3">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m4.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
 <img src="m4.png" alt="m4">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('f1.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
 <img src="f1.png" alt="f1">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('f2.png')">
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
 <img src="f2.png" alt="f2">
 </button>
 
@@ -1447,6 +1429,40 @@ Profile
 </div>
 
 
+<!-- =========================================================
+CONFERBOT AI SUPPORT
+========================================================= -->
+
+<script type="text/javascript">
+(function(d,s,id){
+
+var js,el=d.getElementsByTagName(s)[0];
+
+if(d.getElementById(id)){
+return;
+}
+
+js=d.createElement(s);
+js.async=true;
+js.src='https://cdn.conferbot.com/dist/v1/widget.min.js';
+js.id=id;
+js.charset='UTF-8';
+
+el.parentNode.insertBefore(js,el);
+
+js.onload=function(){
+
+var w=window.ConferbotWidget(
+"6ac78c5dbb3336663970841b",
+"live_chat"
+);
+
+};
+
+})(document,'script','conferbot-js');
+</script>
+
+
 <script>
 
 /* =========================================================
@@ -1481,13 +1497,10 @@ measurementId:
 };
 
 if(!firebase.apps.length){
-
 firebase.initializeApp(firebaseConfig);
-
 }
 
 const auth=firebase.auth();
-
 const db=firebase.database();
 
 auth.setPersistence(
@@ -1507,29 +1520,17 @@ GLOBAL VARIABLES
 ========================================================= */
 
 let currentUser=null;
-
 let selectedProduct="";
-
 let selectedPrice="";
-
 let userLocationLink="";
-
 let ordersQuery=null;
-
 let authBusy=false;
-
 let authStateReady=false;
-
 let whatsappOpening=false;
-
 let locationRequestBusy=false;
-
 let locationReady=false;
-
 let locationRetryTimer=null;
-
 let pendingLocationActions=[];
-
 let paymentStateRestored=false;
 
 
@@ -1603,8 +1604,7 @@ return;
 
 }
 
-const state=
-getPaymentState();
+const state=getPaymentState();
 
 try{
 
@@ -1686,41 +1686,29 @@ error
 
 }
 
-}
-
 
 function clearPaymentFormFields(){
 
 if($("custName")){
-
 $("custName").value="";
-
 }
 
 if($("custPhone")){
-
 $("custPhone").value="";
-
 }
 
 if($("custAddress")){
-
 $("custAddress").value="";
-
 }
 
 if($("utrNumber")){
-
 $("utrNumber").value="";
-
 }
 
 selectedProduct="";
-
 selectedPrice="";
 
 $("modalProductInfo").textContent="";
-
 $("upiPayAmount").textContent="0";
 
 }
@@ -1745,31 +1733,23 @@ selectedPrice=
 String(state.price);
 
 if($("custName")){
-
 $("custName").value=
 String(state.name||"");
-
 }
 
 if($("custPhone")){
-
 $("custPhone").value=
 String(state.phone||"");
-
 }
 
 if($("custAddress")){
-
 $("custAddress").value=
 String(state.address||"");
-
 }
 
 if($("utrNumber")){
-
 $("utrNumber").value=
 String(state.utr||"");
-
 }
 
 $("modalProductInfo").textContent=
@@ -1797,9 +1777,7 @@ RESTORE LOCAL PAYMENT STATE
 function restorePaymentStateFromLocalStorage(){
 
 if(paymentStateRestored){
-
 return;
-
 }
 
 let raw=null;
@@ -1823,9 +1801,7 @@ return;
 }
 
 if(!raw){
-
 return;
-
 }
 
 try{
@@ -1840,7 +1816,6 @@ state.price
 ){
 
 paymentStateRestored=true;
-
 applyPaymentState(state);
 
 }
@@ -1853,11 +1828,7 @@ error
 );
 
 try{
-
-localStorage.removeItem(
-PAYMENT_STATE_KEY
-);
-
+localStorage.removeItem(PAYMENT_STATE_KEY);
 }catch(e){}
 
 }
@@ -1933,9 +1904,7 @@ function setupPaymentAutoSave(){
 const el=$(id);
 
 if(!el){
-
 return;
-
 }
 
 [
@@ -1948,9 +1917,7 @@ return;
 el.addEventListener(
 eventName,
 function(){
-
 savePaymentState();
-
 });
 
 });
@@ -1973,13 +1940,9 @@ LOGIN_MEMORY_KEY
 )==="1";
 
 if(hasLoggedInBefore){
-
 showAuthLoading();
-
 }else{
-
 hideAuthLoading();
-
 }
 
 
@@ -1992,20 +1955,16 @@ message,
 icon="⚠️"
 ){
 
-const old=
-$("appMessageBox");
+const old=$("appMessageBox");
 
 if(old){
-
 old.remove();
-
 }
 
 const box=
 document.createElement("div");
 
-box.id=
-"appMessageBox";
+box.id="appMessageBox";
 
 box.innerHTML=
 '<div class="app-message-overlay">'+
@@ -2021,16 +1980,12 @@ escapeHtml(message)+
 '</div>';
 
 const ok=
-box.querySelector(
-".app-message-ok"
-);
+box.querySelector(".app-message-ok");
 
 ok.addEventListener(
 "click",
 function(){
-
 box.remove();
-
 });
 
 document.body.appendChild(box);
@@ -2058,20 +2013,15 @@ AUTH ERROR
 
 function showAuthError(message){
 
-const el=
-$("authError");
+const el=$("authError");
 
-el.textContent=
-message;
-
-el.style.display=
-"block";
+el.textContent=message;
+el.style.display="block";
 
 setTimeout(
 function(){
 
-el.style.display=
-"none";
+el.style.display="none";
 
 },
 7000
@@ -2082,12 +2032,9 @@ el.style.display=
 
 function hideAuthError(){
 
-const el=
-$("authError");
+const el=$("authError");
 
-el.style.display=
-"none";
-
+el.style.display="none";
 el.textContent="";
 
 }
@@ -2099,46 +2046,33 @@ AUTH LOADING
 
 function showAuthLoading(){
 
-const loader=
-$("authLoading");
+const loader=$("authLoading");
 
 if(!loader){
-
 return;
-
 }
 
-loader.style.display=
-"flex";
-
-loader.style.opacity=
-"1";
+loader.style.display="flex";
+loader.style.opacity="1";
 
 }
 
 
 function hideAuthLoading(){
 
-const loader=
-$("authLoading");
+const loader=$("authLoading");
 
 if(!loader){
-
 return;
-
 }
 
-loader.style.opacity=
-"0";
+loader.style.opacity="0";
 
 setTimeout(
 function(){
 
 if(loader){
-
-loader.style.display=
-"none";
-
+loader.style.display="none";
 }
 
 },
@@ -2157,19 +2091,13 @@ busy,
 text
 ){
 
-$("authBtn").disabled=
-busy;
-
-$("profileAuthBtn").disabled=
-busy;
+$("authBtn").disabled=busy;
+$("profileAuthBtn").disabled=busy;
 
 if(busy){
 
-$("authBtn").innerText=
-text;
-
-$("profileAuthBtn").innerText=
-text;
+$("authBtn").innerText=text;
+$("profileAuthBtn").innerText=text;
 
 }
 
@@ -2183,11 +2111,8 @@ AUTH STATE
 auth.onAuthStateChanged(
 function(user){
 
-currentUser=
-user||null;
-
-authStateReady=
-true;
+currentUser=user||null;
+authStateReady=true;
 
 updateAuthUI();
 
@@ -2200,15 +2125,11 @@ LOGIN_MEMORY_KEY,
 "1"
 );
 
-loadUserOrders(
-user.uid
-);
+loadUserOrders(user.uid);
 
 setTimeout(
 function(){
-
 restorePaymentStateFromLocalStorage();
-
 },
 100
 );
@@ -2275,14 +2196,10 @@ return localStorage.getItem(
 
 function setProfileAvatar(src){
 
-const img=
-$("profilePageImg");
+const img=$("profilePageImg");
 
 if(img){
-
-img.src=
-src;
-
+img.src=src;
 }
 
 const topPic=
@@ -2291,10 +2208,7 @@ document.querySelector(
 );
 
 if(topPic){
-
-topPic.src=
-src;
-
+topPic.src=src;
 }
 
 }
@@ -2302,23 +2216,13 @@ src;
 
 function updateAuthUI(){
 
-const authBtn=
-$("authBtn");
+const authBtn=$("authBtn");
+const name=$("profileName");
+const email=$("profileEmail");
+const img=$("profilePageImg");
+const profileBtn=$("profileAuthBtn");
 
-const name=
-$("profileName");
-
-const email=
-$("profileEmail");
-
-const img=
-$("profilePageImg");
-
-const profileBtn=
-$("profileAuthBtn");
-
-const avatar=
-getSavedAvatar();
+const avatar=getSavedAvatar();
 
 if(currentUser){
 
@@ -2332,48 +2236,35 @@ currentUser.displayName||
 "Google User";
 
 email.textContent=
-currentUser.email||
-"";
+currentUser.email||"";
 
-img.src=
-avatar;
+img.src=avatar;
 
-profileBtn.textContent=
-"Logout";
-
-profileBtn.onclick=
-googleSignOut;
+profileBtn.textContent="Logout";
+profileBtn.onclick=googleSignOut;
 
 }else{
 
-authBtn.textContent=
-"Sign In";
+authBtn.textContent="Sign In";
 
-name.textContent=
-"Guest User";
+name.textContent="Guest User";
 
 email.textContent=
 "Google Account Not Connected";
 
-img.src=
-avatar;
+img.src=avatar;
 
 profileBtn.textContent=
 "Google Account से लॉगिन करें";
 
-profileBtn.onclick=
-googleSignIn;
+profileBtn.onclick=googleSignIn;
 
 }
 
-authBusy=
-false;
+authBusy=false;
 
-authBtn.disabled=
-false;
-
-profileBtn.disabled=
-false;
+authBtn.disabled=false;
+profileBtn.disabled=false;
 
 }
 
@@ -2381,13 +2272,9 @@ false;
 function handleAuthAction(){
 
 if(currentUser){
-
 googleSignOut();
-
 }else{
-
 googleSignIn();
-
 }
 
 }
@@ -2403,13 +2290,10 @@ if(
 currentUser||
 authBusy
 ){
-
 return;
-
 }
 
-authBusy=
-true;
+authBusy=true;
 
 hideAuthError();
 
@@ -2430,9 +2314,7 @@ window.AndroidApp.signIn();
 
 }catch(error){
 
-authBusy=
-false;
-
+authBusy=false;
 updateAuthUI();
 
 showAuthError(
@@ -2455,9 +2337,7 @@ prompt:"select_account"
 
 try{
 
-await auth.signInWithPopup(
-provider
-);
+await auth.signInWithPopup(provider);
 
 localStorage.setItem(
 LOGIN_MEMORY_KEY,
@@ -2473,8 +2353,7 @@ console.error(
 error
 );
 
-authBusy=
-false;
+authBusy=false;
 
 updateAuthUI();
 
@@ -2527,16 +2406,14 @@ await auth.signInWithCredential(
 credential
 );
 
-currentUser=
-result.user;
+currentUser=result.user;
 
 localStorage.setItem(
 LOGIN_MEMORY_KEY,
 "1"
 );
 
-authBusy=
-false;
+authBusy=false;
 
 hideAuthError();
 
@@ -2546,9 +2423,7 @@ hideAuthLoading();
 
 setTimeout(
 function(){
-
 restorePaymentStateFromLocalStorage();
-
 },
 100
 );
@@ -2560,8 +2435,7 @@ console.error(
 error
 );
 
-authBusy=
-false;
+authBusy=false;
 
 updateAuthUI();
 
@@ -2580,8 +2454,7 @@ console.error(
 message
 );
 
-authBusy=
-false;
+authBusy=false;
 
 updateAuthUI();
 
@@ -2609,8 +2482,7 @@ auth.signOut()
 .then(
 function(){
 
-currentUser=
-null;
+currentUser=null;
 
 localStorage.removeItem(
 LOGIN_MEMORY_KEY
@@ -2712,16 +2584,14 @@ AVATAR
 
 function openAvatarPicker(){
 
-$("avatarModal").style.display=
-"block";
+$("avatarModal").style.display="block";
 
 }
 
 
 function closeAvatarPicker(){
 
-$("avatarModal").style.display=
-"none";
+$("avatarModal").style.display="none";
 
 }
 
@@ -2733,9 +2603,7 @@ localStorage.setItem(
 fileName
 );
 
-setProfileAvatar(
-fileName
-);
+setProfileAvatar(fileName);
 
 updateAuthUI();
 
@@ -2782,23 +2650,14 @@ b.classList.remove(
 
 });
 
-const view=
-$(viewId);
+const view=$(viewId);
 
 if(view){
-
-view.classList.add(
-"active-view"
-);
-
+view.classList.add("active-view");
 }
 
 if(btnEl){
-
-btnEl.classList.add(
-"active"
-);
-
+btnEl.classList.add("active");
 }
 
 }
@@ -2810,17 +2669,13 @@ LOCATION
 
 function updateLocationStatus(text){
 
-const el=
-$("locationStatus");
+const el=$("locationStatus");
 
 if(!el){
-
 return;
-
 }
 
-el.textContent=
-text||"";
+el.textContent=text||"";
 
 }
 
@@ -2830,19 +2685,14 @@ lat,
 lon
 ){
 
-const latitude=
-Number(lat);
-
-const longitude=
-Number(lon);
+const latitude=Number(lat);
+const longitude=Number(lon);
 
 if(
 !Number.isFinite(latitude)||
 !Number.isFinite(longitude)
 ){
-
 return;
-
 }
 
 userLocationLink=
@@ -2851,20 +2701,13 @@ encodeURIComponent(
 latitude+","+longitude
 );
 
-locationReady=
-true;
-
-locationRequestBusy=
-false;
+locationReady=true;
+locationRequestBusy=false;
 
 if(locationRetryTimer){
 
-clearTimeout(
-locationRetryTimer
-);
-
-locationRetryTimer=
-null;
+clearTimeout(locationRetryTimer);
+locationRetryTimer=null;
 
 }
 
@@ -2884,9 +2727,7 @@ setTimeout(
 function(){
 
 try{
-
 action();
-
 }catch(error){
 
 console.error(
@@ -2908,19 +2749,14 @@ error
 function requestUserLocation(){
 
 if(locationReady){
-
 return;
-
 }
 
 if(locationRequestBusy){
-
 return;
-
 }
 
-locationRequestBusy=
-true;
+locationRequestBusy=true;
 
 updateLocationStatus(
 "📍 Live Location लोड हो रही है..."
@@ -2943,9 +2779,7 @@ console.error(
 error
 );
 
-locationRequestBusy=
-false;
-
+locationRequestBusy=false;
 scheduleLocationRetry();
 
 }
@@ -2976,9 +2810,7 @@ console.error(
 error
 );
 
-locationRequestBusy=
-false;
-
+locationRequestBusy=false;
 scheduleLocationRetry();
 
 },
@@ -2993,9 +2825,7 @@ maximumAge:0
 
 }else{
 
-locationRequestBusy=
-false;
-
+locationRequestBusy=false;
 scheduleLocationRetry();
 
 }
@@ -3007,9 +2837,7 @@ function scheduleLocationRetry(){
 
 if(locationRetryTimer){
 
-clearTimeout(
-locationRetryTimer
-);
+clearTimeout(locationRetryTimer);
 
 }
 
@@ -3017,13 +2845,10 @@ locationRetryTimer=
 setTimeout(
 function(){
 
-locationRetryTimer=
-null;
+locationRetryTimer=null;
 
 if(!locationReady){
-
 requestUserLocation();
-
 }
 
 },
@@ -3036,11 +2861,8 @@ requestUserLocation();
 window.nativeLocationSuccess=
 function(lat,lon){
 
-const latitude=
-Number(lat);
-
-const longitude=
-Number(lon);
+const latitude=Number(lat);
+const longitude=Number(lon);
 
 if(
 !Number.isFinite(latitude)||
@@ -3071,8 +2893,7 @@ console.error(
 message
 );
 
-locationRequestBusy=
-false;
+locationRequestBusy=false;
 
 updateLocationStatus(
 "📍 Live Location प्राप्त नहीं हुई, दोबारा कोशिश हो रही है..."
@@ -3088,9 +2909,7 @@ function runWithLocation(action){
 if(locationReady){
 
 try{
-
 action();
-
 }catch(error){
 
 console.error(
@@ -3104,9 +2923,7 @@ return;
 
 }
 
-pendingLocationActions.push(
-action
-);
+pendingLocationActions.push(action);
 
 requestUserLocation();
 
@@ -3148,16 +2965,12 @@ return;
 }
 
 if(whatsappOpening){
-
 return;
-
 }
 
-whatsappOpening=
-true;
+whatsappOpening=true;
 
-const bridge=
-window.AndroidApp;
+const bridge=window.AndroidApp;
 
 if(
 bridge &&
@@ -3171,10 +2984,7 @@ bridge.openWhatsApp(text);
 
 setTimeout(
 function(){
-
-whatsappOpening=
-false;
-
+whatsappOpening=false;
 },
 500
 );
@@ -3188,8 +2998,7 @@ console.error(
 error
 );
 
-whatsappOpening=
-false;
+whatsappOpening=false;
 
 showAppMessage(
 "WhatsApp खोलने में समस्या हुई।",
@@ -3229,10 +3038,7 @@ showAppMessage(
 
 setTimeout(
 function(){
-
-whatsappOpening=
-false;
-
+whatsappOpening=false;
 },
 500
 );
@@ -3243,8 +3049,7 @@ false;
 window.nativeWhatsAppError=
 function(message){
 
-whatsappOpening=
-false;
+whatsappOpening=false;
 
 showAppMessage(
 message||
@@ -3258,8 +3063,7 @@ message||
 window.nativeWhatsAppOpened=
 function(){
 
-whatsappOpening=
-false;
+whatsappOpening=false;
 
 };
 
@@ -3280,9 +3084,7 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 openWhatsApp(
@@ -3325,13 +3127,11 @@ tableSliderTrack.addEventListener(
 function(){
 
 const width=
-tableSliderTrack.clientWidth||
-1;
+tableSliderTrack.clientWidth||1;
 
 const index=
 Math.round(
-tableSliderTrack.scrollLeft/
-width
+tableSliderTrack.scrollLeft/width
 );
 
 if(tableColors[index]){
@@ -3353,13 +3153,10 @@ id,
 direction
 ){
 
-const track=
-$(id);
+const track=$(id);
 
 if(!track){
-
 return;
-
 }
 
 track.scrollBy({
@@ -3377,13 +3174,10 @@ behavior:"smooth"
 
 function getSelectedTableColor(){
 
-const track=
-$("tableSlider");
+const track=$("tableSlider");
 
 if(!track){
-
 return tableColors[0];
-
 }
 
 const index=
@@ -3405,9 +3199,7 @@ LOGIN CHECK
 function requireLogin(){
 
 if(currentUser){
-
 return true;
-
 }
 
 showAppMessage(
@@ -3436,18 +3228,12 @@ productName,
 price
 ){
 
-selectedProduct=
-String(productName);
-
-selectedPrice=
-String(price);
+selectedProduct=String(productName);
+selectedPrice=String(price);
 
 $("custName").value="";
-
 $("custPhone").value="";
-
 $("custAddress").value="";
-
 $("utrNumber").value="";
 
 $("modalProductInfo").textContent=
@@ -3460,8 +3246,7 @@ $("upiPayAmount").textContent=
 Number(selectedPrice)
 .toLocaleString("en-IN");
 
-$("orderModal").style.display=
-"block";
+$("orderModal").style.display="block";
 
 savePaymentState();
 
@@ -3480,9 +3265,7 @@ price
 ){
 
 if(!requireLogin()){
-
 return;
-
 }
 
 prepareNewPayment(
@@ -3496,9 +3279,7 @@ price
 function openTableOrderForm(){
 
 if(!requireLogin()){
-
 return;
-
 }
 
 const product=
@@ -3520,14 +3301,11 @@ HIDE MODAL WITHOUT CLEARING
 
 function hideOrderModal(){
 
-$("orderModal").style.display=
-"none";
+$("orderModal").style.display="none";
 
-const btn=
-$("onlineOrderBtn");
+const btn=$("onlineOrderBtn");
 
-btn.disabled=
-false;
+btn.disabled=false;
 
 btn.textContent=
 "💬 WhatsApp पर Order भेजें";
@@ -3549,14 +3327,11 @@ sessionStorage.removeItem(
 "pendingUpiWhatsApp"
 );
 
-$("orderModal").style.display=
-"none";
+$("orderModal").style.display="none";
 
-const btn=
-$("onlineOrderBtn");
+const btn=$("onlineOrderBtn");
 
-btn.disabled=
-false;
+btn.disabled=false;
 
 btn.textContent=
 "💬 WhatsApp पर Order भेजें";
@@ -3634,35 +3409,20 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 sessionStorage.setItem(
 "pendingUpiWhatsApp",
 JSON.stringify({
 
-product:
-selectedProduct,
-
-price:
-amount,
-
-name:
-name,
-
-phone:
-phone,
-
-address:
-address,
-
-location:
-userLocationLink,
-
-startedAt:
-Date.now()
+product:selectedProduct,
+price:amount,
+name:name,
+phone:phone,
+address:address,
+location:userLocationLink,
+startedAt:Date.now()
 
 })
 );
@@ -3692,9 +3452,7 @@ typeof window.AndroidApp.openUpi===
 
 try{
 
-window.AndroidApp.openUpi(
-upiUrl
-);
+window.AndroidApp.openUpi(upiUrl);
 
 }catch(error){
 
@@ -3713,8 +3471,7 @@ return;
 
 try{
 
-window.location.href=
-upiUrl;
+window.location.href=upiUrl;
 
 }catch(error){
 
@@ -3757,17 +3514,14 @@ sessionStorage.getItem(
 );
 
 if(!raw){
-
 return;
-
 }
 
 let data;
 
 try{
 
-data=
-JSON.parse(raw);
+data=JSON.parse(raw);
 
 }catch(e){
 
@@ -3821,7 +3575,7 @@ sessionStorage.removeItem(
 
 const message=
 
-"🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n"+
+"🌟 नया онлайн पेमेंट आर्डर 🌟\n\n"+
 "📦 सामान: "+
 data.product+
 "\n💰 कीमत: ₹"+
@@ -3839,9 +3593,7 @@ freshLocation+
 "\n🔢 UTR / Transaction No: Payment app से UTR भेजें"+
 "\n\n⚠️ नोट: UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
 
-openWhatsApp(
-message
-);
+openWhatsApp(message);
 
 }
 
@@ -3855,9 +3607,7 @@ window.addEventListener(
 function(){
 
 if(!locationReady){
-
 requestUserLocation();
-
 }
 
 if(
@@ -3952,9 +3702,7 @@ if(
 
 runWithLocation(
 function(){
-
 submitOnlineOrder();
-
 }
 );
 
@@ -3962,64 +3710,48 @@ return;
 
 }
 
-const btn=
-$("onlineOrderBtn");
+const btn=$("onlineOrderBtn");
 
-btn.disabled=
-true;
+btn.disabled=true;
 
 btn.textContent=
 "⏳ Order Firebase में Save हो रहा है...";
 
 const orderData={
 
-userId:
-currentUser.uid,
+userId:currentUser.uid,
 
 userEmail:
 currentUser.email||"",
 
-customerName:
-name,
+customerName:name,
 
-customerPhone:
-phone,
+customerPhone:phone,
 
 customerPhoto:
 currentUser.photoURL||"",
 
-product:
-selectedProduct,
+product:selectedProduct,
 
-price:
-Number(selectedPrice),
+price:Number(selectedPrice),
 
-address:
-address,
+address:address,
 
-utrNumber:
-utr,
+utrNumber:utr,
 
-location:
-userLocationLink,
+location:userLocationLink,
 
-status:
-"pending",
+status:"pending",
 
-paymentStatus:
-"submitted",
+paymentStatus:"submitted",
 
-paymentMethod:
-"UPI",
+paymentMethod:"UPI",
 
-createdAt:
-Date.now(),
+createdAt:Date.now(),
 
-timestamp:
-new Date().toISOString(),
+timestamp:new Date().toISOString(),
 
-date:
-new Date().toLocaleString(
+date:new Date().toLocaleString(
 "en-IN",
 {
 dateStyle:"medium",
@@ -4034,12 +3766,9 @@ try{
 const ref=
 db.ref("orders").push();
 
-orderData.orderId=
-ref.key;
+orderData.orderId=ref.key;
 
-await ref.set(
-orderData
-);
+await ref.set(orderData);
 
 const message=
 
@@ -4072,11 +3801,9 @@ sessionStorage.removeItem(
 
 clearPaymentFormFields();
 
-$("orderModal").style.display=
-"none";
+$("orderModal").style.display="none";
 
-btn.disabled=
-false;
+btn.disabled=false;
 
 btn.textContent=
 "💬 WhatsApp पर Order भेजें";
@@ -4090,9 +3817,7 @@ ref.key,
 setTimeout(
 function(){
 
-openWhatsApp(
-message
-);
+openWhatsApp(message);
 
 },
 300
@@ -4107,8 +3832,7 @@ error
 
 savePaymentState();
 
-btn.disabled=
-false;
+btn.disabled=false;
 
 btn.textContent=
 "💬 WhatsApp पर Order भेजें";
@@ -4187,12 +3911,9 @@ error.message||error
 }
 
 
-function ordersValueHandler(
-snapshot
-){
+function ordersValueHandler(snapshot){
 
-const list=
-$("ordersList");
+const list=$("ordersList");
 
 list.innerHTML="";
 
@@ -4210,14 +3931,11 @@ const orders=[];
 snapshot.forEach(
 function(child){
 
-const o=
-child.val();
+const o=child.val();
 
 if(o){
 
-o._id=
-child.key;
-
+o._id=child.key;
 orders.push(o);
 
 }
@@ -4244,22 +3962,16 @@ String(
 order.status||"pending"
 ).toLowerCase();
 
-let cls=
-"status-pending";
-
-let text=
-"⏳ Pending";
+let cls="status-pending";
+let text="⏳ Pending";
 
 if(
 status==="successful"||
 status==="success"
 ){
 
-cls=
-"status-success";
-
-text=
-"✅ Successful";
+cls="status-success";
+text="✅ Successful";
 
 }
 
@@ -4268,19 +3980,15 @@ status==="failed"||
 status==="failure"
 ){
 
-cls=
-"status-failed";
-
-text=
-"❌ Failed";
+cls="status-failed";
+text="❌ Failed";
 
 }
 
 const card=
 document.createElement("div");
 
-card.className=
-"order-card";
+card.className="order-card";
 
 card.innerHTML=
 
@@ -4337,26 +4045,14 @@ order.date||""
 
 if(order.location){
 
-const a=
-document.createElement("a");
+const a=document.createElement("a");
 
-a.href=
-order.location;
-
-a.target=
-"_blank";
-
-a.rel=
-"noopener noreferrer";
-
-a.textContent=
-"📍 Delivery Location देखें";
-
-a.style.display=
-"block";
-
-a.style.marginTop=
-"8px";
+a.href=order.location;
+a.target="_blank";
+a.rel="noopener noreferrer";
+a.textContent="📍 Delivery Location देखें";
+a.style.display="block";
+a.style.marginTop="8px";
 
 card.appendChild(a);
 
@@ -4387,9 +4083,7 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 openWhatsApp(
