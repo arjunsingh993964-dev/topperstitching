@@ -727,116 +727,20 @@ transform:rotate(360deg)
 }
 }
 
-.auth-loading-text{
-margin-top:12px;
-color:#1a237e;
-font-size:14px;
-font-weight:bold;
-text-align:center;
-padding:0 20px
-}
-
-/* ================================
-   DRAGGABLE CONFERBOT LAUNCHER
-   ================================ */
-
-#conferbotLauncher{
+/* REAL CONFERBOT */
+#conferbot-real-drag-helper{
 position:fixed;
-right:16px;
-bottom:82px;
-width:58px;
-height:58px;
+display:none;
+z-index:99980;
+pointer-events:none;
 border-radius:50%;
-border:0;
-background:linear-gradient(135deg,#1565c0,#1a237e);
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:27px;
-box-shadow:0 5px 18px rgba(0,0,0,.30);
-z-index:99990;
-cursor:grab;
-touch-action:none;
-user-select:none;
--webkit-user-select:none;
--webkit-tap-highlight-color:transparent;
-transition:box-shadow .2s ease,transform .15s ease;
+background:transparent
 }
 
-#conferbotLauncher:active{
-cursor:grabbing;
-transform:scale(.96)
-}
-
-#conferbotLauncher.dragging{
-cursor:grabbing;
-box-shadow:0 8px 25px rgba(0,0,0,.38);
-transition:none
-}
-
-#conferbotLauncher .chat-icon{
-line-height:1;
-pointer-events:none
-}
-
-#conferbotLauncher .chat-dot{
-position:absolute;
-right:2px;
-top:2px;
-width:13px;
-height:13px;
-background:#25d366;
-border:2px solid #fff;
-border-radius:50%;
-pointer-events:none
-}
-
-/* Hide Conferbot's default launcher if its common launcher classes are used */
-.conferbot-widget-button,
-.conferbot-launcher,
-#conferbot-button,
-.conferbot-button{
-z-index:99980!important
-}
-
-@media(max-width:500px){
-
-.brand-title{
-font-size:18px
-}
-
-.brand-subtitle{
-font-size:10px
-}
-
-.modal-content{
-margin:3% auto;
-padding:15px
-}
-
-.qr-box img{
-width:200px;
-height:200px
-}
-
-#conferbotLauncher{
-width:56px;
-height:56px;
-right:14px;
-bottom:82px
-}
-
-}
-
-@media(min-width:501px){
-
-#conferbotLauncher{
-right:20px;
-bottom:82px
-}
-
-}
+/*
+   Conferbot का अपना real launcher ही दिखेगा।
+   कोई fake 🤖 / 💬 button नहीं बनाया गया है।
+*/
 </style>
 </head>
 
@@ -1042,12 +946,10 @@ Sign In
 
 <div class="specs">
 <div><span>मॉडल:</span> SV / TA1</div>
-
 <div>
 <span>कलर:</span>
 <span id="selectedTableColorText">Light Wooden</span>
 </div>
-
 <div><span>टाइप:</span> Top Table Only</div>
 <div><span>वारंटी / गारंटी:</span> None</div>
 </div>
@@ -1234,61 +1136,33 @@ Google Account से लॉगिन करें
 
 <div class="avatar-grid">
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m1.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
 <img src="m1.png" alt="m1">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m2.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
 <img src="m2.png" alt="m2">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m3.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
 <img src="m3.png" alt="m3">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('m4.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
 <img src="m4.png" alt="m4">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('f1.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
 <img src="f1.png" alt="f1">
 </button>
 
-<button
-class="avatar-option"
-type="button"
-onclick="selectAvatar('f2.png')"
->
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
 <img src="f2.png" alt="f2">
 </button>
 
 </div>
 
-<button
-class="avatar-close"
-type="button"
-onclick="closeAvatarPicker()"
->
+<button class="avatar-close" type="button" onclick="closeAvatarPicker()">
 बंद करें
 </button>
 
@@ -1312,32 +1186,17 @@ onclick="closeAvatarPicker()"
 
 <div class="form-group">
 <label>आपका पूरा नाम:</label>
-<input
-type="text"
-id="custName"
-placeholder="अपना नाम लिखें"
-autocomplete="name"
->
+<input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">
 </div>
 
 <div class="form-group">
 <label>मोबाइल नंबर:</label>
-<input
-type="tel"
-id="custPhone"
-placeholder="मोबाइल नंबर लिखें"
-inputmode="numeric"
-maxlength="10"
->
+<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
 </div>
 
 <div class="form-group">
 <label>पूरा पता:</label>
-<textarea
-id="custAddress"
-rows="3"
-placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"
-></textarea>
+<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>
 </div>
 
 <div class="qr-box">
@@ -1363,29 +1222,14 @@ Payment के बाद वापस ऐप में आने पर WhatsApp
 
 <div class="form-group">
 <label>UTR / Transaction Number:</label>
-<input
-type="text"
-id="utrNumber"
-placeholder="Payment के बाद UTR नंबर डालें"
-autocomplete="off"
-inputmode="numeric"
-maxlength="40"
->
+<input type="text" id="utrNumber" placeholder="Payment के बाद UTR नंबर डालें" autocomplete="off" inputmode="numeric" maxlength="40">
 </div>
 
-<button
-id="onlineOrderBtn"
-class="btn-submit"
-onclick="submitOnlineOrder()"
->
+<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">
 💬 WhatsApp पर Order भेजें
 </button>
 
-<button
-class="btn-close"
-type="button"
-onclick="cancelOrderForm()"
->
+<button class="btn-close" type="button" onclick="cancelOrderForm()">
 रद्द करें
 </button>
 
@@ -1395,42 +1239,22 @@ onclick="cancelOrderForm()"
 
 <div class="bottom-nav">
 
-<button
-class="nav-item active"
-onclick="switchTab('homeView',this)"
->
+<button class="nav-item active" onclick="switchTab('homeView',this)">
 <span class="icon">🏠</span>
 Home
 </button>
 
-<button
-class="nav-item"
-onclick="switchTab('ordersView',this)"
->
+<button class="nav-item" onclick="switchTab('ordersView',this)">
 <span class="icon">📦</span>
 Orders
 </button>
 
-<button
-class="nav-item"
-onclick="switchTab('profileView',this)"
->
+<button class="nav-item" onclick="switchTab('profileView',this)">
 <span class="icon">👤</span>
 Profile
 </button>
 
 </div>
-
-<!-- Custom draggable chatbot launcher -->
-<button
-id="conferbotLauncher"
-type="button"
-aria-label="Chatbot खोलें"
-title="Topper Help"
->
-<span class="chat-icon">🤖</span>
-<span class="chat-dot"></span>
-</button>
 
 <script>
 const firebaseConfig={
@@ -1678,11 +1502,7 @@ error
 );
 
 try{
-
-localStorage.removeItem(
-PAYMENT_STATE_KEY
-);
-
+localStorage.removeItem(PAYMENT_STATE_KEY);
 }catch(e){}
 
 }
@@ -1795,9 +1615,7 @@ escapeHtml(message)+
 '</div>'+
 '</div>';
 
-const ok=box.querySelector(
-".app-message-ok"
-);
+const ok=box.querySelector(".app-message-ok");
 
 ok.addEventListener(
 "click",
@@ -2287,15 +2105,11 @@ showAuthError(
 }
 
 function openAvatarPicker(){
-
 $("avatarModal").style.display="block";
-
 }
 
 function closeAvatarPicker(){
-
 $("avatarModal").style.display="none";
-
 }
 
 function selectAvatar(fileName){
@@ -2311,9 +2125,7 @@ closeAvatarPicker();
 
 }
 
-setProfileAvatar(
-getSavedAvatar()
-);
+setProfileAvatar(getSavedAvatar());
 
 function switchTab(viewId,btnEl){
 
@@ -2322,9 +2134,7 @@ document.querySelectorAll(
 )
 .forEach(function(v){
 
-v.classList.remove(
-"active-view"
-);
+v.classList.remove("active-view");
 
 });
 
@@ -2333,18 +2143,14 @@ document.querySelectorAll(
 )
 .forEach(function(b){
 
-b.classList.remove(
-"active"
-);
+b.classList.remove("active");
 
 });
 
 const view=$(viewId);
 
 if(view){
-view.classList.add(
-"active-view"
-);
+view.classList.add("active-view");
 }
 
 if(btnEl){
@@ -2374,9 +2180,7 @@ if(
 !Number.isFinite(latitude)||
 !Number.isFinite(longitude)
 ){
-
 return;
-
 }
 
 userLocationLink=
@@ -2410,16 +2214,12 @@ setTimeout(
 function(){
 
 try{
-
 action();
-
 }catch(error){
-
 console.error(
 "Location action error:",
 error
 );
-
 }
 
 },
@@ -2516,9 +2316,7 @@ scheduleLocationRetry();
 function scheduleLocationRetry(){
 
 if(locationRetryTimer){
-
 clearTimeout(locationRetryTimer);
-
 }
 
 locationRetryTimer=
@@ -2584,20 +2382,15 @@ function runWithLocation(action){
 if(locationReady){
 
 try{
-
 action();
-
 }catch(error){
-
 console.error(
 "Location action error:",
 error
 );
-
 }
 
 return;
-
 }
 
 pendingLocationActions.push(action);
@@ -2624,7 +2417,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 if(whatsappOpening){
@@ -2717,9 +2509,7 @@ message||
 };
 
 window.nativeWhatsAppOpened=function(){
-
 whatsappOpening=false;
-
 };
 
 function buyNow(productName,price){
@@ -2730,13 +2520,10 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 openWhatsApp(
-
 "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
 "📦 सामान: "+productName+
 "\n💰 कीमत: ₹"+
@@ -2744,7 +2531,6 @@ Number(price).toLocaleString("en-IN")+
 "\n\n📍 लाइव लोकेशन: "+
 userLocationLink+
 "\n\nकृपया डिलीवरी की जानकारी भेजें।"
-
 );
 
 });
@@ -2795,12 +2581,8 @@ return;
 }
 
 track.scrollBy({
-
-left:
-direction*track.clientWidth,
-
+left:direction*track.clientWidth,
 behavior:"smooth"
-
 });
 
 }
@@ -2836,9 +2618,7 @@ showAppMessage(
 
 switchTab(
 "profileView",
-document.querySelectorAll(
-".nav-item"
-)[2]
+document.querySelectorAll(".nav-item")[2]
 );
 
 return false;
@@ -2858,14 +2638,10 @@ $("utrNumber").value="";
 $("modalProductInfo").textContent=
 selectedProduct+
 " - ₹"+
-Number(selectedPrice).toLocaleString(
-"en-IN"
-);
+Number(selectedPrice).toLocaleString("en-IN");
 
 $("upiPayAmount").textContent=
-Number(selectedPrice).toLocaleString(
-"en-IN"
-);
+Number(selectedPrice).toLocaleString("en-IN");
 
 $("orderModal").style.display="block";
 
@@ -2946,12 +2722,11 @@ Number(selectedPrice||0);
 if(!amount){
 
 showAppMessage(
-"पहले कोई product चुनें।",
+"पहले कोई product चुनें。",
 "⚠️"
 );
 
 return;
-
 }
 
 const name=
@@ -2977,7 +2752,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 if(!/^\d{10}$/.test(phone)){
@@ -2990,7 +2764,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 savePaymentState();
@@ -3001,15 +2774,12 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 sessionStorage.setItem(
 "pendingUpiWhatsApp",
 JSON.stringify({
-
 product:selectedProduct,
 price:amount,
 name:name,
@@ -3017,7 +2787,6 @@ phone:phone,
 address:address,
 location:userLocationLink,
 startedAt:Date.now()
-
 })
 );
 
@@ -3025,17 +2794,11 @@ savePaymentState();
 
 const upiUrl=
 "upi://pay?pa="+
-encodeURIComponent(
-"topperstitching@naviaxis"
-)+
+encodeURIComponent("topperstitching@naviaxis")+
 "&pn="+
-encodeURIComponent(
-"Ankit Kumar Singh"
-)+
+encodeURIComponent("Ankit Kumar Singh")+
 "&am="+
-encodeURIComponent(
-amount.toFixed(2)
-)+
+encodeURIComponent(amount.toFixed(2))+
 "&cu=INR";
 
 if(
@@ -3045,9 +2808,7 @@ typeof window.AndroidApp.openUpi==="function"
 
 try{
 
-window.AndroidApp.openUpi(
-upiUrl
-);
+window.AndroidApp.openUpi(upiUrl);
 
 }catch(error){
 
@@ -3097,9 +2858,7 @@ showAppMessage(
 function sendPendingUpiOrderToWhatsApp(){
 
 const raw=
-sessionStorage.getItem(
-"pendingUpiWhatsApp"
-);
+sessionStorage.getItem("pendingUpiWhatsApp");
 
 if(!raw){
 return;
@@ -3113,10 +2872,7 @@ data=JSON.parse(raw);
 
 }catch(e){
 
-sessionStorage.removeItem(
-"pendingUpiWhatsApp"
-);
-
+sessionStorage.removeItem("pendingUpiWhatsApp");
 return;
 
 }
@@ -3124,15 +2880,10 @@ return;
 if(
 !data||
 !data.product||
-Date.now()-
-Number(data.startedAt||0)>
-30601000
+Date.now()-Number(data.startedAt||0)>30601000
 ){
 
-sessionStorage.removeItem(
-"pendingUpiWhatsApp"
-);
-
+sessionStorage.removeItem("pendingUpiWhatsApp");
 return;
 
 }
@@ -3143,29 +2894,22 @@ if(
 ){
 
 runWithLocation(function(){
-
 sendPendingUpiOrderToWhatsApp();
-
 });
 
 return;
 
 }
 
-const freshLocation=
-userLocationLink;
+const freshLocation=userLocationLink;
 
-sessionStorage.removeItem(
-"pendingUpiWhatsApp"
-);
+sessionStorage.removeItem("pendingUpiWhatsApp");
 
 const message=
 "🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n"+
 "📦 सामान: "+data.product+
 "\n💰 कीमत: ₹"+
-Number(data.price).toLocaleString(
-"en-IN"
-)+
+Number(data.price).toLocaleString("en-IN")+
 "\n\n👤 ग्राहक का नाम: "+data.name+
 "\n📞 फोन नंबर: "+data.phone+
 "\n🏠 पूरा पता: "+data.address+
@@ -3186,14 +2930,8 @@ if(!locationReady){
 requestUserLocation();
 }
 
-if(
-sessionStorage.getItem(
-"pendingUpiWhatsApp"
-)
-){
-
+if(sessionStorage.getItem("pendingUpiWhatsApp")){
 sendPendingUpiOrderToWhatsApp();
-
 }
 
 }
@@ -3214,25 +2952,14 @@ return;
 
 }
 
-const name=
-$("custName").value.trim();
-
-const phone=
-$("custPhone").value.trim();
-
-const address=
-$("custAddress").value.trim();
-
-const utr=
-$("utrNumber").value.trim();
+const name=$("custName").value.trim();
+const phone=$("custPhone").value.trim();
+const address=$("custAddress").value.trim();
+const utr=$("utrNumber").value.trim();
 
 savePaymentState();
 
-if(
-!name||
-!phone||
-!address
-){
+if(!name||!phone||!address){
 
 showAppMessage(
 "कृपया अपनी सभी जानकारी भरें!",
@@ -3240,7 +2967,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 if(!/^\d{10}$/.test(phone)){
@@ -3251,7 +2977,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 if(!utr){
@@ -3262,7 +2987,6 @@ showAppMessage(
 );
 
 return;
-
 }
 
 if(
@@ -3271,56 +2995,34 @@ if(
 ){
 
 runWithLocation(function(){
-
 submitOnlineOrder();
-
 });
 
 return;
-
 }
 
 const btn=$("onlineOrderBtn");
 
 btn.disabled=true;
-
-btn.textContent=
-"⏳ Order Firebase में Save हो रहा है...";
+btn.textContent="⏳ Order Firebase में Save हो रहा है...";
 
 const orderData={
 
 userId:currentUser.uid,
-
-userEmail:
-currentUser.email||"",
-
+userEmail:currentUser.email||"",
 customerName:name,
-
 customerPhone:phone,
-
-customerPhoto:
-currentUser.photoURL||"",
-
+customerPhoto:currentUser.photoURL||"",
 product:selectedProduct,
-
 price:Number(selectedPrice),
-
 address:address,
-
 utrNumber:utr,
-
 location:userLocationLink,
-
 status:"pending",
-
 paymentStatus:"submitted",
-
 paymentMethod:"UPI",
-
 createdAt:Date.now(),
-
 timestamp:new Date().toISOString(),
-
 date:new Date().toLocaleString(
 "en-IN",
 {
@@ -3333,11 +3035,9 @@ timeStyle:"short"
 
 try{
 
-const ref=
-db.ref("orders").push();
+const ref=db.ref("orders").push();
 
-orderData.orderId=
-ref.key;
+orderData.orderId=ref.key;
 
 await ref.set(orderData);
 
@@ -3346,9 +3046,7 @@ const message=
 "🆔 Order ID: "+ref.key+
 "\n\n📦 सामान: "+selectedProduct+
 "\n💰 कीमत: ₹"+
-Number(selectedPrice).toLocaleString(
-"en-IN"
-)+
+Number(selectedPrice).toLocaleString("en-IN")+
 "\n\n👤 ग्राहक का नाम: "+name+
 "\n📞 फोन नंबर: "+phone+
 "\n🏠 पूरा पता: "+address+
@@ -3358,19 +3056,13 @@ Number(selectedPrice).toLocaleString(
 "\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
 clearPaymentState();
-
-sessionStorage.removeItem(
-"pendingUpiWhatsApp"
-);
-
+sessionStorage.removeItem("pendingUpiWhatsApp");
 clearPaymentFormFields();
 
 $("orderModal").style.display="none";
 
 btn.disabled=false;
-
-btn.textContent=
-"💬 WhatsApp पर Order भेजें";
+btn.textContent="💬 WhatsApp पर Order भेजें";
 
 showAppMessage(
 "आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+
@@ -3380,9 +3072,7 @@ ref.key,
 
 setTimeout(
 function(){
-
 openWhatsApp(message);
-
 },
 300
 );
@@ -3397,9 +3087,7 @@ error
 savePaymentState();
 
 btn.disabled=false;
-
-btn.textContent=
-"💬 WhatsApp पर Order भेजें";
+btn.textContent="💬 WhatsApp पर Order भेजें";
 
 showAppMessage(
 "Order Save नहीं हो पाया!\n\n"+
@@ -3536,78 +3224,47 @@ text="❌ Failed";
 
 }
 
-const card=
-document.createElement("div");
+const card=document.createElement("div");
 
 card.className="order-card";
 
 card.innerHTML=
 '<div class="order-header">'+
 "<b>"+
-escapeHtml(
-order.product||"Product"
-)+
+escapeHtml(order.product||"Product")+
 "</b>"+
 '<span class="status-badge '+cls+'">'+
 text+
 "</span>"+
 "</div>"+
-
 "<div><b>🆔 Order ID:</b> "+
-escapeHtml(
-order.orderId||order._id
-)+
+escapeHtml(order.orderId||order._id)+
 "</div>"+
-
 '<div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+
-Number(
-order.price||0
-).toLocaleString(
-"en-IN"
-)+
+Number(order.price||0).toLocaleString("en-IN")+
 "</div>"+
-
 '<div style="margin-top:6px"><b>👤 नाम:</b> '+
-escapeHtml(
-order.customerName||""
-)+
+escapeHtml(order.customerName||"")+
 "</div>"+
-
 '<div style="margin-top:6px"><b>📞 मोबाइल:</b> '+
-escapeHtml(
-order.customerPhone||""
-)+
+escapeHtml(order.customerPhone||"")+
 "</div>"+
-
 '<div style="margin-top:6px"><b>🏠 पता:</b> '+
-escapeHtml(
-order.address||""
-)+
+escapeHtml(order.address||"")+
 "</div>"+
-
 '<div style="margin-top:6px"><b>🕐 तारीख:</b> '+
-escapeHtml(
-order.date||""
-)+
+escapeHtml(order.date||"")+
 "</div>";
 
 if(order.location){
 
-const a=
-document.createElement("a");
+const a=document.createElement("a");
 
 a.href=order.location;
-
 a.target="_blank";
-
-a.rel=
-"noopener noreferrer";
-
-a.textContent=
-"📍 Delivery Location देखें";
-
+a.rel="noopener noreferrer";
+a.textContent="📍 Delivery Location देखें";
 a.style.display="block";
-
 a.style.marginTop="8px";
 
 card.appendChild(a);
@@ -3634,19 +3291,15 @@ if(
 !locationReady||
 !userLocationLink
 ){
-
 return;
-
 }
 
 openWhatsApp(
-
 "नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
 "📦 सामान: "+product+
 "\n💰 कीमत: ₹550"+
 "\n\n📍 लाइव लोकेशन: "+userLocationLink+
 "\n\nकृपया डिलीवरी की जानकारी भेजें।"
-
 );
 
 });
@@ -3657,12 +3310,8 @@ window.addEventListener(
 "click",
 function(e){
 
-if(
-e.target===$("orderModal")
-){
-
+if(e.target===$("orderModal")){
 hideOrderModal();
-
 }
 
 }
@@ -3700,71 +3349,229 @@ restorePaymentStateFromLocalStorage();
 1000
 );
 
-/* =========================================
-   DRAGGABLE CHATBOT POSITION
-   ========================================= */
+/* ==================================================
+   REAL CONFERBOT POSITION MEMORY + DRAG
+   ================================================== */
 
-const CHAT_POSITION_KEY="topper_conferbot_position_v1";
-const chatLauncher=$("conferbotLauncher");
+const CONFERBOT_POSITION_KEY=
+"topper_real_conferbot_position_v2";
 
-let chatDragging=false;
-let chatMoved=false;
-let chatStartX=0;
-let chatStartY=0;
-let chatStartLeft=0;
-let chatStartTop=0;
+let realConferbotElement=null;
+let realConferbotDragging=false;
+let realConferbotMoved=false;
+let realConferbotPointerId=null;
+let realConferbotStartX=0;
+let realConferbotStartY=0;
+let realConferbotStartLeft=0;
+let realConferbotStartTop=0;
+let realConferbotDragTarget=null;
 
-function getChatButtonSize(){
+function getRealConferbotCandidates(){
 
-return{
-width:chatLauncher.offsetWidth||58,
-height:chatLauncher.offsetHeight||58
-};
-
-}
-
-function getDefaultChatPosition(){
-
-const size=getChatButtonSize();
-
-return{
-left:Math.max(
-8,
-window.innerWidth-size.width-16
-),
-top:Math.max(
-8,
-window.innerHeight-size.height-82
+const all=
+Array.from(
+document.body.querySelectorAll(
+"button,div,a,iframe"
 )
+);
+
+return all.filter(function(el){
+
+if(
+el.id==="authLoading"||
+el.id==="authError"||
+el.id==="orderModal"||
+el.id==="avatarModal"||
+el.id==="appMessageBox"||
+el.classList.contains("bottom-nav")
+){
+return false;
+}
+
+const r=el.getBoundingClientRect();
+
+if(
+r.width<38||
+r.width>110||
+r.height<38||
+r.height>110
+){
+return false;
+}
+
+const style=
+window.getComputedStyle(el);
+
+if(
+style.display==="none"||
+style.visibility==="hidden"||
+style.opacity==="0"
+){
+return false;
+}
+
+if(style.position!=="fixed"){
+return false;
+}
+
+if(
+r.left<0||
+r.top<0||
+r.right>window.innerWidth+5||
+r.bottom>window.innerHeight+5
+){
+return false;
+}
+
+const nearRight=
+window.innerWidth-r.right<120;
+
+const nearBottom=
+window.innerHeight-r.bottom<150;
+
+const nearLeft=
+r.left<120;
+
+return nearRight&&nearBottom||nearLeft&&nearBottom;
+
+});
+
+}
+
+function isLikelyConferbot(el){
+
+if(!el){
+return false;
+}
+
+const id=
+String(el.id||"").toLowerCase();
+
+const cls=
+String(el.className||"").toLowerCase();
+
+const aria=
+String(
+el.getAttribute("aria-label")||""
+).toLowerCase();
+
+const title=
+String(
+el.getAttribute("title")||""
+).toLowerCase();
+
+const src=
+String(
+el.getAttribute("src")||""
+).toLowerCase();
+
+const text=
+String(el.innerText||"").toLowerCase();
+
+const combined=
+id+" "+
+cls+" "+
+aria+" "+
+title+" "+
+src+" "+
+text;
+
+if(
+combined.includes("conferbot")||
+combined.includes("confer bot")
+){
+return true;
+}
+
+if(
+el.tagName==="IFRAME" &&
+(
+src.includes("conferbot")||
+src.includes("wdt.conferbot")||
+src.includes("chat")
+)
+){
+return true;
+}
+
+return false;
+
+}
+
+function findRealConferbot(){
+
+const marked=
+Array.from(
+document.querySelectorAll(
+'[id*="conferbot" i],[class*="conferbot" i],[aria-label*="chat" i],[title*="chat" i]'
+)
+);
+
+for(
+const el of marked
+){
+
+if(isLikelyConferbot(el)){
+return el;
+}
+
+}
+
+const candidates=
+getRealConferbotCandidates();
+
+for(
+const el of candidates
+){
+
+if(isLikelyConferbot(el)){
+return el;
+}
+
+}
+
+return null;
+
+}
+
+function getElementPosition(el){
+
+const r=
+el.getBoundingClientRect();
+
+return{
+left:r.left,
+top:r.top,
+width:r.width,
+height:r.height
 };
 
 }
 
-function saveChatPosition(){
+function saveRealConferbotPosition(el){
 
-if(!chatLauncher){
+if(!el){
 return;
 }
 
-const rect=chatLauncher.getBoundingClientRect();
-
-const data={
-left:Math.round(rect.left),
-top:Math.round(rect.top),
-savedAt:Date.now()
-};
+const p=
+getElementPosition(el);
 
 try{
 
 localStorage.setItem(
-CHAT_POSITION_KEY,
-JSON.stringify(data)
+CONFERBOT_POSITION_KEY,
+JSON.stringify({
+left:Math.round(p.left),
+top:Math.round(p.top),
+savedAt:Date.now()
+})
 );
 
 }catch(error){
 
 console.error(
-"Chatbot position save error:",
+"Conferbot position save error:",
 error
 );
 
@@ -3772,400 +3579,404 @@ error
 
 }
 
-function clampChatPosition(left,top){
+function clampRealConferbotPosition(
+el,
+left,
+top
+){
 
-const size=getChatButtonSize();
+const r=
+getElementPosition(el);
+
+const width=r.width||56;
+const height=r.height||56;
+
+const margin=8;
 
 const maxLeft=
 Math.max(
-8,
-window.innerWidth-size.width-8
+margin,
+window.innerWidth-width-margin
 );
 
 const maxTop=
 Math.max(
-8,
-window.innerHeight-size.height-8
+margin,
+window.innerHeight-height-margin
 );
 
 return{
 left:Math.min(
-Math.max(8,left),
+Math.max(margin,Number(left)||0),
 maxLeft
 ),
 top:Math.min(
-Math.max(8,top),
+Math.max(margin,Number(top)||0),
 maxTop
 )
 };
 
 }
 
-function applyChatPosition(left,top){
+function applyRealConferbotPosition(
+el,
+left,
+top
+){
+
+if(!el){
+return;
+}
 
 const p=
-clampChatPosition(
-Number(left),
-Number(top)
+clampRealConferbotPosition(
+el,
+left,
+top
 );
 
-chatLauncher.style.left=p.left+"px";
-chatLauncher.style.top=p.top+"px";
-chatLauncher.style.right="auto";
-chatLauncher.style.bottom="auto";
+el.style.setProperty(
+"left",
+p.left+"px",
+"important"
+);
+
+el.style.setProperty(
+"top",
+p.top+"px",
+"important"
+);
+
+el.style.setProperty(
+"right",
+"auto",
+"important"
+);
+
+el.style.setProperty(
+"bottom",
+"auto",
+"important"
+);
+
+el.style.setProperty(
+"margin",
+"0",
+"important"
+);
 
 }
 
-function loadChatPosition(){
+function loadSavedRealConferbotPosition(el){
 
-let saved=null;
+if(!el){
+return;
+}
+
+let data=null;
 
 try{
 
 const raw=
 localStorage.getItem(
-CHAT_POSITION_KEY
+CONFERBOT_POSITION_KEY
 );
 
 if(raw){
-saved=JSON.parse(raw);
+data=JSON.parse(raw);
 }
 
 }catch(error){
 
 console.error(
-"Chatbot position read error:",
+"Conferbot saved position read error:",
 error
 );
 
 }
 
 if(
-saved &&
-Number.isFinite(Number(saved.left)) &&
-Number.isFinite(Number(saved.top))
+data &&
+Number.isFinite(Number(data.left)) &&
+Number.isFinite(Number(data.top))
 ){
 
-applyChatPosition(
-Number(saved.left),
-Number(saved.top)
-);
-
-return;
-
-}
-
-const defaultPosition=
-getDefaultChatPosition();
-
-applyChatPosition(
-defaultPosition.left,
-defaultPosition.top
+applyRealConferbotPosition(
+el,
+Number(data.left),
+Number(data.top)
 );
 
 }
 
-function snapChatToNearestEdge(){
+}
 
-if(!chatLauncher){
+function snapRealConferbot(el){
+
+if(!el){
 return;
 }
 
-const rect=
-chatLauncher.getBoundingClientRect();
-
-const size=
-getChatButtonSize();
+const p=
+getElementPosition(el);
 
 const margin=8;
 
-const distanceLeft=
-rect.left;
-
+const distanceLeft=p.left;
 const distanceRight=
-window.innerWidth-
-rect.right;
+window.innerWidth-p.left-p.width;
 
-let targetLeft;
+let left;
 
 if(distanceLeft<=distanceRight){
 
-targetLeft=margin;
+left=margin;
 
 }else{
 
-targetLeft=
-window.innerWidth-
-size.width-
-margin;
+left=
+window.innerWidth-p.width-margin;
 
 }
 
-const targetTop=
-Math.min(
-Math.max(
-margin,
-rect.top
-),
-Math.max(
-margin,
-window.innerHeight-size.height-margin
-)
+applyRealConferbotPosition(
+el,
+left,
+p.top
 );
 
-applyChatPosition(
-targetLeft,
-targetTop
-);
-
-saveChatPosition();
+saveRealConferbotPosition(el);
 
 }
 
-function startChatDrag(clientX,clientY){
+function attachRealConferbotDrag(el){
 
-if(!chatLauncher){
+if(!el){
 return;
 }
 
-const rect=
-chatLauncher.getBoundingClientRect();
-
-chatDragging=true;
-chatMoved=false;
-
-chatStartX=clientX;
-chatStartY=clientY;
-chatStartLeft=rect.left;
-chatStartTop=rect.top;
-
-chatLauncher.classList.add("dragging");
-
-}
-
-function moveChatDrag(clientX,clientY){
-
-if(!chatDragging){
+if(
+realConferbotDragTarget===el
+){
 return;
 }
 
-const dx=clientX-chatStartX;
-const dy=clientY-chatStartY;
+realConferbotDragTarget=el;
+realConferbotElement=el;
+
+loadSavedRealConferbotPosition(el);
+
+el.style.cursor="grab";
+el.style.touchAction="none";
+el.style.userSelect="none";
+el.style.webkitUserSelect="none";
+
+el.addEventListener(
+"pointerdown",
+function(e){
+
+if(
+e.pointerType==="mouse" &&
+e.button!==0
+){
+return;
+}
+
+realConferbotDragging=true;
+realConferbotMoved=false;
+realConferbotPointerId=e.pointerId;
+
+const p=
+getElementPosition(el);
+
+realConferbotStartX=e.clientX;
+realConferbotStartY=e.clientY;
+realConferbotStartLeft=p.left;
+realConferbotStartTop=p.top;
+
+el.style.cursor="grabbing";
+
+try{
+el.setPointerCapture(e.pointerId);
+}catch(error){}
+
+},
+true
+);
+
+el.addEventListener(
+"pointermove",
+function(e){
+
+if(
+!realConferbotDragging||
+e.pointerId!==realConferbotPointerId
+){
+return;
+}
+
+const dx=
+e.clientX-realConferbotStartX;
+
+const dy=
+e.clientY-realConferbotStartY;
 
 if(
 Math.abs(dx)>5||
 Math.abs(dy)>5
 ){
 
-chatMoved=true;
+realConferbotMoved=true;
 
 }
 
-const p=
-clampChatPosition(
-chatStartLeft+dx,
-chatStartTop+dy
+const next=
+clampRealConferbotPosition(
+el,
+realConferbotStartLeft+dx,
+realConferbotStartTop+dy
 );
 
-applyChatPosition(
-p.left,
-p.top
+applyRealConferbotPosition(
+el,
+next.left,
+next.top
 );
-
-}
-
-function finishChatDrag(){
-
-if(!chatDragging){
-return;
-}
-
-chatDragging=false;
-
-chatLauncher.classList.remove(
-"dragging"
-);
-
-if(chatMoved){
-
-snapChatToNearestEdge();
-
-}else{
-
-openConferbot();
-
-}
-
-}
-
-function openConferbot(){
-
-try{
-
-if(
-window.conferbotInstance &&
-typeof window.conferbotInstance.open==="function"
-){
-
-window.conferbotInstance.open();
-return;
-
-}
-
-if(
-window.conferbotInstance &&
-typeof window.conferbotInstance.show==="function"
-){
-
-window.conferbotInstance.show();
-return;
-
-}
-
-if(
-window.conferbotInstance &&
-typeof window.conferbotInstance.toggle==="function"
-){
-
-window.conferbotInstance.toggle();
-return;
-
-}
-
-const possibleButtons=
-document.querySelectorAll(
-'.conferbot-widget-button,.conferbot-launcher,#conferbot-button,.conferbot-button'
-);
-
-if(possibleButtons.length){
-
-possibleButtons[0].click();
-return;
-
-}
-
-console.warn(
-"Conferbot launcher अभी तैयार नहीं है।"
-);
-
-}catch(error){
-
-console.error(
-"Conferbot open error:",
-error
-);
-
-}
-
-}
-
-if(chatLauncher){
-
-chatLauncher.addEventListener(
-"pointerdown",
-function(e){
-
-if(e.pointerType==="mouse" && e.button!==0){
-return;
-}
 
 e.preventDefault();
 
-try{
-chatLauncher.setPointerCapture(e.pointerId);
-}catch(error){}
-
-startChatDrag(
-e.clientX,
-e.clientY
+},
+true
 );
 
-}
-);
-
-chatLauncher.addEventListener(
-"pointermove",
-function(e){
-
-if(!chatDragging){
-return;
-}
-
-e.preventDefault();
-
-moveChatDrag(
-e.clientX,
-e.clientY
-);
-
-}
-);
-
-chatLauncher.addEventListener(
+el.addEventListener(
 "pointerup",
 function(e){
 
-e.preventDefault();
+if(
+!realConferbotDragging||
+e.pointerId!==realConferbotPointerId
+){
+return;
+}
 
-try{
-chatLauncher.releasePointerCapture(e.pointerId);
-}catch(error){}
+realConferbotDragging=false;
+realConferbotPointerId=null;
 
-finishChatDrag();
+el.style.cursor="grab";
+
+if(realConferbotMoved){
+
+snapRealConferbot(el);
 
 }
+
+try{
+el.releasePointerCapture(e.pointerId);
+}catch(error){}
+
+},
+true
 );
 
-chatLauncher.addEventListener(
+el.addEventListener(
 "pointercancel",
 function(){
 
-finishChatDrag();
+realConferbotDragging=false;
+realConferbotPointerId=null;
+el.style.cursor="grab";
+
+},
+true
+);
+
+}
+
+function setupRealConferbotWatcher(){
+
+let attempts=0;
+
+function scan(){
+
+attempts++;
+
+const el=findRealConferbot();
+
+if(el){
+
+attachRealConferbotDrag(el);
+
+return;
+
+}
+
+if(attempts<120){
+
+setTimeout(
+scan,
+500
+);
+
+}
+
+}
+
+scan();
+
+const observer=
+new MutationObserver(
+function(){
+
+const el=findRealConferbot();
+
+if(el){
+
+attachRealConferbotDrag(el);
+
+}
 
 }
 );
 
-chatLauncher.addEventListener(
-"contextmenu",
-function(e){
-
-if(chatMoved){
-e.preventDefault();
-}
-
+observer.observe(
+document.body,
+{
+childList:true,
+subtree:true,
+attributes:true
 }
 );
-
-loadChatPosition();
-
-}
 
 window.addEventListener(
 "resize",
 function(){
 
-if(!chatLauncher){
-return;
-}
-
-const rect=
-chatLauncher.getBoundingClientRect();
+if(realConferbotElement){
 
 const p=
-clampChatPosition(
-rect.left,
-rect.top
+getElementPosition(
+realConferbotElement
 );
 
-applyChatPosition(
+applyRealConferbotPosition(
+realConferbotElement,
 p.left,
 p.top
 );
 
-saveChatPosition();
+saveRealConferbotPosition(
+realConferbotElement
+);
+
+}
 
 }
 );
+
+}
+
+setupRealConferbotWatcher();
 
 function escapeHtml(value){
 
@@ -4189,7 +4000,9 @@ return String(value)
 }
 </script>
 
-<!-- Start of Conferbot Script -->
+<!-- ==================================================
+     REAL CONFERBOT
+     ================================================== -->
 <script type="text/javascript">
 (function(d,s,id){
 
@@ -4201,7 +4014,8 @@ return;
 
 js=d.createElement(s);
 js.async=true;
-js.src="https://cdn.conferbot.com/dist/v1/widget.min.js";
+js.src=
+"https://cdn.conferbot.com/dist/v1/widget.min.js";
 js.id=id;
 js.charset="UTF-8";
 
@@ -4217,7 +4031,9 @@ window.ConferbotWidget(
 "live_chat"
 );
 
-console.log("Conferbot loaded successfully.");
+console.log(
+"Real Conferbot loaded successfully."
+);
 
 }catch(error){
 
@@ -4240,7 +4056,6 @@ console.error(
 
 })(document,"script","conferbot-js");
 </script>
-<!-- End of Conferbot Script -->
 
 </body>
 </html>
