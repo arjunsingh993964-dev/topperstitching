@@ -1,52 +1,46 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Topper Sewing Machine Shopping</title>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<style>
-*{
-box-sizing:border-box;
-font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-margin:0;
-padding:0
-}
-
-body{
-background:#f0f2f5;
-padding-bottom:90px;
-color:#222
-}
-
-header{
-background:linear-gradient(135deg,#1a237e,#0d47a1);
-color:#fff;
-padding:15px 12px;
-text-align:center;
-position:sticky;
-top:0;
-z-index:100;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
-display:flex;
-justify-content:space-between;
-align-items:center
-}
-
-.brand-title{
-font-size:20px;
-font-weight:900;
-letter-spacing:1px;
-color:#ffab00;
-text-transform:uppercase;
-text-shadow:1px 1px 2px rgba(0,0,0,.5);
-text-align:left
-}
-
+<!DOCTYPE html>  
+<html lang="hi">    
+<head>      
+<meta charset="UTF-8">        
+<meta name="viewport" content="width=device-width,initial-scale=1.0">          
+<title>Topper Sewing Machine Shopping</title>  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  
+<style>          
+*{          
+box-sizing:border-box;          
+font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;          
+margin:0;          
+padding:0          
+}    
+body{      
+background:#f0f2f5;      
+padding-bottom:90px;      
+color:#222      
+}  
+header{    
+background:linear-gradient(135deg,#1a237e,#0d47a1);    
+color:#fff;    
+padding:15px 12px;    
+text-align:center;    
+position:sticky;    
+top:0;    
+z-index:100;    
+box-shadow:0 4px 10px rgba(0,0,0,.2);    
+display:flex;    
+justify-content:space-between;    
+align-items:center    
+}  
+.brand-title{  
+font-size:20px;  
+font-weight:900;  
+letter-spacing:1px;  
+color:#ffab00;  
+text-transform:uppercase;  
+text-shadow:1px 1px 2px rgba(0,0,0,.5);  
+text-align:left  
+}  
 .brand-subtitle{
 font-size:11px;
 color:#e0e0e0;
@@ -726,568 +720,310 @@ to{
 transform:rotate(360deg)
 }
 }
-
-/* =========================================================
-   REAL CONFERBOT DRAG HANDLE
-   ========================================================= */
-
-#topperConferbotDragHandle{
-position:fixed;
-display:none;
-width:28px;
-height:60px;
-background:transparent;
-z-index:2147483647;
-cursor:grab;
-touch-action:none;
-user-select:none;
--webkit-user-select:none;
--webkit-tap-highlight-color:transparent;
-}
-
-#topperConferbotDragHandle.dragging{
-cursor:grabbing;
-}
-
-</style>
-</head>
-
-<body>
-
+</style>  
+</head>  
+<body>  
 <div id="authLoading">
-<div class="auth-loader"></div>
-<div class="auth-loading-text">Account लोड हो रहा है...</div>
-</div>
-
-<header>
-<div>
-<div class="brand-title">TOPPER STITCHING</div>
-<div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>
-</div>
-
-<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">
-Sign In
-</button>
-</header>
-
-<div id="authError" class="auth-error"></div>
-
-<div id="homeView" class="view-section active-view">
-
-<div class="banner">
-<h2>सिलाई मशीन और पार्ट्स के लिए सबसे भरोसेमंद दुकान</h2>
-<p>बेस्ट क्वालिटी, उचित दाम और बेहतरीन सर्विस</p>
-</div>
-
-<div class="products">
-
-<div class="card">
-<div>
-<div class="img-container">
-<img src="IMG_20260829_174914.png" alt="Topper SV Tailor" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Topper SV Tailor</h3>
-<div class="price">₹4,500</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Topper Stitching</div>
-<div><span>मॉडल:</span> SV tailor</div>
-<div><span>टाइप:</span> Sewing Machine Only Head</div>
-<div><span>वारंटी:</span> 5 Years</div>
-<div><span>गारंटी:</span> 0 Days</div>
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyNow('Topper SV Tailor','4500')">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-<div class="img-container">
-<img src="IMG_20260829_175005.png" alt="Topper SV Tailor Deluxe" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Topper SV Tailor Deluxe</h3>
-<div class="price">₹4,500</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Topper Stitching</div>
-<div><span>मॉडल:</span> SV tailor delox</div>
-<div><span>टाइप:</span> Sewing Machine Only Head</div>
-<div><span>वारंटी:</span> 5 Years</div>
-<div><span>गारंटी:</span> 0 Days</div>
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyNow('Topper SV Tailor Deluxe','4500')">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-<div class="img-container">
-<img src="IMG_20260829_174949.png" alt="Bag Closer Single Needle" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Bag Closer Single Needle</h3>
-<div class="price">₹5,800</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Topper Stitching</div>
-<div><span>मॉडल:</span> single nidile</div>
-<div><span>टाइप:</span> Bag Closer Machine Only (Heavy Duty)</div>
-<div><span>वारंटी:</span> 2 Times Service</div>
-<div><span>गारंटी:</span> 0 Days</div>
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyNow('Bag Closer Single Needle','5800')">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-<div class="img-container">
-<img src="file_00000000a1f88211baaa2ea57e9f39f9.png" alt="Topper TA1" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Topper TA1 Model</h3>
-<div class="price">₹6,000</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Topper Stitching</div>
-<div><span>मॉडल:</span> umbrella</div>
-<div><span>टाइप:</span> Sewing Machine Only Head</div>
-<div><span>वारंटी:</span> 5 Years</div>
-<div><span>गारंटी:</span> 0 Days</div>
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyNow('Topper TA1 Model','6000')">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-
-<div class="slider-container">
-
-<button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">
-❮
-</button>
-
-<div class="slider-track" id="tableSlider">
-
-<div class="slide">
-<img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Light Wooden</div>
-</div>
-
-<div class="slide">
-<img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Grey Wooden</div>
-</div>
-
-<div class="slide">
-<img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Light Dark Wooden</div>
-</div>
-
-<div class="slide">
-<img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'">
-<div class="slide-name">Dark Wooden</div>
-</div>
-
-</div>
-
-<button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">
-❯
-</button>
-
-</div>
-
-<div class="card-details">
-<h3>Sewing Machine Top Table</h3>
-<div class="price">₹550</div>
-
-<div class="specs">
-<div><span>मॉडल:</span> SV / TA1</div>
-<div>
-<span>कलर:</span>
-<span id="selectedTableColorText">Light Wooden</span>
-</div>
-<div><span>टाइप:</span> Top Table Only</div>
-<div><span>वारंटी / गारंटी:</span> None</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openTableOrderForm()">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyTableNow()">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-
-<div class="img-container">
-<img src="IMG_20260829_174934.png" alt="Jupiter Scissors" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Jupiter Scissors</h3>
-<div class="price">₹300</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Jupiter Scissors</div>
-<div><span>साइज:</span> Size 10</div>
-<div><span>टाइप:</span> Scissors Only</div>
-<div><span>वारंटी / गारंटी:</span> None</div>
-<div class="out-of-stock">Out of stock</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="showOutOfStock()">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="showOutOfStock()">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-<div class="card">
-<div>
-
-<div class="img-container">
-<img src="IMG_20260829_174935.png" alt="Topper SV Tailor 130k" onerror="this.style.display='none'">
-</div>
-
-<div class="card-details">
-<h3>Topper कढ़ाई (130k)</h3>
-<div class="price">₹7,200</div>
-
-<div class="specs">
-<div><span>ब्रांड:</span> Topper Stitching</div>
-<div><span>मॉडल:</span> 130k (कढ़ाई)</div>
-<div><span>टाइप:</span> Sewing Machine Only Head</div>
-<div><span>वारंटी:</span> 5 Years</div>
-<div><span>गारंटी:</span> 0 Days</div>
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>
-</div>
-</div>
-</div>
-
-<div>
-<button class="btn-online" onclick="openOrderForm('Topper कढ़ाई (130k)','7200')">
-💳 ऑनलाइन पेमेंट करें
-</button>
-
-<button class="btn-buy" onclick="buyNow('Topper कढ़ाई (130k)','7200')">
-📲 व्हाट्सएप पर खरीदें
-</button>
-</div>
-</div>
-
-</div>
-
-<div class="footer-address">
-
-<strong>📍 मुख्य स्टोर का पता:</strong>
-
-मेन रोड सासामुसा, गोपालगंज, बिहार
-<br><br>
-
-संपर्क करें: <b>+91 9264137710</b>
-<br>
-
-Gmail: <b>ankitsingh926@gmail.com</b>
-
-<button
-type="button"
-class="btn-submit location-btn"
-onclick="requestUserLocation()"
->
-📍 मेरी Live Location अपडेट करें
-</button>
-
-<div id="locationStatus" class="location-status"></div>
-
-</div>
-
-</div>
-
-<div id="ordersView" class="view-section">
-
-<div class="orders-container">
-
-<h2 class="orders-title">
-आपके ऑर्डर्स (My Orders)
-</h2>
-
-<div id="ordersList">
-<p class="empty-orders">
-ऑर्डर्स लोड हो रहे हैं...
-</p>
-</div>
-
-</div>
-
-</div>
-
-<div id="profileView" class="view-section">
-
-<div class="profile-container">
-
-<div class="profile-photo-wrap">
-
-<img
-id="profilePageImg"
-src="u1.png"
-class="profile-img"
-alt="Profile"
->
-
-<button
-class="profile-edit-btn"
-type="button"
-onclick="openAvatarPicker()"
->
-✏️
-</button>
-
-</div>
-
-<h3 id="profileName" style="color:#1a237e">
-Guest User
-</h3>
-
-<p
-id="profileEmail"
-style="color:#666;font-size:13px;margin-top:4px"
->
-Google Account Not Connected
-</p>
-
-<div style="margin-top:20px">
-
-<button
-id="profileAuthBtn"
-class="btn-submit"
-onclick="googleSignIn()"
->
-Google Account से लॉगिन करें
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<div id="avatarModal" class="avatar-modal">
-
-<div class="avatar-box">
-
-<h3>Profile Photo चुनें</h3>
-
-<div class="avatar-grid">
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')">
-<img src="m1.png" alt="m1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')">
-<img src="m2.png" alt="m2">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')">
-<img src="m3.png" alt="m3">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')">
-<img src="m4.png" alt="m4">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')">
-<img src="f1.png" alt="f1">
-</button>
-
-<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')">
-<img src="f2.png" alt="f2">
-</button>
-
-</div>
-
-<button class="avatar-close" type="button" onclick="closeAvatarPicker()">
-बंद करें
-</button>
-
-</div>
-
-</div>
-
-<div id="orderModal" class="modal">
-
-<div class="modal-content">
-
-<h3>🛒 ऑनलाइन आर्डर और पेमेंट</h3>
-
-<div class="delivery-badge">
-🚚 Home Delivery Only For
-<br>
-<b>Bihar District: Gopalganj (Area)</b>
-</div>
-
-<p id="modalProductInfo"></p>
-
-<div class="form-group">
-<label>आपका पूरा नाम:</label>
-<input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">
-</div>
-
-<div class="form-group">
-<label>मोबाइल नंबर:</label>
-<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
-</div>
-
-<div class="form-group">
-<label>पूरा पता:</label>
-<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>
-</div>
-
-<div class="qr-box">
-
-<p style="font-size:15px;font-weight:700;color:#333">
-💳 नीचे Pay बटन दबाकर उपलब्ध UPI App चुनें और भुगतान करें।
-</p>
-
-<button
-type="button"
-class="btn-submit"
-style="margin-top:10px;background:#1565c0"
-onclick="payViaUpiIntent()"
->
-💳 Online Pay ₹<span id="upiPayAmount">0</span>
-</button>
-
-<p style="font-size:12px;color:#777;margin-top:8px">
-Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।
-</p>
-
-</div>
-
-<div class="form-group">
-<label>UTR / Transaction Number:</label>
-<input type="text" id="utrNumber" placeholder="Payment के बाद UTR नंबर डालें" autocomplete="off" inputmode="numeric" maxlength="40">
-</div>
-
-<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">
-💬 WhatsApp पर Order भेजें
-</button>
-
-<button class="btn-close" type="button" onclick="cancelOrderForm()">
-रद्द करें
-</button>
-
-</div>
-
-</div>
-
-<div class="bottom-nav">
-
-<button class="nav-item active" onclick="switchTab('homeView',this)">
-<span class="icon">🏠</span>
-Home
-</button>
-
-<button class="nav-item" onclick="switchTab('ordersView',this)">
-<span class="icon">📦</span>
-Orders
-</button>
-
-<button class="nav-item" onclick="switchTab('profileView',this)">
-<span class="icon">👤</span>
-Profile
-</button>
-
-</div>
-
-<script>
-const firebaseConfig={
-apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",
-authDomain:"toppersewingmachine.firebaseapp.com",
-databaseURL:"https://toppersewingmachine-default-rtdb.firebaseio.com",
-projectId:"toppersewingmachine",
-storageBucket:"toppersewingmachine.firebasestorage.app",
-messagingSenderId:"281176461879",
-appId:"1:281176461879:web:97648170de01d8c975e5b2",
-measurementId:"G-GRP6EXGE3L"
-};
-
-if(!firebase.apps.length){
-firebase.initializeApp(firebaseConfig);
-}
-
-const auth=firebase.auth();
-const db=firebase.database();
-
-auth.setPersistence(
-firebase.auth.Auth.Persistence.LOCAL
-).catch(function(error){
-console.error("Auth persistence error:",error);
-});
+<div class="auth-loader"></div>          
+<div class="auth-loading-text">Account लोड हो रहा है...</div>          
+</div>  
+
+<header>          
+<div>          
+<div class="brand-title">TOPPER STITCHING</div>          
+<div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>          
+</div>  
+<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">          
+Sign In          
+</button>          
+</header>  
+
+<div id="authError" class="auth-error"></div>  
+
+<div id="homeView" class="view-section active-view">  
+<div class="banner">          
+<h2>सिलाई मशीन और पार्ट्स के लिए सबसे भरोसेमंद दुकान</h2>          
+<p>बेस्ट क्वालिटी, उचित दाम और बेहतरीन सर्विस</p>          
+</div>  
+
+<div class="products">  
+<div class="card">          
+<div>          
+<div class="img-container">          
+<img src="IMG_20260829_174914.png" alt="Topper SV Tailor" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Topper SV Tailor</h3>          
+<div class="price">₹4,500</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Topper Stitching</div>          
+<div><span>मॉडल:</span> SV tailor</div>          
+<div><span>टाइप:</span> Sewing Machine Only Head</div>          
+<div><span>वारंटी:</span> 5 Years</div>          
+<div><span>गारंटी:</span> 0 Days</div>          
+<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyNow('Topper SV Tailor','4500')">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>          
+<div class="img-container">          
+<img src="IMG_20260829_175005.png" alt="Topper SV Tailor Deluxe" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Topper SV Tailor Deluxe</h3>          
+<div class="price">₹4,500</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Topper Stitching</div>          
+<div><span>मॉडल:</span> SV tailor delox</div>          
+<div><span>टाइप:</span> Sewing Machine Only Head</div>          
+<div><span>वारंटी:</span> 5 Years</div>          
+<div><span>गारंटी:</span> 0 Days</div>          
+<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyNow('Topper SV Tailor Deluxe','4500')">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>          
+<div class="img-container">          
+<img src="IMG_20260829_174949.png" alt="Bag Closer Single Needle" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Bag Closer Single Needle</h3>          
+<div class="price">₹5,800</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Topper Stitching</div>          
+<div><span>मॉडल:</span> single nidile</div>          
+<div><span>टाइप:</span> Bag Closer Machine Only (Heavy Duty)</div>          
+<div><span>वारंटी:</span> 2 Times Service</div>          
+<div><span>गारंटी:</span> 0 Days</div>          
+<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyNow('Bag Closer Single Needle','5800')">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>          
+<div class="img-container">          
+<img src="file_00000000a1f88211baaa2ea57e9f39f9.png" alt="Topper TA1" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Topper TA1 Model</h3>          
+<div class="price">₹6,000</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Topper Stitching</div>          
+<div><span>मॉडल:</span> umbrella</div>          
+<div><span>टाइप:</span> Sewing Machine Only Head</div>          
+<div><span>वारंटी:</span> 5 Years</div>          
+<div><span>गारंटी:</span> 0 Days</div>          
+<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyNow('Topper TA1 Model','6000')">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>  
+<div class="slider-container">  
+<button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>  
+<div class="slider-track" id="tableSlider">  
+<div class="slide"><img src="wood-1.png" alt="Light Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Wooden</div></div>  
+<div class="slide"><img src="wood-2.png" alt="Grey Wooden" onerror="this.style.display='none'"><div class="slide-name">Grey Wooden</div></div>  
+<div class="slide"><img src="wood-3.png" alt="Light Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Light Dark Wooden</div></div>  
+<div class="slide"><img src="wood-4.png" alt="Dark Wooden" onerror="this.style.display='none'"><div class="slide-name">Dark Wooden</div></div>  
+</div>  
+<button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>  
+</div>  
+<div class="card-details">          
+<h3>Sewing Machine Top Table</h3>          
+<div class="price">₹550</div>  
+<div class="specs">          
+<div><span>मॉडल:</span> SV / TA1</div>          
+<div><span>कलर:</span> <span id="selectedTableColorText">Light Wooden</span></div>          
+<div><span>टाइप:</span> Top Table Only</div>          
+<div><span>वारंटी / गारंटी:</span> None</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openTableOrderForm()">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyTableNow()">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>  
+<div class="img-container">          
+<img src="IMG_20260829_174934.png" alt="Jupiter Scissors" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Jupiter Scissors</h3>          
+<div class="price">₹300</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Jupiter Scissors</div>          
+<div><span>साइज:</span> Size 10</div>          
+<div><span>टाइप:</span> Scissors Only</div>          
+<div><span>वारंटी / गारंटी:</span> None</div>          
+<div class="out-of-stock">Out of stock</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="showOutOfStock()">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="showOutOfStock()">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+
+<div class="card">          
+<div>  
+<div class="img-container">          
+<img src="IMG_20260829_174935.png" alt="Topper SV Tailor 130k" onerror="this.style.display='none'">          
+</div>  
+<div class="card-details">          
+<h3>Topper कढ़ाई (130k)</h3>          
+<div class="price">₹7,200</div>  
+<div class="specs">          
+<div><span>ब्रांड:</span> Topper Stitching</div>          
+<div><span>मॉडल:</span> 130k (कढ़ाई)</div>          
+<div><span>टाइप:</span> Sewing Machine Only Head</div>          
+<div><span>वारंटी:</span> 5 Years</div>          
+<div><span>गारंटी:</span> 0 Days</div>          
+<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+</div>          
+</div>          
+</div>  
+<div>          
+<button class="btn-online" onclick="openOrderForm('Topper कढ़ाई (130k)','7200')">💳 ऑनलाइन पेमेंट करें</button>  
+<button class="btn-buy" onclick="buyNow('Topper कढ़ाई (130k)','7200')">📲 व्हाट्सएप पर खरीदें</button>          
+</div>          
+</div>  
+</div>  
+
+<div class="footer-address">  
+<strong>📍 मुख्य स्टोर का पता:</strong> मेन रोड सासामुसा, गोपालगंज, बिहार      
+<br><br>  संपर्क करें: <b>+91 9264137710</b>    
+<br>  Gmail: <b>ankitsingh926@gmail.com</b>  
+<button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 मेरी Live Location अपडेट करें</button>
+<div id="locationStatus" class="location-status"></div>  
+</div>  
+</div>  
+
+<div id="ordersView" class="view-section">  
+<div class="orders-container">  
+<h2 class="orders-title">आपके ऑर्डर्स (My Orders)</h2>  
+<div id="ordersList"><p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p></div>  
+</div>  
+</div>  
+
+<div id="profileView" class="view-section">  
+<div class="profile-container">  
+<div class="profile-photo-wrap">  
+<img id="profilePageImg" src="u1.png" class="profile-img" alt="Profile">   
+<button class="profile-edit-btn" type="button" onclick="openAvatarPicker()">✏️</button>
+</div>  
+<h3 id="profileName" style="color:#1a237e">Guest User</h3>  
+<p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">Google Account Not Connected</p>  
+<div style="margin-top:20px">  
+<button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Google Account से लॉगिन करें</button>  
+</div>  
+</div>  
+</div>  
+
+<div id="avatarModal" class="avatar-modal">  
+<div class="avatar-box">  
+<h3>Profile Photo चुनें</h3>  
+<div class="avatar-grid">  
+<button class="avatar-option" type="button" onclick="selectAvatar('m1.png')"><img src="m1.png" alt="m1"></button>  
+<button class="avatar-option" type="button" onclick="selectAvatar('m2.png')"><img src="m2.png" alt="m2"></button>  
+<button class="avatar-option" type="button" onclick="selectAvatar('m3.png')"><img src="m3.png" alt="m3"></button>  
+<button class="avatar-option" type="button" onclick="selectAvatar('m4.png')"><img src="m4.png" alt="m4"></button>  
+<button class="avatar-option" type="button" onclick="selectAvatar('f1.png')"><img src="f1.png" alt="f1"></button>  
+<button class="avatar-option" type="button" onclick="selectAvatar('f2.png')"><img src="f2.png" alt="f2"></button>  
+</div>  
+<button class="avatar-close" type="button" onclick="closeAvatarPicker()">बंद करें</button>  
+</div>  
+</div>  
+
+<div id="orderModal" class="modal">  
+<div class="modal-content">  
+<h3>🛒 ऑनलाइन आर्डर और पेमेंट</h3>  
+<div class="delivery-badge">🚚 Home Delivery Only For<br><b>Bihar District: Gopalganj (Area)</b></div>  
+<p id="modalProductInfo"></p>  
+<div class="form-group">          
+<label>आपका पूरा नाम:</label>          
+<input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">          
+</div>  
+<div class="form-group">          
+<label>मोबाइल नंबर:</label>          
+<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">          
+</div>  
+<div class="form-group">          
+<label>पूरा पता:</label>          
+<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>          
+</div>  
+<div class="qr-box">  
+<p style="font-size:15px;font-weight:700;color:#333">💳 नीचे Pay बटन दबाकर उपलब्ध UPI App चुनें और भुगतान करें।</p>  
+<button type="button" class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">💳 Online Pay ₹<span id="upiPayAmount">0</span></button>  
+<p style="font-size:12px;color:#777;margin-top:8px">Payment के बाद वापस ऐप में आने पर WhatsApp में आपकी order details भेजने की कोशिश की जाएगी।</p>  
+</div>  
+<div class="form-group">          
+<label>UTR / Transaction Number:</label>          
+<input type="text" id="utrNumber" placeholder="Payment के बाद UTR नंबर डालें" autocomplete="off" inputmode="numeric" maxlength="40">          
+</div>  
+<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">💬 WhatsApp पर Order भेजें</button>  
+<button class="btn-close" type="button" onclick="cancelOrderForm()">रद्द करें</button>  
+</div>  
+</div>  
+
+<div class="bottom-nav">  
+<button class="nav-item active" onclick="switchTab('homeView',this)"><span class="icon">🏠</span>Home</button>  
+<button class="nav-item" onclick="switchTab('ordersView',this)"><span class="icon">📦</span>Orders</button>  
+<button class="nav-item" onclick="switchTab('profileView',this)"><span class="icon">👤</span>Profile</button>  
+</div>  
+
+<script>          
+const firebaseConfig={          
+apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",          
+authDomain:"toppersewingmachine.firebaseapp.com",          
+databaseURL:"https://toppersewingmachine-default-rtdb.firebaseio.com",          
+projectId:"toppersewingmachine",          
+storageBucket:"toppersewingmachine.firebasestorage.app",          
+messagingSenderId:"281176461879",          
+appId:"1:281176461879:web:97648170de01d8c975e5b2",          
+measurementId:"G-GRP6EXGE3L"          
+};    
+
+if(!firebase.apps.length){      
+firebase.initializeApp(firebaseConfig);      
+}  
+
+const auth=firebase.auth();    
+const db=firebase.database();  
+
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(error){  
+console.error("Auth persistence error:",error);  
+});  
 
 let currentUser=null;
 let selectedProduct="";
@@ -1304,11 +1040,9 @@ let pendingLocationActions=[];
 let paymentStateRestored=false;
 
 const $=id=>document.getElementById(id);
-
 const PAYMENT_STATE_KEY="topper_active_payment_state_v3";
 
 function getPaymentState(){
-
 return{
 version:3,
 product:selectedProduct||"",
@@ -1319,494 +1053,174 @@ address:$("custAddress")?$("custAddress").value.trim():"",
 utr:$("utrNumber")?$("utrNumber").value.trim():"",
 savedAt:Date.now()
 };
-
 }
 
 function savePaymentState(){
-
-if(!selectedProduct||!selectedPrice){
-return;
-}
-
+if(!selectedProduct||!selectedPrice)return;
 const state=getPaymentState();
-
 try{
-
-localStorage.setItem(
-PAYMENT_STATE_KEY,
-JSON.stringify(state)
-);
-
-}catch(error){
-
-console.error(
-"Payment localStorage save error:",
-error
-);
-
+localStorage.setItem(PAYMENT_STATE_KEY,JSON.stringify(state));
+}catch(error){}
+if(window.AndroidApp && typeof window.AndroidApp.savePaymentState==="function"){
+try{window.AndroidApp.savePaymentState(JSON.stringify(state));}catch(error){}
 }
-
-if(
-window.AndroidApp &&
-typeof window.AndroidApp.savePaymentState==="function"
-){
-
-try{
-
-window.AndroidApp.savePaymentState(
-JSON.stringify(state)
-);
-
-}catch(error){
-
-console.error(
-"Native payment state save error:",
-error
-);
-
-}
-
-}
-
 }
 
 function clearPaymentState(){
-
-try{
-
-localStorage.removeItem(
-PAYMENT_STATE_KEY
-);
-
-}catch(error){
-
-console.error(
-"Payment localStorage clear error:",
-error
-);
-
+try{localStorage.removeItem(PAYMENT_STATE_KEY);}catch(error){}
+if(window.AndroidApp && typeof window.AndroidApp.clearPaymentState==="function"){
+try{window.AndroidApp.clearPaymentState();}catch(error){}
 }
-
-if(
-window.AndroidApp &&
-typeof window.AndroidApp.clearPaymentState==="function"
-){
-
-try{
-
-window.AndroidApp.clearPaymentState();
-
-}catch(error){
-
-console.error(
-"Native payment state clear error:",
-error
-);
-
-}
-
-}
-
 }
 
 function clearPaymentFormFields(){
-
 if($("custName"))$("custName").value="";
 if($("custPhone"))$("custPhone").value="";
 if($("custAddress"))$("custAddress").value="";
 if($("utrNumber"))$("utrNumber").value="";
-
 selectedProduct="";
 selectedPrice="";
-
 $("modalProductInfo").textContent="";
 $("upiPayAmount").textContent="0";
-
 }
 
 function applyPaymentState(state){
-
-if(!state||!state.product||!state.price){
-return;
-}
-
+if(!state||!state.product||!state.price)return;
 selectedProduct=String(state.product);
 selectedPrice=String(state.price);
-
-if($("custName")){
-$("custName").value=String(state.name||"");
-}
-
-if($("custPhone")){
-$("custPhone").value=String(state.phone||"");
-}
-
-if($("custAddress")){
-$("custAddress").value=String(state.address||"");
-}
-
-if($("utrNumber")){
-$("utrNumber").value=String(state.utr||"");
-}
-
-$("modalProductInfo").textContent=
-selectedProduct+
-" - ₹"+
-Number(selectedPrice||0).toLocaleString("en-IN");
-
-$("upiPayAmount").textContent=
-Number(selectedPrice||0).toLocaleString("en-IN");
-
+if($("custName"))$("custName").value=String(state.name||"");
+if($("custPhone"))$("custPhone").value=String(state.phone||"");
+if($("custAddress"))$("custAddress").value=String(state.address||"");
+if($("utrNumber"))$("utrNumber").value=String(state.utr||"");
+$("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN");
+$("upiPayAmount").textContent=Number(selectedPrice||0).toLocaleString("en-IN");
 $("orderModal").style.display="block";
-
 requestUserLocation();
-
 }
 
 function restorePaymentStateFromLocalStorage(){
-
-if(paymentStateRestored){
-return;
-}
-
+if(paymentStateRestored)return;
 let raw=null;
-
+try{raw=localStorage.getItem(PAYMENT_STATE_KEY);}catch(error){return;}
+if(!raw)return;
 try{
-
-raw=localStorage.getItem(
-PAYMENT_STATE_KEY
-);
-
-}catch(error){
-
-console.error(
-"Payment state read error:",
-error
-);
-
-return;
-}
-
-if(!raw){
-return;
-}
-
-try{
-
 const state=JSON.parse(raw);
-
 if(state&&state.product&&state.price){
-
 paymentStateRestored=true;
 applyPaymentState(state);
-
 }
-
 }catch(error){
-
-console.error(
-"Payment state restore error:",
-error
-);
-
-try{
-localStorage.removeItem(PAYMENT_STATE_KEY);
-}catch(e){}
-
+try{localStorage.removeItem(PAYMENT_STATE_KEY);}catch(e){}
 }
-
 }
 
 window.nativeRestorePaymentState=function(raw){
-
 try{
-
-const state=
-typeof raw==="string"
-?JSON.parse(raw)
-:raw;
-
-if(!state||!state.product||!state.price){
-return;
-}
-
-try{
-
-localStorage.setItem(
-PAYMENT_STATE_KEY,
-JSON.stringify(state)
-);
-
-}catch(e){}
-
+const state=typeof raw==="string"?JSON.parse(raw):raw;
+if(!state||!state.product||!state.price)return;
+try{localStorage.setItem(PAYMENT_STATE_KEY,JSON.stringify(state));}catch(e){}
 paymentStateRestored=true;
 applyPaymentState(state);
-
-}catch(error){
-
-console.error(
-"Native payment state restore error:",
-error
-);
-
-}
-
+}catch(error){}
 };
 
 function setupPaymentAutoSave(){
-
-[
-"custName",
-"custPhone",
-"custAddress",
-"utrNumber"
-].forEach(function(id){
-
+["custName","custPhone","custAddress","utrNumber"].forEach(function(id){
 const el=$(id);
-
-if(!el){
-return;
-}
-
-[
-"input",
-"change",
-"blur"
-].forEach(function(eventName){
-
-el.addEventListener(
-eventName,
-function(){
-savePaymentState();
-}
-);
-
+if(!el)return;
+["input","change","blur"].forEach(function(eventName){
+el.addEventListener(eventName,function(){savePaymentState();});
 });
-
 });
-
 }
 
 const LOGIN_MEMORY_KEY="topper_has_logged_in_before";
-
-const hasLoggedInBefore=
-localStorage.getItem(LOGIN_MEMORY_KEY)==="1";
-
-if(hasLoggedInBefore){
-showAuthLoading();
-}else{
-hideAuthLoading();
-}
+const hasLoggedInBefore=localStorage.getItem(LOGIN_MEMORY_KEY)==="1";
+if(hasLoggedInBefore){showAuthLoading();}else{hideAuthLoading();}
 
 function showAppMessage(message,icon="⚠️"){
-
 const old=$("appMessageBox");
-
-if(old){
-old.remove();
-}
-
+if(old)old.remove();
 const box=document.createElement("div");
-
 box.id="appMessageBox";
-
-box.innerHTML=
-'<div class="app-message-overlay">'+
-'<div class="app-message-card">'+
-'<div class="app-message-icon">'+
-escapeHtml(icon)+
-'</div>'+
-'<div class="app-message-text">'+
-escapeHtml(message)+
-'</div>'+
-'<button type="button" class="app-message-ok">OK</button>'+
-'</div>'+
-'</div>';
-
-const ok=box.querySelector(".app-message-ok");
-
-ok.addEventListener(
-"click",
-function(){
-box.remove();
-}
-);
-
+box.innerHTML='<div class="app-message-overlay"><div class="app-message-card"><div class="app-message-icon">'+escapeHtml(icon)+'</div><div class="app-message-text">'+escapeHtml(message)+'</div><button type="button" class="app-message-ok">OK</button></div></div>';
+box.querySelector(".app-message-ok").addEventListener("click",function(){box.remove();});
 document.body.appendChild(box);
-
 }
 
 function showOutOfStock(){
-
-showAppMessage(
-"यह सामान अभी Out of stock है।",
-"❌"
-);
-
+showAppMessage("यह सामान अभी Out of stock है।","❌");
 }
 
 function showAuthError(message){
-
 const el=$("authError");
-
 el.textContent=message;
 el.style.display="block";
-
-setTimeout(
-function(){
-el.style.display="none";
-},
-7000
-);
-
+setTimeout(function(){el.style.display="none";},7000);
 }
 
 function hideAuthError(){
-
 const el=$("authError");
-
 el.style.display="none";
 el.textContent="";
-
 }
 
 function showAuthLoading(){
-
 const loader=$("authLoading");
-
-if(!loader){
-return;
-}
-
+if(!loader)return;
 loader.style.display="flex";
 loader.style.opacity="1";
-
 }
 
 function hideAuthLoading(){
-
 const loader=$("authLoading");
-
-if(!loader){
-return;
-}
-
+if(!loader)return;
 loader.style.opacity="0";
-
-setTimeout(
-function(){
-
-if(loader){
-loader.style.display="none";
-}
-
-},
-180
-);
-
+setTimeout(function(){if(loader)loader.style.display="none";},180);
 }
 
 function setAuthButtonsBusy(busy,text){
-
 $("authBtn").disabled=busy;
 $("profileAuthBtn").disabled=busy;
-
 if(busy){
-
 $("authBtn").innerText=text;
 $("profileAuthBtn").innerText=text;
-
 }
-
 }
 
 auth.onAuthStateChanged(function(user){
-
 currentUser=user||null;
 authStateReady=true;
-
 updateAuthUI();
 hideAuthLoading();
-
 if(user){
-
-localStorage.setItem(
-LOGIN_MEMORY_KEY,
-"1"
-);
-
+localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 loadUserOrders(user.uid);
-
-setTimeout(
-function(){
-restorePaymentStateFromLocalStorage();
-},
-100
-);
-
+setTimeout(function(){restorePaymentStateFromLocalStorage();},100);
 }else{
-
 clearOrdersListener();
-
 }
-
 });
 
-auth.getRedirectResult()
-.then(function(result){
-
+auth.getRedirectResult().then(function(result){
 if(result&&result.user){
-
-localStorage.setItem(
-LOGIN_MEMORY_KEY,
-"1"
-);
-
+localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 hideAuthError();
-
 }
-
-})
-.catch(function(error){
-
-console.error(
-"Google redirect result error",
-error
-);
-
-handleAuthError(error);
-
-});
+}).catch(function(error){handleAuthError(error);});
 
 function getSavedAvatar(){
-
-return localStorage.getItem(
-"topperProfileAvatar"
-)||"u1.png";
-
+return localStorage.getItem("topperProfileAvatar")||"u1.png";
 }
 
 function setProfileAvatar(src){
-
 const img=$("profilePageImg");
-
-if(img){
-img.src=src;
-}
-
-const topPic=
-document.querySelector(
-"#authBtn .user-pic"
-);
-
-if(topPic){
-topPic.src=src;
-}
-
+if(img)img.src=src;
+const topPic=document.querySelector("#authBtn .user-pic");
+if(topPic)topPic.src=src;
 }
 
 function updateAuthUI(){
-
 const authBtn=$("authBtn");
 const name=$("profileName");
 const email=$("profileEmail");
@@ -1815,979 +1229,295 @@ const profileBtn=$("profileAuthBtn");
 const avatar=getSavedAvatar();
 
 if(currentUser){
-
-authBtn.innerHTML=
-'<img src="'+
-escapeAttribute(avatar)+
-'" class="user-pic" alt="Profile"> Logout';
-
-name.textContent=
-currentUser.displayName||
-"Google User";
-
-email.textContent=
-currentUser.email||
-"";
-
+authBtn.innerHTML='<img src="'+escapeAttribute(avatar)+'" class="user-pic" alt="Profile"> Logout';
+name.textContent=currentUser.displayName||"Google User";
+email.textContent=currentUser.email||"";
 img.src=avatar;
-
 profileBtn.textContent="Logout";
 profileBtn.onclick=googleSignOut;
-
 }else{
-
 authBtn.textContent="Sign In";
-
 name.textContent="Guest User";
-
-email.textContent=
-"Google Account Not Connected";
-
+email.textContent="Google Account Not Connected";
 img.src=avatar;
-
-profileBtn.textContent=
-"Google Account से लॉगिन करें";
-
+profileBtn.textContent="Google Account से लॉगिन करें";
 profileBtn.onclick=googleSignIn;
-
 }
-
 authBusy=false;
 authBtn.disabled=false;
 profileBtn.disabled=false;
-
 }
 
 function handleAuthAction(){
-
-if(currentUser){
-googleSignOut();
-}else{
-googleSignIn();
-}
-
+if(currentUser){googleSignOut();}else{googleSignIn();}
 }
 
 async function googleSignIn(){
-
-if(currentUser||authBusy){
-return;
-}
-
+if(currentUser||authBusy)return;
 authBusy=true;
-
 hideAuthError();
-
-setAuthButtonsBusy(
-true,
-"Google Login खुल रहा है..."
-);
-
-if(
-window.AndroidApp &&
-typeof window.AndroidApp.signIn==="function"
-){
-
-try{
-
-window.AndroidApp.signIn();
-
-}catch(error){
-
+setAuthButtonsBusy(true,"Google Login खुल रहा है...");
+if(window.AndroidApp && typeof window.AndroidApp.signIn==="function"){
+try{window.AndroidApp.signIn();}catch(error){
 authBusy=false;
 updateAuthUI();
-
-showAuthError(
-"❌ Google Login नहीं हुआ: "+
-(error.message||error)
-);
-
+showAuthError("❌ Google Login नहीं हुआ: "+(error.message||error));
 }
-
 return;
-
 }
-
-const provider=
-new firebase.auth.GoogleAuthProvider();
-
-provider.setCustomParameters({
-prompt:"select_account"
-});
-
+const provider=new firebase.auth.GoogleAuthProvider();
+provider.setCustomParameters({prompt:"select_account"});
 try{
-
 await auth.signInWithPopup(provider);
-
-localStorage.setItem(
-LOGIN_MEMORY_KEY,
-"1"
-);
-
+localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 hideAuthError();
-
 }catch(error){
-
-console.error(
-"Google popup login error",
-error
-);
-
 authBusy=false;
 updateAuthUI();
-
-if(
-error&&
-error.code==="auth/popup-blocked"
-){
-
-showAuthError(
-"❌ Google popup browser ने block किया।"
-);
-
-}else if(
-error&&
-error.code==="auth/popup-closed-by-user"
-){
-
-showAuthError(
-"Google Login window बंद कर दी गई।"
-);
-
-}else{
-
 handleAuthError(error);
-
 }
-
-}
-
 }
 
 window.nativeGoogleLogin=async function(idToken){
-
 try{
-
-const credential=
-firebase.auth.GoogleAuthProvider
-.credential(idToken);
-
-const result=
-await auth.signInWithCredential(
-credential
-);
-
+const credential=firebase.auth.GoogleAuthProvider.credential(idToken);
+const result=await auth.signInWithCredential(credential);
 currentUser=result.user;
-
-localStorage.setItem(
-LOGIN_MEMORY_KEY,
-"1"
-);
-
+localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 authBusy=false;
-
 hideAuthError();
 updateAuthUI();
 hideAuthLoading();
-
-setTimeout(
-function(){
-restorePaymentStateFromLocalStorage();
-},
-100
-);
-
+setTimeout(function(){restorePaymentStateFromLocalStorage();},100);
 }catch(error){
-
-console.error(
-"Native Google Firebase Login Error:",
-error
-);
-
 authBusy=false;
 updateAuthUI();
 handleAuthError(error);
-
 }
-
 };
 
 window.nativeGoogleLoginError=function(message){
-
-console.error(
-"Native Google Login Error:",
-message
-);
-
 authBusy=false;
 updateAuthUI();
 hideAuthLoading();
-
-showAuthError(
-"❌ Google Login नहीं हुआ: "+
-(message||"Unknown error")
-);
-
+showAuthError("❌ Google Login नहीं हुआ: "+(message||"Unknown error"));
 };
 
 function googleSignOut(){
-
-auth.signOut()
-.then(function(){
-
+auth.signOut().then(function(){
 currentUser=null;
-
-localStorage.removeItem(
-LOGIN_MEMORY_KEY
-);
-
+localStorage.removeItem(LOGIN_MEMORY_KEY);
 updateAuthUI();
 hideAuthLoading();
-
-showAppMessage(
-"Log Out हो गया!",
-"✅"
-);
-
-})
-.catch(function(error){
-
-showAppMessage(
-"Logout Error: "+error.message,
-"❌"
-);
-
-});
-
+showAppMessage("Log Out हो गया!","✅");
+}).catch(function(error){showAppMessage("Logout Error: "+error.message,"❌");});
 }
 
 function handleAuthError(error){
-
-console.error(error);
-
-let msg=
-error&&error.message
-?error.message
-:"Unknown error";
-
-if(
-error&&
-error.code==="auth/unauthorized-domain"
-){
-
-msg=
-"यह domain ("+
-location.hostname+
-") Firebase Authorized Domains में add नहीं है।";
-
-}else if(
-error&&
-error.code==="auth/operation-not-allowed"
-){
-
-msg=
-"Firebase Authentication में Google provider enabled नहीं है।";
-
-}else if(
-error&&
-error.code==="auth/invalid-continue-uri"
-){
-
-msg=
-"Google redirect URL invalid है।";
-
-}else if(
-error&&
-error.code==="auth/account-exists-with-different-credential"
-){
-
-msg=
-"इस email से Firebase में पहले किसी दूसरे sign-in method का account बना है।";
-
+let msg=error&&error.message?error.message:"Unknown error";
+showAuthError("❌ Google Login नहीं हुआ: "+msg);
 }
 
-showAuthError(
-"❌ Google Login नहीं हुआ: "+msg
-);
-
-}
-
-function openAvatarPicker(){
-$("avatarModal").style.display="block";
-}
-
-function closeAvatarPicker(){
-$("avatarModal").style.display="none";
-}
-
+function openAvatarPicker(){$("avatarModal").style.display="block";}
+function closeAvatarPicker(){$("avatarModal").style.display="none";}
 function selectAvatar(fileName){
-
-localStorage.setItem(
-"topperProfileAvatar",
-fileName
-);
-
+localStorage.setItem("topperProfileAvatar",fileName);
 setProfileAvatar(fileName);
 updateAuthUI();
 closeAvatarPicker();
-
 }
-
 setProfileAvatar(getSavedAvatar());
 
 function switchTab(viewId,btnEl){
-
-document.querySelectorAll(
-".view-section"
-)
-.forEach(function(v){
-
-v.classList.remove("active-view");
-
-});
-
-document.querySelectorAll(
-".nav-item"
-)
-.forEach(function(b){
-
-b.classList.remove("active");
-
-});
-
+document.querySelectorAll(".view-section").forEach(function(v){v.classList.remove("active-view");});
+document.querySelectorAll(".nav-item").forEach(function(b){b.classList.remove("active");});
 const view=$(viewId);
-
-if(view){
-view.classList.add("active-view");
-}
-
-if(btnEl){
-btnEl.classList.add("active");
-}
-
+if(view)view.classList.add("active-view");
+if(btnEl)btnEl.classList.add("active");
 }
 
 function updateLocationStatus(text){
-
 const el=$("locationStatus");
-
-if(!el){
-return;
-}
-
-el.textContent=text||"";
-
+if(el)el.textContent=text||"";
 }
 
 function setUserLocation(lat,lon){
-
 const latitude=Number(lat);
 const longitude=Number(lon);
-
-if(
-!Number.isFinite(latitude)||
-!Number.isFinite(longitude)
-){
-return;
-}
-
-userLocationLink=
-"https://www.google.com/maps?q="+
-encodeURIComponent(
-latitude+","+longitude
-);
-
+if(!Number.isFinite(latitude)||!Number.isFinite(longitude))return;
+userLocationLink="https://www.google.com/maps?q="+encodeURIComponent(latitude+","+longitude);
 locationReady=true;
 locationRequestBusy=false;
-
-if(locationRetryTimer){
-
-clearTimeout(locationRetryTimer);
-locationRetryTimer=null;
-
-}
-
-updateLocationStatus(
-"✅ Live Location उपलब्ध है"
-);
-
-const actions=
-pendingLocationActions.slice();
-
+if(locationRetryTimer){clearTimeout(locationRetryTimer);locationRetryTimer=null;}
+updateLocationStatus("✅ Live Location उपलब्ध है");
+const actions=pendingLocationActions.slice();
 pendingLocationActions=[];
-
-actions.forEach(function(action){
-
-setTimeout(
-function(){
-
-try{
-action();
-}catch(error){
-console.error(
-"Location action error:",
-error
-);
-}
-
-},
-0
-);
-
-});
-
+actions.forEach(function(action){try{action();}catch(error){}});
 }
 
 function requestUserLocation(){
-
-if(locationReady){
-return;
-}
-
-if(locationRequestBusy){
-return;
-}
-
+if(locationReady||locationRequestBusy)return;
 locationRequestBusy=true;
-
-updateLocationStatus(
-"📍 Live Location लोड हो रही है..."
-);
-
-if(
-window.AndroidApp &&
-typeof window.AndroidApp.getLocation==="function"
-){
-
-try{
-
-window.AndroidApp.getLocation();
-
-}catch(error){
-
-console.error(
-"Native location error:",
-error
-);
-
+updateLocationStatus("📍 Live Location लोड हो रही है...");
+if(window.AndroidApp && typeof window.AndroidApp.getLocation==="function"){
+try{window.AndroidApp.getLocation();}catch(error){
 locationRequestBusy=false;
 scheduleLocationRetry();
-
 }
-
 return;
-
 }
-
 if(navigator.geolocation){
-
 navigator.geolocation.getCurrentPosition(
-
-function(pos){
-
-setUserLocation(
-pos.coords.latitude,
-pos.coords.longitude
+function(pos){setUserLocation(pos.coords.latitude,pos.coords.longitude);},
+function(error){locationRequestBusy=false;scheduleLocationRetry();},
+{enableHighAccuracy:true,timeout:20000,maximumAge:0}
 );
-
-},
-
-function(error){
-
-console.error(
-"Browser GPS Error:",
-error
-);
-
-locationRequestBusy=false;
-scheduleLocationRetry();
-
-},
-
-{
-enableHighAccuracy:true,
-timeout:20000,
-maximumAge:0
-}
-
-);
-
 }else{
-
 locationRequestBusy=false;
 scheduleLocationRetry();
-
 }
-
 }
 
 function scheduleLocationRetry(){
-
-if(locationRetryTimer){
-clearTimeout(locationRetryTimer);
-}
-
-locationRetryTimer=
-setTimeout(
-function(){
-
+if(locationRetryTimer)clearTimeout(locationRetryTimer);
+locationRetryTimer=setTimeout(function(){
 locationRetryTimer=null;
-
-if(!locationReady){
-requestUserLocation();
+if(!locationReady)requestUserLocation();
+},3000);
 }
 
-},
-3000
-);
-
-}
-
-window.nativeLocationSuccess=function(lat,lon){
-
-const latitude=Number(lat);
-const longitude=Number(lon);
-
-if(
-!Number.isFinite(latitude)||
-!Number.isFinite(longitude)
-){
-
-window.nativeLocationError(
-"Invalid location received"
-);
-
-return;
-
-}
-
-setUserLocation(
-latitude,
-longitude
-);
-
-};
-
+window.nativeLocationSuccess=function(lat,lon){setUserLocation(lat,lon);};
 window.nativeLocationError=function(message){
-
-console.error(
-"Native Location Error:",
-message
-);
-
 locationRequestBusy=false;
-
-updateLocationStatus(
-"📍 Live Location प्राप्त नहीं हुई, दोबारा कोशिश हो रही है..."
-);
-
+updateLocationStatus("📍 Live Location प्राप्त नहीं हुई...");
 scheduleLocationRetry();
-
 };
 
 function runWithLocation(action){
-
-if(locationReady){
-
-try{
-action();
-}catch(error){
-console.error(
-"Location action error:",
-error
-);
-}
-
-return;
-}
-
+if(locationReady){try{action();}catch(error){}return;}
 pendingLocationActions.push(action);
 requestUserLocation();
-
 }
 
-setTimeout(
-function(){
-requestUserLocation();
-},
-100
-);
+setTimeout(function(){requestUserLocation();},100);
 
 function openWhatsApp(message){
-
 const text=String(message||"").trim();
-
-if(!text){
-
-showAppMessage(
-"WhatsApp message खाली है।",
-"⚠️"
-);
-
-return;
-}
-
-if(whatsappOpening){
-return;
-}
-
+if(!text)return;
+if(whatsappOpening)return;
 whatsappOpening=true;
-
-const bridge=window.AndroidApp;
-
-if(
-bridge &&
-typeof bridge.openWhatsApp==="function"
-){
-
+if(window.AndroidApp && typeof window.AndroidApp.openWhatsApp==="function"){
 try{
-
-bridge.openWhatsApp(text);
-
-setTimeout(
-function(){
-whatsappOpening=false;
-},
-500
-);
-
+window.AndroidApp.openWhatsApp(text);
+setTimeout(function(){whatsappOpening=false;},500);
 return;
-
-}catch(error){
-
-console.error(
-"Native WhatsApp Error:",
-error
-);
-
-whatsappOpening=false;
-
-showAppMessage(
-"WhatsApp खोलने में समस्या हुई।",
-"❌"
-);
-
-return;
-
+}catch(error){whatsappOpening=false;}
+}
+try{window.open("https://wa.me/9192641377710?text="+encodeURIComponent(text),"_blank");}catch(error){}
+setTimeout(function(){whatsappOpening=false;},500);
 }
 
-}
-
-const url=
-"https://wa.me/9192641377710?text="+
-encodeURIComponent(text);
-
-try{
-
-window.open(url,"_blank");
-
-}catch(error){
-
-console.error(
-"Browser WhatsApp Error:",
-error
-);
-
-showAppMessage(
-"WhatsApp खोलने में समस्या हुई।",
-"❌"
-);
-
-}
-
-setTimeout(
-function(){
-whatsappOpening=false;
-},
-500
-);
-
-}
-
-window.nativeWhatsAppError=function(message){
-
-whatsappOpening=false;
-
-showAppMessage(
-message||
-"WhatsApp इस डिवाइस पर उपलब्ध नहीं है। कृपया WhatsApp install करके फिर कोशिश करें।",
-"📱"
-);
-
-};
-
-window.nativeWhatsAppOpened=function(){
-whatsappOpening=false;
-};
+window.nativeWhatsAppError=function(message){whatsappOpening=false;};
+window.nativeWhatsAppOpened=function(){whatsappOpening=false;};
 
 function buyNow(productName,price){
-
 runWithLocation(function(){
-
-if(
-!locationReady||
-!userLocationLink
-){
-return;
-}
-
-openWhatsApp(
-"नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
-"📦 सामान: "+productName+
-"\n💰 कीमत: ₹"+
-Number(price).toLocaleString("en-IN")+
-"\n\n📍 लाइव लोकेशन: "+
-userLocationLink+
-"\n\nकृपया डिलीवरी की जानकारी भेजें।"
-);
-
+if(!locationReady||!userLocationLink)return;
+openWhatsApp("नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n📦 सामान: "+productName+"\n💰 कीमत: ₹"+Number(price).toLocaleString("en-IN")+"\n\n📍 लाइव लोकेशन: "+userLocationLink+"\n\nकृपया डिलीवरी की जानकारी भेजें।");
 });
-
 }
 
-const tableColors=[
-"Light Wooden",
-"Grey Wooden",
-"Light Dark Wooden",
-"Dark Wooden"
-];
-
+const tableColors=["Light Wooden","Grey Wooden","Light Dark Wooden","Dark Wooden"];
 const tableSliderTrack=$("tableSlider");
-
 if(tableSliderTrack){
-
-tableSliderTrack.addEventListener(
-"scroll",
-function(){
-
-const width=
-tableSliderTrack.clientWidth||1;
-
-const index=
-Math.round(
-tableSliderTrack.scrollLeft/width
-);
-
-if(tableColors[index]){
-
-$("selectedTableColorText").textContent=
-tableColors[index];
-
-}
-
-}
-);
-
+tableSliderTrack.addEventListener("scroll",function(){
+const width=tableSliderTrack.clientWidth||1;
+const index=Math.round(tableSliderTrack.scrollLeft/width);
+if(tableColors[index]){$("selectedTableColorText").textContent=tableColors[index];}
+});
 }
 
 function slideImages(id,direction){
-
 const track=$(id);
-
-if(!track){
-return;
-}
-
-track.scrollBy({
-left:direction*track.clientWidth,
-behavior:"smooth"
-});
-
+if(!track)return;
+track.scrollBy({left:direction*track.clientWidth,behavior:"smooth"});
 }
 
 function getSelectedTableColor(){
-
 const track=$("tableSlider");
-
-if(!track){
-return tableColors[0];
-}
-
-const index=
-Math.round(
-track.scrollLeft/
-(track.clientWidth||1)
-);
-
+if(!track)return tableColors[0];
+const index=Math.round(track.scrollLeft/(track.clientWidth||1));
 return tableColors[index]||tableColors[0];
-
 }
 
 function requireLogin(){
-
-if(currentUser){
-return true;
-}
-
-showAppMessage(
-"ऑर्डर करने के लिए पहले Google Account से Sign-In करें!",
-"🔐"
-);
-
-switchTab(
-"profileView",
-document.querySelectorAll(".nav-item")[2]
-);
-
+if(currentUser)return true;
+showAppMessage("ऑर्डर करने के लिए पहले Google Account से Sign-In करें!","🔐");
+switchTab("profileView",document.querySelectorAll(".nav-item")[2]);
 return false;
-
 }
 
 function prepareNewPayment(productName,price){
-
 selectedProduct=String(productName);
 selectedPrice=String(price);
-
 $("custName").value="";
 $("custPhone").value="";
 $("custAddress").value="";
 $("utrNumber").value="";
-
-$("modalProductInfo").textContent=
-selectedProduct+
-" - ₹"+
-Number(selectedPrice).toLocaleString("en-IN");
-
-$("upiPayAmount").textContent=
-Number(selectedPrice).toLocaleString("en-IN");
-
+$("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice).toLocaleString("en-IN");
+$("upiPayAmount").textContent=Number(selectedPrice).toLocaleString("en-IN");
 $("orderModal").style.display="block";
-
 savePaymentState();
 requestUserLocation();
-
 }
 
 function openOrderForm(productName,price){
-
-if(!requireLogin()){
-return;
-}
-
-prepareNewPayment(
-productName,
-price
-);
-
+if(!requireLogin())return;
+prepareNewPayment(productName,price);
 }
 
 function openTableOrderForm(){
-
-if(!requireLogin()){
-return;
-}
-
-const product=
-"Sewing Machine Top Table ["+
-getSelectedTableColor()+
-"]";
-
-prepareNewPayment(
-product,
-"550"
-);
-
+if(!requireLogin())return;
+prepareNewPayment("Sewing Machine Top Table ["+getSelectedTableColor()+"]","550");
 }
 
 function hideOrderModal(){
-
 $("orderModal").style.display="none";
-
 const btn=$("onlineOrderBtn");
-
 btn.disabled=false;
-
-btn.textContent=
-"💬 WhatsApp पर Order भेजें";
-
+btn.textContent="💬 WhatsApp पर Order भेजें";
 }
 
 function cancelOrderForm(){
-
 clearPaymentState();
 clearPaymentFormFields();
-
-sessionStorage.removeItem(
-"pendingUpiWhatsApp"
-);
-
+sessionStorage.removeItem("pendingUpiWhatsApp");
 $("orderModal").style.display="none";
-
 const btn=$("onlineOrderBtn");
-
 btn.disabled=false;
-
-btn.textContent=
-"💬 WhatsApp पर Order भेजें";
-
+btn.textContent="💬 WhatsApp पर Order भेजें";
 }
 
 function payViaUpiIntent(){
-
-const amount=
-Number(selectedPrice||0);
-
-if(!amount){
-
-showAppMessage(
-"पहले कोई product चुनें。",
-"⚠️"
-);
-
-return;
-}
-
-const name=
-$("custName").value.trim();
-
-const phone=
-$("custPhone").value.trim();
-
-const address=
-$("custAddress").value.trim();
-
-if(
-!name||
-!phone||
-!address
-){
-
+const amount=Number(selectedPrice||0);
+if(!amount)return;
+const name=$("custName").value.trim();
+const phone=$("custPhone").value.trim();
+const address=$("custAddress").value.trim();
+if(!name||!phone||!address){
 savePaymentState();
-
-showAppMessage(
-"पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।",
-"📝"
-);
-
+showAppMessage("पहले अपना नाम, मोबाइल नंबर और पूरा पता भरें।","📝");
 return;
 }
-
 if(!/^\d{10}$/.test(phone)){
-
 savePaymentState();
-
-showAppMessage(
-"कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
-"📱"
-);
-
+showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर डालें!","📱");
 return;
 }
-
 savePaymentState();
-
 runWithLocation(function(){
-
-if(
-!locationReady||
-!userLocationLink
-){
-return;
-}
-
-sessionStorage.setItem(
-"pendingUpiWhatsApp",
-JSON.stringify({
+if(!locationReady||!userLocationLink)return;
+sessionStorage.setItem("pendingUpiWhatsApp",JSON.stringify({
 product:selectedProduct,
 price:amount,
 name:name,
@@ -2795,227 +1525,83 @@ phone:phone,
 address:address,
 location:userLocationLink,
 startedAt:Date.now()
-})
-);
-
+}));
 savePaymentState();
-
-const upiUrl=
-"upi://pay?pa="+
-encodeURIComponent("topperstitching@naviaxis")+
-"&pn="+
-encodeURIComponent("Ankit Kumar Singh")+
-"&am="+
-encodeURIComponent(amount.toFixed(2))+
-"&cu=INR";
-
-if(
-window.AndroidApp &&
-typeof window.AndroidApp.openUpi==="function"
-){
-
-try{
-
-window.AndroidApp.openUpi(upiUrl);
-
-}catch(error){
-
-console.error(
-"Native UPI Error:",
-error
-);
-
-window.nativeUpiError();
-
-}
-
+const upiUrl="upi://pay?pa="+encodeURIComponent("topperstitching@naviaxis")+"&pn="+encodeURIComponent("Ankit Kumar Singh")+"&am="+encodeURIComponent(amount.toFixed(2))+"&cu=INR";
+if(window.AndroidApp && typeof window.AndroidApp.openUpi==="function"){
+try{window.AndroidApp.openUpi(upiUrl);}catch(error){window.nativeUpiError();}
 return;
-
 }
-
-try{
-
-window.location.href=upiUrl;
-
-}catch(error){
-
-console.error(
-"UPI Error:",
-error
-);
-
-window.nativeUpiError();
-
-}
-
+try{window.location.href=upiUrl;}catch(error){window.nativeUpiError();}
 });
-
 }
 
 window.nativeUpiError=function(){
-
 savePaymentState();
-
-showAppMessage(
-"इस डिवाइस पर कोई UPI app उपलब्ध नहीं मिला। कृपया Google Pay, PhonePe या किसी UPI app को install करके फिर कोशिश करें।",
-"💳"
-);
-
+showAppMessage("इस डिवाइस पर कोई UPI app उपलब्ध नहीं मिला।","💳");
 };
 
 function sendPendingUpiOrderToWhatsApp(){
-
-const raw=
-sessionStorage.getItem("pendingUpiWhatsApp");
-
-if(!raw){
-return;
-}
-
+const raw=sessionStorage.getItem("pendingUpiWhatsApp");
+if(!raw)return;
 let data;
-
-try{
-
-data=JSON.parse(raw);
-
-}catch(e){
-
+try{data=JSON.parse(raw);}catch(e){
 sessionStorage.removeItem("pendingUpiWhatsApp");
 return;
-
 }
-
-if(
-!data||
-!data.product||
-Date.now()-Number(data.startedAt||0)>30601000
-){
-
+if(!data||!data.product||Date.now()-Number(data.startedAt||0)>30601000){
 sessionStorage.removeItem("pendingUpiWhatsApp");
 return;
-
+}
+if(!locationReady||!userLocationLink){
+runWithLocation(function(){sendPendingUpiOrderToWhatsApp();});
+return;
+}
+const freshLocation=userLocationLink;
+sessionStorage.removeItem("pendingUpiWhatsApp");
+const message="🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n📦 सामान: "+data.product+"\n💰 कीमत: ₹"+Number(data.price).toLocaleString("en-IN")+"\n\n👤 ग्राहक का नाम: "+data.name+"\n📞 फोन नंबर: "+data.phone+"\n🏠 पूरा पता: "+data.address+"\n\n📍 लाइव लोकेशन: "+freshLocation+"\n\n💳 Payment: UPI\n🔢 UTR / Transaction No: Payment app से UTR भेजें";
+openWhatsApp(message);
 }
 
-if(
-!locationReady||
-!userLocationLink
-){
-
-runWithLocation(function(){
-sendPendingUpiOrderToWhatsApp();
+window.addEventListener("pageshow",function(){
+if(!locationReady)requestUserLocation();
+if(sessionStorage.getItem("pendingUpiWhatsApp"))sendPendingUpiOrderToWhatsApp();
 });
 
-return;
-
-}
-
-const freshLocation=userLocationLink;
-
-sessionStorage.removeItem("pendingUpiWhatsApp");
-
-const message=
-"🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n"+
-"📦 सामान: "+data.product+
-"\n💰 कीमत: ₹"+
-Number(data.price).toLocaleString("en-IN")+
-"\n\n👤 ग्राहक का नाम: "+data.name+
-"\n📞 फोन नंबर: "+data.phone+
-"\n🏠 पूरा पता: "+data.address+
-"\n\n📍 लाइव लोकेशन: "+freshLocation+
-"\n\n💳 Payment: UPI"+
-"\n🔢 UTR / Transaction No: Payment app से UTR भेजें"+
-"\n\n⚠️ नोट: UPI payment पूरा करने के बाद यह WhatsApp message भेजा गया है। कृपया UTR भी भेजें।";
-
-openWhatsApp(message);
-
-}
-
-window.addEventListener(
-"pageshow",
-function(){
-
-if(!locationReady){
-requestUserLocation();
-}
-
-if(sessionStorage.getItem("pendingUpiWhatsApp")){
-sendPendingUpiOrderToWhatsApp();
-}
-
-}
-);
-
 async function submitOnlineOrder(){
-
 if(!currentUser){
-
 savePaymentState();
-
-showAppMessage(
-"कृपया पहले Google Account से Login करें!",
-"🔐"
-);
-
+showAppMessage("कृपया पहले Google Account से Login करें!","🔐");
 return;
-
 }
-
 const name=$("custName").value.trim();
 const phone=$("custPhone").value.trim();
 const address=$("custAddress").value.trim();
 const utr=$("utrNumber").value.trim();
-
 savePaymentState();
 
 if(!name||!phone||!address){
-
-showAppMessage(
-"कृपया अपनी सभी जानकारी भरें!",
-"📝"
-);
-
+showAppMessage("कृपया अपनी सभी जानकारी भरें!","📝");
 return;
 }
-
 if(!/^\d{10}$/.test(phone)){
-
-showAppMessage(
-"कृपया 10 अंकों का सही मोबाइल नंबर डालें!",
-"📱"
-);
-
+showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर डालें!","📱");
 return;
 }
-
 if(!utr){
-
-showAppMessage(
-"कृपया payment के बाद UTR / Transaction Number डालें!",
-"💳"
-);
-
+showAppMessage("कृपया payment के बाद UTR / Transaction Number डालें!","💳");
 return;
 }
-
-if(
-!locationReady||
-!userLocationLink
-){
-
-runWithLocation(function(){
-submitOnlineOrder();
-});
-
+if(!locationReady||!userLocationLink){
+runWithLocation(function(){submitOnlineOrder();});
 return;
 }
 
 const btn=$("onlineOrderBtn");
-
 btn.disabled=true;
 btn.textContent="⏳ Order Firebase में Save हो रहा है...";
 
 const orderData={
-
 userId:currentUser.uid,
 userEmail:currentUser.email||"",
 customerName:name,
@@ -3031,1594 +1617,121 @@ paymentStatus:"submitted",
 paymentMethod:"UPI",
 createdAt:Date.now(),
 timestamp:new Date().toISOString(),
-date:new Date().toLocaleString(
-"en-IN",
-{
-dateStyle:"medium",
-timeStyle:"short"
-}
-)
-
+date:new Date().toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})
 };
 
 try{
-
 const ref=db.ref("orders").push();
-
 orderData.orderId=ref.key;
-
 await ref.set(orderData);
 
-const message=
-"🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n"+
-"🆔 Order ID: "+ref.key+
-"\n\n📦 सामान: "+selectedProduct+
-"\n💰 कीमत: ₹"+
-Number(selectedPrice).toLocaleString("en-IN")+
-"\n\n👤 ग्राहक का नाम: "+name+
-"\n📞 फोन नंबर: "+phone+
-"\n🏠 पूरा पता: "+address+
-"\n\n📍 लाइव लोकेशन: "+userLocationLink+
-"\n\n💳 Payment: UPI"+
-"\n🔢 UTR / Transaction No: "+utr+
-"\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
+const message="🌟 नया ऑनलाइन पेमेंट आर्डर 🌟\n\n🆔 Order ID: "+ref.key+"\n\n📦 सामान: "+selectedProduct+"\n💰 कीमत: ₹"+Number(selectedPrice).toLocaleString("en-IN")+"\n\n👤 ग्राहक का नाम: "+name+"\n📞 फोन नंबर: "+phone+"\n🏠 पूरा पता: "+address+"\n\n📍 लाइव लोकेशन: "+userLocationLink+"\n\n💳 Payment: UPI\n🔢 UTR / Transaction No: "+utr+"\n📸 *पेमेंट स्क्रीनशॉट WhatsApp पर भेजें।";
 
 clearPaymentState();
 sessionStorage.removeItem("pendingUpiWhatsApp");
 clearPaymentFormFields();
-
 $("orderModal").style.display="none";
-
 btn.disabled=false;
 btn.textContent="💬 WhatsApp पर Order भेजें";
 
-showAppMessage(
-"आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+
-ref.key,
-"✅"
-);
-
-setTimeout(
-function(){
-openWhatsApp(message);
-},
-300
-);
-
+showAppMessage("आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+ref.key,"✅");
+setTimeout(function(){openWhatsApp(message);},300);
 }catch(error){
-
-console.error(
-"Firebase Order Error:",
-error
-);
-
 savePaymentState();
-
 btn.disabled=false;
 btn.textContent="💬 WhatsApp पर Order भेजें";
-
-showAppMessage(
-"Order Save नहीं हो पाया!\n\n"+
-(error.message||error),
-"❌"
-);
-
+showAppMessage("Order Save नहीं हो पाया!\n\n"+(error.message||error),"❌");
 }
-
 }
 
 function clearOrdersListener(){
-
 if(ordersQuery){
-
-ordersQuery.off(
-"value",
-ordersValueHandler
-);
-
+ordersQuery.off("value",ordersValueHandler);
 ordersQuery=null;
-
 }
-
-$("ordersList").innerHTML=
-'<p class="empty-orders">📦 Orders देखने के लिए Google से Sign-In करें।</p>';
-
+$("ordersList").innerHTML='<p class="empty-orders">📦 Orders देखने के लिए Google से Sign-In करें।</p>';
 }
 
 function loadUserOrders(userId){
-
-if(ordersQuery){
-
-ordersQuery.off(
-"value",
-ordersValueHandler
-);
-
-}
-
-ordersQuery=
-db.ref("orders")
-.orderByChild("userId")
-.equalTo(userId);
-
-$("ordersList").innerHTML=
-'<p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>';
-
-ordersQuery.on(
-"value",
-ordersValueHandler,
-function(error){
-
-console.error(error);
-
-$("ordersList").innerHTML=
-'<p class="empty-orders" style="color:#d32f2f">❌ Orders load नहीं हो सके।<br><br>'+
-escapeHtml(error.message||error)+
-"</p>";
-
-}
-);
-
+if(ordersQuery){ordersQuery.off("value",ordersValueHandler);}
+ordersQuery=db.ref("orders").orderByChild("userId").equalTo(userId);
+$("ordersList").innerHTML='<p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>';
+ordersQuery.on("value",ordersValueHandler,function(error){
+$("ordersList").innerHTML='<p class="empty-orders" style="color:#d32f2f">❌ Orders load नहीं हो सके।</p>';
+});
 }
 
 function ordersValueHandler(snapshot){
-
 const list=$("ordersList");
-
 list.innerHTML="";
-
 if(!snapshot.exists()){
-
-list.innerHTML=
-'<p class="empty-orders">📦 अभी कोई Order नहीं मिला।</p>';
-
+list.innerHTML='<p class="empty-orders">📦 अभी कोई Order नहीं मिला।</p>';
 return;
-
 }
-
 const orders=[];
-
-snapshot.forEach(
-function(child){
-
+snapshot.forEach(function(child){
 const o=child.val();
-
-if(o){
-
-o._id=child.key;
-orders.push(o);
-
-}
-
-}
-);
-
-orders.sort(
-function(a,b){
-
-return Number(b.createdAt||0)-
-Number(a.createdAt||0);
-
-}
-);
-
-orders.forEach(
-function(order){
-
-const status=
-String(order.status||"pending")
-.toLowerCase();
-
+if(o){o._id=child.key;orders.push(o);}
+});
+orders.sort(function(a,b){return Number(b.createdAt||0)-Number(a.createdAt||0);});
+orders.forEach(function(order){
+const status=String(order.status||"pending").toLowerCase();
 let cls="status-pending";
 let text="⏳ Pending";
-
-if(
-status==="successful"||
-status==="success"
-){
-
-cls="status-success";
-text="✅ Successful";
-
-}
-
-if(
-status==="failed"||
-status==="failure"
-){
-
-cls="status-failed";
-text="❌ Failed";
-
-}
-
+if(status==="successful"||status==="success"){cls="status-success";text="✅ Successful";}
+if(status==="failed"||status==="failure"){cls="status-failed";text="❌ Failed";}
 const card=document.createElement("div");
-
 card.className="order-card";
-
-card.innerHTML=
-'<div class="order-header">'+
-"<b>"+
-escapeHtml(order.product||"Product")+
-"</b>"+
-'<span class="status-badge '+cls+'">'+
-text+
-"</span>"+
-"</div>"+
-"<div><b>🆔 Order ID:</b> "+
-escapeHtml(order.orderId||order._id)+
-"</div>"+
-'<div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+
-Number(order.price||0).toLocaleString("en-IN")+
-"</div>"+
-'<div style="margin-top:6px"><b>👤 नाम:</b> '+
-escapeHtml(order.customerName||"")+
-"</div>"+
-'<div style="margin-top:6px"><b>📞 मोबाइल:</b> '+
-escapeHtml(order.customerPhone||"")+
-"</div>"+
-'<div style="margin-top:6px"><b>🏠 पता:</b> '+
-escapeHtml(order.address||"")+
-"</div>"+
-'<div style="margin-top:6px"><b>🕐 तारीख:</b> '+
-escapeHtml(order.date||"")+
-"</div>";
-
+card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge '+cls+'">'+text+'</span></div><div><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
 if(order.location){
-
 const a=document.createElement("a");
-
 a.href=order.location;
 a.target="_blank";
 a.rel="noopener noreferrer";
 a.textContent="📍 Delivery Location देखें";
 a.style.display="block";
 a.style.marginTop="8px";
-
 card.appendChild(a);
-
 }
-
 list.appendChild(card);
-
-}
-);
-
+});
 }
 
 function buyTableNow(){
-
-const product=
-"Sewing Machine Top Table ["+
-getSelectedTableColor()+
-"]";
-
+const product="Sewing Machine Top Table ["+getSelectedTableColor()+"]";
 runWithLocation(function(){
-
-if(
-!locationReady||
-!userLocationLink
-){
-return;
+if(!locationReady||!userLocationLink)return;
+openWhatsApp("नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n📦 सामान: "+product+"\n💰 कीमत: ₹550\n\n📍 लाइव लोकेशन: "+userLocationLink+"\n\nकृपया डिलीवरी की जानकारी भेजें।");
+});
 }
 
-openWhatsApp(
-"नमस्ते Topper Stitching! मुझे यह सामान ऑर्डर करना है:\n\n"+
-"📦 सामान: "+product+
-"\n💰 कीमत: ₹550"+
-"\n\n📍 लाइव लोकेशन: "+userLocationLink+
-"\n\nकृपया डिलीवरी की जानकारी भेजें।"
-);
-
+window.addEventListener("click",function(e){
+if(e.target===$("orderModal")){hideOrderModal();}
 });
 
-}
-
-window.addEventListener(
-"click",
-function(e){
-
-if(e.target===$("orderModal")){
-hideOrderModal();
-}
-
-}
-);
-
-$("custPhone").addEventListener(
-"input",
-function(){
-
-this.value=
-this.value
-.replace(/[^0-9]/g,"")
-.slice(0,10);
-
+$("custPhone").addEventListener("input",function(){
+this.value=this.value.replace(/[^0-9]/g,"").slice(0,10);
 savePaymentState();
-
-}
-);
+});
 
 setupPaymentAutoSave();
 
-setTimeout(
-function(){
-
-if(
-currentUser &&
-!paymentStateRestored
-){
-
-restorePaymentStateFromLocalStorage();
-
-}
-
-},
-1000
-);
-
-
-/* =========================================================
-   REAL CONFERBOT
-   IMPORTANT:
-   Conferbot launcher is an iframe on many devices.
-   Pointer events inside an iframe do NOT reach this page.
-   Therefore a transparent REAL drag handle is placed
-   over the left edge of the actual Conferbot iframe.
-   ========================================================= */
-
-const CONFERBOT_POSITION_KEY=
-"topper_real_conferbot_position_v4";
-
-let realConferbotElement=null;
-let realConferbotDragHandle=null;
-let realConferbotDragging=false;
-let realConferbotMoved=false;
-
-let realConferbotPointerId=null;
-
-let realConferbotStartX=0;
-let realConferbotStartY=0;
-
-let realConferbotStartLeft=0;
-let realConferbotStartTop=0;
-
-let realConferbotInitialized=false;
-
-
-/* ---------- SAVE ---------- */
-
-function saveRealConferbotPosition(left,top){
-
-try{
-
-localStorage.setItem(
-CONFERBOT_POSITION_KEY,
-JSON.stringify({
-left:Number(left),
-top:Number(top),
-savedAt:Date.now()
-})
-);
-
-}catch(error){
-
-console.error(
-"Conferbot position save error:",
-error
-);
-
-}
-
-}
-
-
-/* ---------- READ ---------- */
-
-function getSavedRealConferbotPosition(){
-
-try{
-
-const raw=
-localStorage.getItem(
-CONFERBOT_POSITION_KEY
-);
-
-if(!raw){
-return null;
-}
-
-const data=JSON.parse(raw);
-
-if(
-!Number.isFinite(Number(data.left))||
-!Number.isFinite(Number(data.top))
-){
-
-return null;
-
-}
-
-return{
-left:Number(data.left),
-top:Number(data.top)
-};
-
-}catch(error){
-
-console.error(
-"Conferbot position read error:",
-error
-);
-
-return null;
-
-}
-
-}
-
-
-/* ---------- CHECK ELEMENT ---------- */
-
-function isVisibleElement(el){
-
-if(!el){
-return false;
-}
-
-const rect=
-el.getBoundingClientRect();
-
-if(
-rect.width<35||
-rect.height<35
-){
-return false;
-}
-
-if(
-rect.width>140||
-rect.height>140
-){
-return false;
-}
-
-const style=
-window.getComputedStyle(el);
-
-if(
-style.display==="none"||
-style.visibility==="hidden"||
-Number(style.opacity)===0
-){
-return false;
-}
-
-return true;
-
-}
-
-
-/* ---------- REAL CONFERBOT MARKER ---------- */
-
-function elementHasConferbotName(el){
-
-if(!el){
-return false;
-}
-
-const text=[
-el.id||"",
-el.className||"",
-el.getAttribute("aria-label")||"",
-el.getAttribute("title")||"",
-el.getAttribute("data-testid")||"",
-el.getAttribute("src")||"",
-el.getAttribute("name")||""
-]
-.join(" ")
-.toLowerCase();
-
-return(
-text.includes("conferbot")||
-text.includes("confer-bot")
-);
-
-}
-
-
-/* ---------- FIND REAL WIDGET ---------- */
-
-function findRealConferbot(){
-
-const selectors=[
-
-"iframe[src*='conferbot']",
-"iframe[src*='chat']",
-"iframe[title*='chat' i]",
-"[id*='conferbot' i]",
-"[class*='conferbot' i]",
-"[data-conferbot]",
-"[data-conferbot-widget]"
-
-];
-
-for(
-const selector of selectors
-){
-
-let elements=[];
-
-try{
-
-elements=
-Array.from(
-document.querySelectorAll(selector)
-);
-
-}catch(error){
-
-continue;
-
-}
-
-for(
-const el of elements
-){
-
-if(!isVisibleElement(el)){
-continue;
-}
-
-return el;
-
-}
-
-}
-
-
-/* ---------- SECONDARY SCAN ---------- */
-
-const all=
-Array.from(
-document.querySelectorAll(
-"iframe,button,div,a"
-)
-);
-
-const candidates=[];
-
-for(
-const el of all
-){
-
-if(!isVisibleElement(el)){
-continue;
-}
-
-if(
-el.closest(".bottom-nav")||
-el.closest("#orderModal")||
-el.closest("#avatarModal")||
-el.closest("#appMessageBox")||
-el.closest("#authLoading")
-){
-continue;
-}
-
-const rect=
-el.getBoundingClientRect();
-
-const style=
-window.getComputedStyle(el);
-
-const fixed=
-style.position==="fixed"||
-style.position==="absolute";
-
-if(!fixed){
-continue;
-}
-
-const nearBottom=
-window.innerHeight-
-rect.bottom<
-220;
-
-const nearRight=
-window.innerWidth-
-rect.right<
-220;
-
-const nearLeft=
-rect.left<
-220;
-
-if(
-!nearBottom||
-(!nearRight&&!nearLeft)
-){
-continue;
-}
-
-let score=0;
-
-if(el.tagName==="IFRAME"){
-score+=50;
-}
-
-if(elementHasConferbotName(el)){
-score+=200;
-}
-
-if(
-rect.width>=45&&
-rect.width<=90&&
-rect.height>=45&&
-rect.height<=90
-){
-score+=30;
-}
-
-if(
-nearRight&&
-nearBottom
-){
-score+=10;
-}
-
-candidates.push({
-el:el,
-score:score
-});
-
-}
-
-candidates.sort(
-function(a,b){
-return b.score-a.score;
-}
-);
-
-if(candidates.length){
-return candidates[0].el;
-}
-
-return null;
-
-}
-
-
-/* ---------- GET RECT ---------- */
-
-function getRealConferbotRect(){
-
-if(!realConferbotElement){
-return null;
-}
-
-return realConferbotElement.getBoundingClientRect();
-
-}
-
-
-/* ---------- CLAMP ---------- */
-
-function clampConferbotPosition(
-left,
-top
-){
-
-const rect=
-getRealConferbotRect();
-
-if(!rect){
-return{
-left:left,
-top:top
-};
-}
-
-const margin=8;
-
-const width=
-Math.max(40,rect.width);
-
-const height=
-Math.max(40,rect.height);
-
-const maxLeft=
-Math.max(
-margin,
-window.innerWidth-
-width-
-margin
-);
-
-const maxTop=
-Math.max(
-margin,
-window.innerHeight-
-height-
-margin
-);
-
-let finalLeft=
-Number(left);
-
-let finalTop=
-Number(top);
-
-if(!Number.isFinite(finalLeft)){
-finalLeft=margin;
-}
-
-if(!Number.isFinite(finalTop)){
-finalTop=margin;
-}
-
-finalLeft=
-Math.max(
-margin,
-Math.min(
-finalLeft,
-maxLeft
-)
-);
-
-finalTop=
-Math.max(
-margin,
-Math.min(
-finalTop,
-maxTop
-)
-);
-
-return{
-left:finalLeft,
-top:finalTop
-};
-
-}
-
-
-/* ---------- MOVE REAL WIDGET ---------- */
-
-function moveRealConferbot(
-left,
-top
-){
-
-if(!realConferbotElement){
-return;
-}
-
-const p=
-clampConferbotPosition(
-left,
-top
-);
-
-realConferbotElement.style.setProperty(
-"position",
-"fixed",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"left",
-p.left+"px",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"top",
-p.top+"px",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"right",
-"auto",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"bottom",
-"auto",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"margin",
-"0",
-"important"
-);
-
-realConferbotElement.style.setProperty(
-"transform",
-"none",
-"important"
-);
-
-return p;
-
-}
-
-
-/* ---------- UPDATE HANDLE ---------- */
-
-function updateConferbotDragHandle(){
-
-if(
-!realConferbotElement||
-!realConferbotDragHandle
-){
-return;
-}
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-if(
-rect.width<=0||
-rect.height<=0
-){
-realConferbotDragHandle.style.display="none";
-return;
-}
-
-
-/*
-   Handle सिर्फ bubble के बायें हिस्से पर रहेगा।
-   इससे bubble का बाकी हिस्सा normal click/open कर सकता है।
-*/
-
-const handleWidth=
-Math.min(
-32,
-Math.max(
-22,
-rect.width*0.40
-)
-);
-
-const handleHeight=
-Math.min(
-70,
-Math.max(
-45,
-rect.height
-)
-);
-
-realConferbotDragHandle.style.display=
-"block";
-
-realConferbotDragHandle.style.width=
-handleWidth+"px";
-
-realConferbotDragHandle.style.height=
-handleHeight+"px";
-
-realConferbotDragHandle.style.left=
-rect.left+"px";
-
-realConferbotDragHandle.style.top=
-(
-rect.top+
-(rect.height-handleHeight)/2
-)+"px";
-
-}
-
-
-/* ---------- DEFAULT / SAVED POSITION ---------- */
-
-function applyInitialConferbotPosition(){
-
-if(!realConferbotElement){
-return;
-}
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-if(
-rect.width<=0||
-rect.height<=0
-){
-return;
-}
-
-const saved=
-getSavedRealConferbotPosition();
-
-let left;
-let top;
-
-if(saved){
-
-left=saved.left;
-top=saved.top;
-
-}else{
-
-/*
-   First opening:
-   Bottom-right,
-   Profile button से ऊपर।
-*/
-
-left=
-window.innerWidth-
-rect.width-
-18;
-
-top=
-window.innerHeight-
-rect.height-
-88;
-
-}
-
-const p=
-moveRealConferbot(
-left,
-top
-);
-
-saveRealConferbotPosition(
-p.left,
-p.top
-);
-
-updateConferbotDragHandle();
-
-}
-
-
-/* ---------- CREATE HANDLE ---------- */
-
-function createConferbotDragHandle(){
-
-if(!realConferbotElement){
-return;
-}
-
-if(!realConferbotDragHandle){
-
-realConferbotDragHandle=
-document.createElement("div");
-
-realConferbotDragHandle.id=
-"topperConferbotDragHandle";
-
-document.body.appendChild(
-realConferbotDragHandle
-);
-
-setupConferbotDragEvents();
-
-}
-
-updateConferbotDragHandle();
-
-}
-
-
-/* ---------- DRAG START ---------- */
-
-function startConferbotDrag(e){
-
-if(!realConferbotElement){
-return;
-}
-
-if(
-e.pointerType==="mouse"&&
-e.button!==0
-){
-return;
-}
-
-e.preventDefault();
-e.stopPropagation();
-
-realConferbotDragging=true;
-realConferbotMoved=false;
-
-realConferbotPointerId=
-e.pointerId;
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-realConferbotStartX=
-e.clientX;
-
-realConferbotStartY=
-e.clientY;
-
-realConferbotStartLeft=
-rect.left;
-
-realConferbotStartTop=
-rect.top;
-
-realConferbotDragHandle.classList.add(
-"dragging"
-);
-
-try{
-
-realConferbotDragHandle.setPointerCapture(
-e.pointerId
-);
-
-}catch(error){}
-
-}
-
-
-/* ---------- DRAG MOVE ---------- */
-
-function moveConferbotDrag(e){
-
-if(
-!realConferbotDragging||
-e.pointerId!==realConferbotPointerId
-){
-return;
-}
-
-e.preventDefault();
-e.stopPropagation();
-
-const dx=
-e.clientX-
-realConferbotStartX;
-
-const dy=
-e.clientY-
-realConferbotStartY;
-
-if(
-Math.abs(dx)>4||
-Math.abs(dy)>4
-){
-
-realConferbotMoved=true;
-
-}
-
-const p=
-moveRealConferbot(
-realConferbotStartLeft+dx,
-realConferbotStartTop+dy
-);
-
-updateConferbotDragHandle();
-
-}
-
-
-/* ---------- DRAG END ---------- */
-
-function endConferbotDrag(e){
-
-if(
-!realConferbotDragging
-){
-return;
-}
-
-if(
-e&&
-realConferbotPointerId!==null&&
-e.pointerId!==realConferbotPointerId
-){
-return;
-}
-
-realConferbotDragging=false;
-
-realConferbotDragHandle.classList.remove(
-"dragging"
-);
-
-if(realConferbotMoved){
-
-snapRealConferbot();
-
-}
-
-realConferbotPointerId=null;
-
-try{
-
-if(e){
-
-realConferbotDragHandle.releasePointerCapture(
-e.pointerId
-);
-
-}
-
-}catch(error){}
-
-}
-
-
-/* ---------- SNAP LEFT / RIGHT ---------- */
-
-function snapRealConferbot(){
-
-if(!realConferbotElement){
-return;
-}
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-const margin=8;
-
-const distanceLeft=
-rect.left;
-
-const distanceRight=
-window.innerWidth-
-rect.right;
-
-let left;
-
-if(
-distanceLeft<=distanceRight
-){
-
-left=margin;
-
-}else{
-
-left=
-window.innerWidth-
-rect.width-
-margin;
-
-}
-
-const p=
-moveRealConferbot(
-left,
-rect.top
-);
-
-saveRealConferbotPosition(
-p.left,
-p.top
-);
-
-updateConferbotDragHandle();
-
-}
-
-
-/* ---------- DRAG EVENTS ---------- */
-
-function setupConferbotDragEvents(){
-
-if(!realConferbotDragHandle){
-return;
-}
-
-realConferbotDragHandle.addEventListener(
-"pointerdown",
-startConferbotDrag,
-{
-passive:false
-}
-);
-
-realConferbotDragHandle.addEventListener(
-"pointermove",
-moveConferbotDrag,
-{
-passive:false
-}
-);
-
-realConferbotDragHandle.addEventListener(
-"pointerup",
-endConferbotDrag,
-{
-passive:false
-}
-);
-
-realConferbotDragHandle.addEventListener(
-"pointercancel",
-endConferbotDrag,
-{
-passive:false
-}
-);
-
-
-/*
-   Touch devices पर document level move/up भी रखें।
-*/
-
-document.addEventListener(
-"pointermove",
-function(e){
-
-if(
-realConferbotDragging
-){
-moveConferbotDrag(e);
-}
-
-},
-{
-passive:false
-}
-);
-
-document.addEventListener(
-"pointerup",
-function(e){
-
-if(
-realConferbotDragging
-){
-endConferbotDrag(e);
-}
-
-},
-{
-passive:false
-}
-);
-
-}
-
-
-/* ---------- INITIALIZE REAL WIDGET ---------- */
-
-function initializeRealConferbot(){
-
-const el=
-findRealConferbot();
-
-if(!el){
-return false;
-}
-
-if(
-realConferbotElement!==el
-){
-
-realConferbotElement=el;
-realConferbotInitialized=false;
-
-}
-
-createConferbotDragHandle();
-
-if(!realConferbotInitialized){
-
-realConferbotInitialized=true;
-
-setTimeout(
-function(){
-
-if(
-realConferbotElement&&
-document.body.contains(
-realConferbotElement
-)
-){
-
-applyInitialConferbotPosition();
-
-}
-
-},
-150
-);
-
-}
-
-return true;
-
-}
-
-
-/* ---------- WATCHER ---------- */
-
-function startConferbotWatcher(){
-
-let tries=0;
-
-const timer=
-setInterval(
-function(){
-
-tries++;
-
-const found=
-initializeRealConferbot();
-
-if(found||tries>=120){
-
-clearInterval(timer);
-
-}
-
-},
-500
-);
-
-
-/*
-   Conferbot async load होने के बाद DOM बदलता है।
-*/
-
-const observer=
-new MutationObserver(
-function(){
-
-if(
-realConferbotElement&&
-!document.body.contains(
-realConferbotElement
-)
-){
-
-realConferbotElement=null;
-
-if(realConferbotDragHandle){
-
-realConferbotDragHandle.style.display=
-"none";
-
-}
-
-}
-
-setTimeout(
-function(){
-initializeRealConferbot();
-},
-100
-);
-
-}
-);
-
-observer.observe(
-document.body,
-{
-childList:true,
-subtree:true
-}
-);
-
-
-/*
-   Conferbot कभी-कभी अपने style को दोबारा लिख देता है।
-   Drag करते समय नहीं छेड़ना।
-*/
-
-setInterval(
-function(){
-
-if(
-!realConferbotElement||
-realConferbotDragging
-){
-return;
-}
-
-if(
-!document.body.contains(
-realConferbotElement
-)
-){
-return;
-}
-
-const saved=
-getSavedRealConferbotPosition();
-
-if(!saved){
-return;
-}
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-const wantedLeft=
-saved.left;
-
-const wantedTop=
-saved.top;
-
-if(
-Math.abs(rect.left-wantedLeft)>4||
-Math.abs(rect.top-wantedTop)>4
-){
-
-moveRealConferbot(
-wantedLeft,
-wantedTop
-);
-
-updateConferbotDragHandle();
-
-}
-
-},
-1200
-);
-
-}
-
-
-/* ---------- RESIZE ---------- */
-
-window.addEventListener(
-"resize",
-function(){
-
-if(!realConferbotElement){
-return;
-}
-
-if(realConferbotDragging){
-return;
-}
-
-const rect=
-realConferbotElement.getBoundingClientRect();
-
-const p=
-moveRealConferbot(
-rect.left,
-rect.top
-);
-
-saveRealConferbotPosition(
-p.left,
-p.top
-);
-
-updateConferbotDragHandle();
-
-}
-);
-
-
-/* ---------- START WATCHER ---------- */
-
-startConferbotWatcher();
-
-
-/* ---------- ESCAPE HELPERS ---------- */
+setTimeout(function(){
+if(currentUser&&!paymentStateRestored){restorePaymentStateFromLocalStorage();}
+},1000);
 
 function escapeHtml(value){
-
-return String(value)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
+return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
-
 function escapeAttribute(value){
-
-return String(value)
-.replace(/&/g,"&amp;")
-.replace(/"/g,"&quot;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;");
-
+return String(value).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
+</script>  
 
-</script>
+<!-- =========================================================          
+TalkSilo Widget (Added)          
+========================================================= -->  
+<script async src="https://talksilo.com/widget.js" data-key="34f71d2f-8584-4e9c-88f8-f4bf2551acc2"></script>  
 
-
-<!-- =========================================================
-     REAL CONFERBOT SCRIPT
-     ========================================================= -->
-
-<script type="text/javascript">
-(function(d,s,id){
-
-var js;
-var el=d.getElementsByTagName(s)[0];
-
-if(d.getElementById(id)){
-return;
-}
-
-js=d.createElement(s);
-
-js.async=true;
-
-js.src=
-"https://cdn.conferbot.com/dist/v1/widget.min.js";
-
-js.id=id;
-
-js.charset="UTF-8";
-
-el.parentNode.insertBefore(
-js,
-el
-);
-
-js.onload=function(){
-
-try{
-
-window.conferbotInstance=
-window.ConferbotWidget(
-"6ac78c5dbb3336663970841b",
-"live_chat"
-);
-
-console.log(
-"Real Conferbot loaded successfully."
-);
-
-
-/*
-   Widget को DOM में आने का समय देते हैं।
-*/
-
-setTimeout(
-function(){
-
-initializeRealConferbot();
-
-},
-800
-);
-
-setTimeout(
-function(){
-
-initializeRealConferbot();
-
-},
-2000
-);
-
-}catch(error){
-
-console.error(
-"Conferbot Error:",
-error
-);
-
-}
-
-};
-
-js.onerror=function(){
-
-console.error(
-"Conferbot script load failed."
-);
-
-};
-
-})(document,"script","conferbot-js");
-</script>
-
-</body>
+</body>  
 </html>
