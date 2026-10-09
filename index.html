@@ -544,9 +544,9 @@ font-size:11px;
 font-weight:bold
 }
 
-.status-pending{
-background:#fff3e0;
-color:#e65100
+.status-processing{
+background:#e3f2fd;
+color:#1565c0
 }
 
 .profile-container{
@@ -671,7 +671,7 @@ position:fixed;
 inset:0;
 z-index:999998;
 background:rgba(255,255,255,.98);
-display:none;
+display:flex;
 align-items:center;
 justify-content:center;
 flex-direction:column
@@ -699,6 +699,19 @@ transform:rotate(360deg)
 <div class="auth-loader"></div>          
 <div class="auth-loading-text">Account लोड हो रहा है...</div>          
 </div>  
+
+<!-- PHONE VERIFICATION MODAL (FIRST OPEN) -->
+<div id="phoneVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
+<div class="modal-content" style="margin-top:15vh;">
+<h3>📱 मोबाइल नंबर वेरिफिकेशन</h3>
+<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">ऐप का उपयोग करने के लिए कृपया अपना मोबाइल नंबर सत्यापित करें।</p>
+<div class="form-group">
+<label>मोबाइल नंबर (10 अंक):</label>
+<input type="tel" id="verifyPhoneInput" placeholder="अपना मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
+</div>
+<button type="button" class="btn-submit" onclick="verifyAndSavePhone()">नंबर वेरीफाई करें</button>
+</div>
+</div>
 
 <header>          
 <div>          
@@ -1062,6 +1075,40 @@ let locationRequestBusy=false;
 
 const $=id=>document.getElementById(id);
 
+// First Open Phone Verification Check
+window.addEventListener("DOMContentLoaded", function(){
+const verifiedPhone = localStorage.getItem("topper_verified_phone");
+if(verifiedPhone){
+$("phoneVerifyModal").style.display = "none";
+} else {
+$("phoneVerifyModal").style.display = "block";
+}
+loadCart();
+});
+
+function verifyAndSavePhone(){
+const phone = $("verifyPhoneInput").value.trim();
+if(!/^\d{10}$/.test(phone)){
+showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
+return;
+}
+// Save to Firebase Database under verified_phones
+const ref = db.ref("verified_phones").push();
+ref.set({
+phone: phone,
+verifiedAt: Date.now(),
+timestamp: new Date().toISOString()
+}).then(function(){
+localStorage.setItem("topper_verified_phone", phone);
+$("phoneVerifyModal").style.display = "none";
+showAppMessage("मोबाइल नंबर सफलतापूर्वक सत्यापित हो गया!", "✅");
+}).catch(function(error){
+localStorage.setItem("topper_verified_phone", phone);
+$("phoneVerifyModal").style.display = "none";
+showAppMessage("मोबाइल नंबर सेव हो गया!", "✅");
+});
+}
+
 // Cart Management Functions
 function loadCart(){
 try{
@@ -1083,12 +1130,10 @@ updateAllHomepageButtons();
 function toggleCart(name, price, btnEl){
 const index = cart.findIndex(item => item.name === name);
 if(index > -1){
-// Already in cart, so remove it
 cart.splice(index, 1);
 saveCart();
 showAppMessage("🗑️ कार्ट से हटा दिया गया।", "ℹ️");
 } else {
-// Add to cart
 cart.push({name: name, price: Number(price), qty: 1});
 saveCart();
 showAppMessage("🛒 कार्ट में जोड़ा गया!", "✅");
@@ -1122,8 +1167,6 @@ showAppMessage("🗑️ कार्ट से हटा दिया गया�
 function updateAllHomepageButtons(){
 const buttons = document.querySelectorAll(".btn-cart");
 buttons.forEach(btn => {
-if(btn.onclick && btn.onclick.toString().includes("toggleCart") || btn.onclick.toString().includes("addTableToCart")){
-// extract product name from onclick string
 let onclickStr = btn.getAttribute("onclick") || "";
 let match = onclickStr.match(/'([^']+)'/);
 if(match){
@@ -1135,7 +1178,6 @@ btn.classList.add("in-cart");
 } else {
 btn.textContent = "🛒 कार्ट में जोड़ें";
 btn.classList.remove("in-cart");
-}
 }
 }
 });
@@ -1201,7 +1243,7 @@ const title = $("policyModalTitle");
 const text = $("policyModalText");
 if(type === 'terms'){
 title.textContent = "Terms & Policy";
-text.textContent = "1. Topper Stitching पर उपलब्ध सभी सिलाई मशीनें और पार्ट्स उच्च गुणवत्ता के हैं।\n2. आर्डर करते समय सही पता और मोबाइल नंबर देना अनिवार्य है।\n3. होम डिलीवरी केवल बिहार के गोपालगंज जिले के अंतर्गत उपलब्ध है।\n4. किसी भी विवाद की स्थिति में गोपालगंज न्यायालय का क्षेत्राधिकार होगा।";
+text.textContent = "1. Topper Stitching पर उपलब्ध सभी सिलाई मशीनें और पार्ट्स उच्च गुणवत्ता के हैं।\n2. आर्डर करते समय सही पता और मोबाइल नंबर देना अनिवार्य है।\n3. होम डिलीवरी केवल बिहार के गोपालगंज जिले के अंतर्गत उपलब्ध है।\n4. डेटा सुरक्षा: उपयोगकर्ता (User) का सारा डेटा और डिटेल्स क्लाउड (Cloud) पर 100% सुरक्षित और एन्क्रिप्टेड है।\n5. किसी भी विवाद की स्थिति में गोपालगंज न्यायालय का क्षेत्राधिकार होगा।";
 } else if(type === 'refund'){
 title.textContent = "Refund Policy";
 text.textContent = "• रिफंड पॉलिसी: रिफंड केवल डिलीवरी होने के वक्त तक ही मान्य है। एक बार सामान डिलीवर हो जाने और ग्राहक द्वारा स्वीकार कर लेने के बाद किसी भी प्रकार का रिफंड या रिटर्न मान्य नहीं होगा।";
@@ -1474,7 +1516,7 @@ price:Number(selectedPrice),
 address:address,
 utrNumber:utr,
 location:userLocationLink||"",
-status:"pending",
+status:"processing",
 paymentStatus:"submitted",
 paymentMethod:"UPI",
 createdAt:Date.now(),
@@ -1532,7 +1574,7 @@ orders.sort(function(a,b){return Number(b.createdAt||0)-Number(a.createdAt||0);}
 orders.forEach(function(order){
 const card=document.createElement("div");
 card.className="order-card";
-card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge status-pending">⏳ Pending</span></div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
+card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge status-processing">🔄 Processing</span></div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
 list.appendChild(card);
 });
 });
