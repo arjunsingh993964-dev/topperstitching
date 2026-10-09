@@ -517,7 +517,7 @@ function showOutOfStock(){
   showAppMessage("This item is currently out of stock.","❌");
 }
 
-/* Google Sign-In */
+/* Native Google Sign-In through MainActivity.kt */
 async function googleSignIn(){
   if(currentUser||authBusy) return;
 
@@ -539,6 +539,7 @@ async function googleSignIn(){
   }
 }
 
+/* Called by MainActivity.kt after native Google Sign-In */
 async function nativeGoogleLogin(idToken){
   try{
     if(!idToken) throw new Error("Google ID token was not received.");
@@ -554,11 +555,19 @@ async function nativeGoogleLogin(idToken){
   }
 }
 
+/* Called by MainActivity.kt when native login fails */
 function nativeGoogleLoginError(message){
   authBusy=false;
   hideLoading();
   showAuthError("Google sign-in failed: "+String(message||"Unknown error"));
 }
+
+/* Make callbacks available to Android WebView */
+window.nativeGoogleLogin=nativeGoogleLogin;
+window.nativeGoogleLoginError=nativeGoogleLoginError;
+window.nativeLocationSuccess=nativeLocationSuccess;
+window.nativeLocationReceived=nativeLocationReceived;
+window.nativeLocationError=nativeLocationError;
 
 function handleAuthAction(){
   if(currentUser) googleSignOut();
@@ -613,7 +622,6 @@ function updateAuthUI(){
   authBusy=false;
 }
 
-/* Wait for Firebase to resolve the saved login session. */
 auth.onAuthStateChanged(user=>{
   currentUser=user||null;
   authStateResolved=true;
@@ -652,16 +660,20 @@ function openNativeCall(number){
 
 /*
  * Email Support:
- * Open the email app using a mailto link.
- * Recipient and subject are included directly in the URL.
- * Do not use AndroidApp.openEmail here because the native
- * bridge may open the composer without filling the recipient.
+ * Open the user's email app with the recipient prefilled.
+ * Keep the email address unencoded so email apps recognize
+ * it as the To/Recipient address. Encode the subject only.
  */
 function openNativeEmail(email,subject){
   const targetEmail=String(email||"topperstitching@gmail.com").trim();
   const targetSubject=String(subject||"Support Request");
 
-  const mailtoUrl="mailto:"+encodeURIComponent(targetEmail)+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)){
+    showAppMessage("The support email address is invalid.","⚠️");
+    return false;
+  }
+
+  const mailtoUrl="mailto:"+targetEmail+
     "?subject="+encodeURIComponent(targetSubject);
 
   try{
