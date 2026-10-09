@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +91,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </head>
 
 <body>
-
 <div id="authLoading">
   <div class="auth-loader"></div>
   <div style="margin-top:12px">Loading account...</div>
@@ -106,7 +106,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <div id="authError" class="auth-error"></div>
 
-<!-- HOME -->
 <div id="homeView" class="view-section active-view">
   <div class="banner">
     <h2>Your Trusted Sewing Machine and Parts Store</h2>
@@ -114,7 +113,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 
   <div class="products">
-
     <div class="card">
       <div>
         <div class="img-container"><img src="IMG_20260829_174914.png" alt="Topper SV Tailor"></div>
@@ -267,20 +265,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
         <button class="btn-cart" onclick="toggleCart('Topper Karhai (130K)',7200,this)">🛒 Add to Cart</button>
       </div>
     </div>
-
   </div>
 
   <div class="footer-address">
     <strong>📍 Store Address</strong>
     Main Road, Sasamusa, Gopalganj, Bihar
     <br><br>Phone: <b>+91 9264137710</b>
-    <br>Email: <b>support@topperstitching.com</b>
+    <br>Email: <b>topperstitching@gmail.com</b>
     <button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 Update My Live Location</button>
     <div id="locationStatus" class="location-status"></div>
   </div>
 </div>
 
-<!-- CART -->
 <div id="cartView" class="view-section">
   <div class="cart-container">
     <h2 style="color:#1a237e;margin-bottom:15px">🛒 Your Shopping Cart</h2>
@@ -292,7 +288,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- ORDERS -->
 <div id="ordersView" class="view-section">
   <div class="orders-container">
     <h2 style="color:#1a237e;margin-bottom:15px">My Orders</h2>
@@ -300,7 +295,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- PROFILE -->
 <div id="profileView" class="view-section">
   <div class="profile-container">
     <div style="text-align:center">
@@ -316,17 +310,17 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
 
     <div class="profile-section-box">
-      <h4>#Support</h4>
+      <h4>Support</h4>
       <ul>
         <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
         <li><a href="tel:+919264137710" onclick="return openNativeCall('9264137710')">📞 Human Call Support</a></li>
-        <li><a href="mailto:support@topperstitching.com?subject=Support%20Request" onclick="return openNativeEmail('support@topperstitching.com','Support Request')">📧 Email Support</a></li>
+        <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>
       </ul>
     </div>
 
     <div class="profile-section-box">
-      <h4>#Policies</h4>
+      <h4>Policies</h4>
       <ul>
         <li onclick="openPolicyModal('terms')">📄 Terms and Conditions</li>
         <li onclick="openPolicyModal('refund')">🔄 Refund Policy</li>
@@ -334,7 +328,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
 
     <div class="profile-section-box">
-      <h4>#Company Registration</h4>
+      <h4>Company Registration</h4>
       <ul>
         <li>🏢 GSTIN Registered</li>
         <li>📜 UDYAM Registered</li>
@@ -343,7 +337,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- POLICY MODAL -->
 <div id="policyModal" class="modal">
   <div class="modal-content">
     <h3 id="policyModalTitle">Policy</h3>
@@ -352,7 +345,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- AVATAR MODAL -->
 <div id="avatarModal" class="modal">
   <div class="modal-content">
     <h3>Choose Profile Photo</h3>
@@ -368,7 +360,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- ORDER MODAL -->
 <div id="orderModal" class="modal">
   <div class="modal-content">
     <h3>🛒 Order and Payment</h3>
@@ -387,8 +378,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
     <div class="form-group">
       <label for="custPhone">Mobile Number:</label>
-      <input type="tel" id="custPhone" placeholder="Enter 10-digit Indian mobile number" inputmode="tel" maxlength="16" autocomplete="tel">
-      <small id="phoneStatus" style="display:block;margin-top:5px;color:#666">Enter a valid Indian mobile number.</small>
+      <input type="tel" id="custPhone" placeholder="Enter your mobile number" inputmode="tel" maxlength="16" autocomplete="tel">
+      <small id="phoneStatus" style="display:block;margin-top:5px;color:#666">Enter a valid mobile number.</small>
     </div>
 
     <div class="form-group">
@@ -404,7 +395,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="qr-box">
       <p style="font-size:15px;font-weight:700">💳 Tap Pay Online and choose your UPI app.</p>
       <button class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">💳 Pay ₹<span id="upiPayAmount">0</span></button>
-      <p style="font-size:12px;color:#777;margin-top:8px">After payment, return to the app and enter your transaction reference number.</p>
+      <p style="font-size:12px;color:#777;margin-top:8px">After payment, return to the app and enter the transaction reference number shown on your payment receipt.</p>
     </div>
 
     <div class="form-group">
@@ -414,11 +405,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
 
     <button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">Submit Order</button>
-    <button class="btn-close" onclick="cancelOrderForm()">Close / Cancel</button>
+    <button class="btn-close" onclick="cancelOrderForm()">Cancel</button>
   </div>
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav">
   <button class="nav-item active" onclick="switchTab('homeView',this)"><span class="icon">🏠</span>Home</button>
   <button class="nav-item" onclick="switchTab('cartView',this)"><span class="icon">🛒</span>Cart<span id="cartCountBadge" class="cart-badge" style="display:none">0</span></button>
@@ -429,7 +419,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <script>
 "use strict";
 
-/* Firebase configuration */
 const firebaseConfig={
   apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",
   authDomain:"toppersewingmachine.firebaseapp.com",
@@ -461,7 +450,6 @@ let locationRequestBusy=false;
 const $=id=>document.getElementById(id);
 const ORDER_DRAFT_KEY="topper_order_draft_v1";
 
-/* Safe HTML escaping */
 function escapeHtml(value){
   return String(value??"")
     .replace(/&/g,"&amp;")
@@ -514,11 +502,7 @@ function showOutOfStock(){
   showAppMessage("This item is currently out of stock.","❌");
 }
 
-/* =====================================================
-   NATIVE GOOGLE LOGIN
-   Android bridge: AndroidApp.signIn()
-   Kotlin callback: nativeGoogleLogin(idToken)
-   ===================================================== */
+/* Native Google Sign-In */
 async function googleSignIn(){
   if(currentUser||authBusy) return;
 
@@ -543,7 +527,6 @@ async function googleSignIn(){
 async function nativeGoogleLogin(idToken){
   try{
     if(!idToken) throw new Error("Google ID token was not received.");
-
     const credential=firebase.auth.GoogleAuthProvider.credential(idToken);
     await auth.signInWithCredential(credential);
   }catch(error){
@@ -574,11 +557,8 @@ function googleSignOut(){
 }
 
 function getSavedAvatar(){
-  try{
-    return localStorage.getItem("topperProfileAvatar")||"u1.png";
-  }catch(e){
-    return "u1.png";
-  }
+  try{return localStorage.getItem("topperProfileAvatar")||"u1.png";}
+  catch(e){return "u1.png";}
 }
 
 function updateAuthUI(){
@@ -622,37 +602,35 @@ auth.onAuthStateChanged(user=>{
   else clearOrdersListener();
 });
 
-/* Native phone dialer */
+/* Phone support */
 function openNativeCall(number){
   try{
     if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){
       window.AndroidApp.callPhone(String(number));
       return false;
     }
-
     window.location.href="tel:"+String(number);
   }catch(e){
     showAppMessage("Unable to open the phone dialer.","⚠️");
   }
-
   return false;
 }
 
-/* Native email app */
+/* Open Gmail or the device's default email app */
 function openNativeEmail(email,subject){
+  const targetEmail=String(email||"topperstitching@gmail.com");
+  const targetSubject=String(subject||"Support Request");
+
   try{
     if(window.AndroidApp&&typeof window.AndroidApp.openEmail==="function"){
-      window.AndroidApp.openEmail(
-        String(email),
-        String(subject||"Support Request")
-      );
+      window.AndroidApp.openEmail(targetEmail,targetSubject);
       return false;
     }
 
-    window.location.href="mailto:"+encodeURIComponent(email)+
-      "?subject="+encodeURIComponent(subject||"Support Request");
+    const mailto="mailto:"+targetEmail+"?subject="+encodeURIComponent(targetSubject);
+    window.location.href=mailto;
   }catch(e){
-    showAppMessage("Unable to open the email app.","⚠️");
+    showAppMessage("Unable to open the email app. Please email topperstitching@gmail.com directly.","⚠️");
   }
 
   return false;
@@ -682,10 +660,7 @@ function closeAvatarPicker(){
 }
 
 function selectAvatar(fileName){
-  try{
-    localStorage.setItem("topperProfileAvatar",fileName);
-  }catch(e){}
-
+  try{localStorage.setItem("topperProfileAvatar",fileName);}catch(e){}
   setProfileAvatar(fileName);
   closeAvatarPicker();
 }
@@ -699,13 +674,13 @@ function openPolicyModal(type){
       "2. Please provide accurate contact details and a complete delivery address.\n"+
       "3. Home delivery is available only in Gopalganj district, Bihar.\n"+
       "4. Keep your Google account and personal information secure.\n"+
-      "5. Disputes will be handled according to applicable laws.";
+      "5. Orders are subject to confirmation and applicable laws.\n"+
+      "6. Contact topperstitching@gmail.com for assistance.";
   }else{
     $("policyModalTitle").textContent="Refund Policy";
     $("policyModalText").textContent=
-      "Check all product details before placing an order. Refunds, returns and cancellations depend on the order status, product condition and applicable laws. For assistance, contact support@topperstitching.com.";
+      "Refund requests are valid only until the order has been delivered. Once delivery is completed, refund requests under this policy will no longer be accepted. Any eligible refund request made before delivery will be reviewed by Topper Stitching according to the order status, payment details and applicable laws. Submitting a refund request does not guarantee approval. For assistance, contact topperstitching@gmail.com.";
   }
-
   $("policyModal").style.display="block";
 }
 
@@ -723,19 +698,16 @@ function switchTab(viewId,btnEl){
   if(btnEl) btnEl.classList.add("active");
 }
 
-/* =====================================================
-   LOCATION CALLBACKS FROM ANDROID
-   ===================================================== */
+/* Location callbacks from Android */
 function setUserLocation(lat,lon){
   const latitude=Number(lat);
   const longitude=Number(lon);
-
   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return;
 
   userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude;
   locationReady=true;
   locationRequestBusy=false;
-  $("locationStatus").textContent="✅ Live location is available.";
+  $("locationStatus").textContent="Live location is available.";
   saveOrderDraft();
 }
 
@@ -748,7 +720,7 @@ function nativeLocationReceived(locationUrl){
     userLocationLink=locationUrl;
     locationReady=true;
     locationRequestBusy=false;
-    $("locationStatus").textContent="✅ Live location is available.";
+    $("locationStatus").textContent="Live location is available.";
     saveOrderDraft();
   }
 }
@@ -762,7 +734,7 @@ function requestUserLocation(){
   if(locationReady||locationRequestBusy) return;
 
   locationRequestBusy=true;
-  $("locationStatus").textContent="📍 Getting your live location...";
+  $("locationStatus").textContent="Getting your live location...";
 
   if(window.AndroidApp&&typeof window.AndroidApp.getLocation==="function"){
     try{
@@ -799,10 +771,7 @@ if(tableSliderTrack){
   tableSliderTrack.addEventListener("scroll",()=>{
     const width=tableSliderTrack.clientWidth||1;
     const index=Math.round(tableSliderTrack.scrollLeft/width);
-
-    if(tableColors[index]){
-      $("selectedTableColorText").textContent=tableColors[index];
-    }
+    if(tableColors[index]) $("selectedTableColorText").textContent=tableColors[index];
   });
 }
 
@@ -814,7 +783,6 @@ function slideImages(id,direction){
 function getSelectedTableColor(){
   const track=$("tableSlider");
   if(!track) return tableColors[0];
-
   const index=Math.round(track.scrollLeft/(track.clientWidth||1));
   return tableColors[index]||tableColors[0];
 }
@@ -827,29 +795,20 @@ function requireLogin(){
   return false;
 }
 
-/* =====================================================
-   CART
-   ===================================================== */
+/* Shopping cart */
 function loadCart(){
   try{
     const saved=localStorage.getItem("topper_cart");
-
     if(saved){
       const parsed=JSON.parse(saved);
       if(Array.isArray(parsed)) cart=parsed;
     }
-  }catch(e){
-    cart=[];
-  }
-
+  }catch(e){cart=[];}
   updateCartUI();
 }
 
 function saveCart(){
-  try{
-    localStorage.setItem("topper_cart",JSON.stringify(cart));
-  }catch(e){}
-
+  try{localStorage.setItem("topper_cart",JSON.stringify(cart));}catch(e){}
   updateCartUI();
 }
 
@@ -876,7 +835,6 @@ function updateAllHomepageButtons(){
     const text=btn.getAttribute("onclick")||"";
     const match=text.match(/toggleCart\('([^']+)'/);
     const pName=match?match[1]:null;
-
     if(!pName) return;
 
     const found=cart.some(i=>i.name===pName);
@@ -906,13 +864,11 @@ function updateCartUI(){
   cart.forEach((item,index)=>{
     const qty=Math.max(1,Number(item.qty)||1);
     const price=Math.max(0,Number(item.price)||0);
-
     totalQty+=qty;
     totalPrice+=price*qty;
 
     const div=document.createElement("div");
     div.className="cart-item";
-
     div.innerHTML=
       '<div><b>'+escapeHtml(item.name)+'</b>'+
       '<div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+price.toLocaleString("en-IN")+'</div>'+
@@ -928,20 +884,17 @@ function updateCartUI(){
   badge.style.display="inline-block";
   $("cartTotalPrice").textContent=totalPrice.toLocaleString("en-IN");
   summary.style.display="block";
-
   updateAllHomepageButtons();
 }
 
 function updateQty(index,delta){
   if(!cart[index]) return;
-
   cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta);
   saveCart();
 }
 
 function removeFromCart(index){
   if(!cart[index]) return;
-
   cart.splice(index,1);
   saveCart();
   showAppMessage("Item removed from your cart.","ℹ️");
@@ -952,21 +905,14 @@ function checkoutCart(){
 
   const names=cart.map(i=>i.name+" (x"+i.qty+")").join(", ");
   const total=cart.reduce((sum,i)=>sum+(Number(i.price)*Number(i.qty)),0);
-
   prepareNewPayment("Cart Items: "+names,total);
 }
 
-/* =====================================================
-   ORDER FORM: SAVE AND RESTORE
-   The form remains open after an app restart until
-   the user explicitly presses Close / Cancel.
-   ===================================================== */
+/* Persist the order form until the user presses Cancel */
 function saveOrderDraft(){
   try{
-    const modal=$("orderModal");
-
     const draft={
-      isOpen:modal.style.display==="block",
+      isOpen:$("orderModal").style.display==="block",
       selectedProduct:selectedProduct,
       selectedPrice:selectedPrice,
       customerName:$("custName").value,
@@ -977,7 +923,6 @@ function saveOrderDraft(){
       locationLink:userLocationLink,
       savedAt:Date.now()
     };
-
     localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(draft));
   }catch(e){
     console.warn("Unable to save order draft.",e);
@@ -985,9 +930,7 @@ function saveOrderDraft(){
 }
 
 function clearOrderDraft(){
-  try{
-    localStorage.removeItem(ORDER_DRAFT_KEY);
-  }catch(e){}
+  try{localStorage.removeItem(ORDER_DRAFT_KEY);}catch(e){}
 }
 
 function restoreOrderDraft(){
@@ -1012,12 +955,10 @@ function restoreOrderDraft(){
 
     $("modalProductInfo").textContent=
       selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN");
-
     $("upiPayAmount").textContent=
       Number(selectedPrice||0).toLocaleString("en-IN");
 
     $("orderModal").style.display="block";
-
     validatePhone(false);
     validateUTR(false);
   }catch(e){
@@ -1037,9 +978,7 @@ function prepareNewPayment(productName,price){
 
   $("modalProductInfo").textContent=
     selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");
-
-  $("upiPayAmount").textContent=
-    Number(price).toLocaleString("en-IN");
+  $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN");
 
   $("orderModal").style.display="block";
   saveOrderDraft();
@@ -1052,10 +991,7 @@ function openOrderForm(productName,price){
 
 function openTableOrderForm(){
   if(requireLogin()){
-    prepareNewPayment(
-      "Sewing Machine Top Table ["+getSelectedTableColor()+"]",
-      550
-    );
+    prepareNewPayment("Sewing Machine Top Table ["+getSelectedTableColor()+"]",550);
   }
 }
 
@@ -1064,7 +1000,7 @@ function cancelOrderForm(){
   clearOrderDraft();
 }
 
-/* Save the draft whenever the user changes any field. */
+/* Save every field as it changes */
 ["custName","custPhone","custAddress","termsCheck","utrNumber"].forEach(id=>{
   const el=$(id);
   if(!el) return;
@@ -1078,10 +1014,7 @@ function cancelOrderForm(){
   el.addEventListener("change",saveOrderDraft);
 });
 
-/* =====================================================
-   INDIAN MOBILE NUMBER VALIDATION
-   Accepts 10-digit numbers and common +91 formats.
-   ===================================================== */
+/* Indian mobile number validation */
 function normalizeIndianPhone(value){
   let digits=String(value||"").replace(/\D/g,"");
 
@@ -1098,33 +1031,30 @@ function validatePhone(showMessage=true){
   const input=$("custPhone");
   const status=$("phoneStatus");
   const normalized=normalizeIndianPhone(input.value);
-
   const valid=/^[6-9]\d{9}$/.test(normalized);
 
   if(!input.value.trim()){
-    status.textContent="A mobile number is required.";
+    status.textContent="Enter a valid mobile number.";
     status.style.color="#666";
+    input.setCustomValidity("Enter a valid mobile number.");
   }else if(valid){
     status.textContent="✓ Mobile number format is valid.";
     status.style.color="#2e7d32";
     input.setCustomValidity("");
   }else{
-    status.textContent="Enter a valid Indian mobile number with 10 digits.";
+    status.textContent="Enter a valid mobile number.";
     status.style.color="#d32f2f";
-    input.setCustomValidity("Enter a valid Indian mobile number.");
+    input.setCustomValidity("Enter a valid mobile number.");
   }
 
   if(!valid&&showMessage){
-    showAppMessage("Please enter a valid Indian mobile number.","📱");
+    showAppMessage("Enter a valid mobile number.","📱");
   }
 
   return valid;
 }
 
-/* =====================================================
-   UTR / TRANSACTION REFERENCE FORMAT VALIDATION
-   Format validation does not verify actual payment.
-   ===================================================== */
+/* UTR format validation */
 function normalizeUTR(value){
   return String(value||"").trim().replace(/\s+/g,"");
 }
@@ -1133,18 +1063,14 @@ function validateUTR(showMessage=true){
   const input=$("utrNumber");
   const status=$("utrStatus");
   const value=normalizeUTR(input.value);
-
-  /*
-    Accept 12–22 alphanumeric characters.
-    Actual UTR formats can vary between banks and providers.
-  */
   const valid=/^[A-Za-z0-9]{12,22}$/.test(value);
 
   if(!value){
     status.textContent="A UTR / transaction reference number is required.";
     status.style.color="#666";
+    input.setCustomValidity("Enter your UTR / transaction reference number.");
   }else if(valid){
-    status.textContent="✓ Reference number format looks valid. Payment is not yet verified.";
+    status.textContent="Reference number format looks valid. Payment is not yet verified.";
     status.style.color="#2e7d32";
     input.setCustomValidity("");
   }else{
@@ -1160,9 +1086,7 @@ function validateUTR(showMessage=true){
   return valid;
 }
 
-/* =====================================================
-   UPI PAYMENT INTENT
-   ===================================================== */
+/* UPI payment */
 function payViaUpiIntent(){
   if(!$("termsCheck").checked){
     showAppMessage("Please accept the Terms and Conditions first.","📝");
@@ -1181,6 +1105,7 @@ function payViaUpiIntent(){
     "&cu=INR";
 
   try{
+    saveOrderDraft();
     if(window.AndroidApp&&typeof window.AndroidApp.openUpi==="function"){
       window.AndroidApp.openUpi(upiUrl);
     }else{
@@ -1191,9 +1116,7 @@ function payViaUpiIntent(){
   }
 }
 
-/* =====================================================
-   SUBMIT ORDER
-   ===================================================== */
+/* Submit order and save the entered UTR to Firebase */
 async function submitOnlineOrder(){
   if(!currentUser){
     showAppMessage("Please sign in with Google before placing an order.","🔐");
@@ -1300,9 +1223,7 @@ async function submitOnlineOrder(){
   }
 }
 
-/* =====================================================
-   ORDERS
-   ===================================================== */
+/* Orders */
 function clearOrdersListener(){
   if(ordersQuery){
     ordersQuery.off();
@@ -1329,10 +1250,8 @@ function loadUserOrders(userId){
     }
 
     const orders=[];
-
     snapshot.forEach(child=>{
       const o=child.val();
-
       if(o){
         o._id=child.key;
         orders.push(o);
@@ -1361,6 +1280,7 @@ function loadUserOrders(userId){
         '<div style="margin-top:6px"><b>👤 Name:</b> '+escapeHtml(order.customerName||"")+'</div>'+
         '<div style="margin-top:6px"><b>📞 Mobile:</b> '+escapeHtml(order.customerPhone||"Not provided")+'</div>'+
         '<div style="margin-top:6px"><b>🏠 Address:</b> '+escapeHtml(order.address||"")+'</div>'+
+        '<div style="margin-top:6px"><b>💳 UTR / Reference:</b> '+escapeHtml(order.utrNumber||"Not provided")+'</div>'+
         '<div style="margin-top:6px"><b>🕐 Date:</b> '+escapeHtml(order.date||"")+'</div>';
 
       list.appendChild(card);
@@ -1370,9 +1290,7 @@ function loadUserOrders(userId){
   });
 }
 
-/* =====================================================
-   INITIALIZE
-   ===================================================== */
+/* Initialize app */
 setProfileAvatar(getSavedAvatar());
 loadCart();
 
@@ -1381,7 +1299,6 @@ window.addEventListener("DOMContentLoaded",()=>{
   restoreOrderDraft();
 });
 
-/* Also save the current form before the page is hidden. */
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="hidden"&&$("orderModal").style.display==="block"){
     saveOrderDraft();
@@ -1394,6 +1311,5 @@ window.addEventListener("pagehide",()=>{
   }
 });
 </script>
-
 </body>
 </html>
