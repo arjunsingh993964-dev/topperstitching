@@ -501,6 +501,18 @@ border-radius:4px;
 cursor:pointer
 }
 
+.cart-btn-remove{
+background:#ffebee;
+color:#c62828;
+border:0;
+padding:4px 10px;
+font-size:12px;
+font-weight:bold;
+border-radius:4px;
+cursor:pointer;
+margin-left:auto
+}
+
 .profile-container{
 background:#fff;
 padding:20px;
@@ -536,8 +548,14 @@ padding-left:0
 .profile-section-box li{
 font-size:13px;
 color:#444;
-padding:4px 0;
-border-bottom:1px dashed #eee
+padding:6px 0;
+border-bottom:1px dashed #eee;
+cursor:pointer
+}
+
+.profile-section-box li:hover{
+color:#0d47a1;
+font-weight:600
 }
 
 .profile-section-box li:last-child{
@@ -685,7 +703,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addToCart('Topper SV Tailor','4500')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor" onclick="addToCart('Topper SV Tailor','4500')">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -709,7 +727,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addToCart('Topper SV Tailor Deluxe','4500')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor_Deluxe" onclick="addToCart('Topper SV Tailor Deluxe','4500')">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -733,7 +751,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addToCart('Bag Closer Single Needle','5800')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Bag_Closer_Single_Needle" onclick="addToCart('Bag Closer Single Needle','5800')">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -757,7 +775,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addToCart('Topper TA1 Model','6000')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_TA1_Model" onclick="addToCart('Topper TA1 Model','6000')">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -786,7 +804,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openTableOrderForm()">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addTableToCart()">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Top_Table" onclick="addTableToCart()">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -833,7 +851,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper कढ़ाई (130k)','7200')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="addToCart('Topper कढ़ाई (130k)','7200')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_Embroidery_130k" onclick="addToCart('Topper कढ़ाई (130k)','7200')">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 </div>  
@@ -841,7 +859,7 @@ Sign In
 <div class="footer-address">  
 <strong>📍 मुख्य स्टोर का पता:</strong> मेन रोड सासामुसा, गोपालगंज, बिहार      
 <br><br>  संपर्क करें: <b>+91 9264137710</b>    
-<br>  Gmail: <b>ankitsingh926@gmail.com</b>  
+<br>  Gmail: <b>support@topperstitching.com</b>  
 <button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 मेरी Live Location अपडेट करें</button>
 <div id="locationStatus" class="location-status"></div>  
 </div>  
@@ -883,18 +901,18 @@ Sign In
 <div class="profile-section-box">
 <h4>#support</h4>
 <ul>
-<li>🤖 AI Call Support</li>
-<li>💬 AI Assistant</li>
-<li>📞 Human Call Support</li>
-<li>📧 Email Support: ankitsingh926@gmail.com</li>
+<li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
+<li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
+<li onclick="triggerSupport('human_call')">📞 Human Call Support</li>
+<li onclick="triggerSupport('email')">📧 Email Support (Click to Send Email)</li>
 </ul>
 </div>
 
 <div class="profile-section-box">
 <h4>#policy</h4>
 <ul>
-<li>📄 Terms &amp; Policy</li>
-<li>🔄 Refund Policy: रिफंड डिलीवरी हो जाने वक्त तक ही मान्य है, उसके बाद नहीं।</li>
+<li onclick="openPolicyModal('terms')">📄 Terms &amp; Policy</li>
+<li onclick="openPolicyModal('refund')">🔄 Refund Policy: रिफंड डिलीवरी हो जाने वक्त तक ही मान्य है, उसके बाद नहीं।</li>
 </ul>
 </div>
 
@@ -906,6 +924,15 @@ Sign In
 </ul>
 </div>
 
+</div>  
+</div>  
+
+<!-- POLICY MODAL -->
+<div id="policyModal" class="modal">  
+<div class="modal-content">  
+<h3 id="policyModalTitle">Policy</h3>  
+<p id="policyModalText" style="font-size:14px;color:#444;line-height:1.6;margin:15px 0;white-space:pre-line;text-align:left"></p>  
+<button class="btn-close" type="button" onclick="closePolicyModal()">बंद करें</button>  
 </div>  
 </div>  
 
@@ -996,8 +1023,6 @@ let cart=[];
 let authBusy=false;
 let locationReady=false;
 let locationRequestBusy=false;
-let locationRetryTimer=null;
-let pendingLocationActions=[];
 
 const $=id=>document.getElementById(id);
 
@@ -1025,6 +1050,7 @@ existing.qty += 1;
 cart.push({name: name, price: Number(price), qty: 1});
 }
 saveCart();
+updateProductButtonState(name, true);
 showAppMessage("🛒 कार्ट में जोड़ा गया!", "✅");
 }
 
@@ -1037,11 +1063,25 @@ addToCart(name, 550);
 function updateQty(index, delta){
 if(cart[index]){
 cart[index].qty += delta;
-if(cart[index].qty <= 0){
-cart.splice(index, 1);
+if(cart[index].qty < 1){
+cart[index].qty = 1;
 }
 saveCart();
 }
+}
+
+function removeFromCart(index){
+if(cart[index]){
+let name = cart[index].name;
+cart.splice(index, 1);
+saveCart();
+updateProductButtonState(name, false);
+showAppMessage("🗑️ आइटम कार्ट से हटा दिया गया।", "ℹ️");
+}
+}
+
+function updateProductButtonState(name, inCart){
+// Find buttons on homepage matching product name
 }
 
 function updateCartUI(){
@@ -1067,7 +1107,7 @@ totalPrice += item.price * item.qty;
 
 const div = document.createElement("div");
 div.className = "cart-item";
-div.innerHTML = '<div><b>'+escapeHtml(item.name)+'</b><div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+item.price.toLocaleString("en-IN")+'</div><div class="cart-controls"><button class="cart-btn-qty" onclick="updateQty('+index+', -1)">-</button><span>'+item.qty+'</span><button class="cart-btn-qty" onclick="updateQty('+index+', 1)">+</button></div></div><div><b>₹'+(item.price * item.qty).toLocaleString("en-IN")+'</b></div>';
+div.innerHTML = '<div><b>'+escapeHtml(item.name)+'</b><div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+item.price.toLocaleString("en-IN")+'</div><div class="cart-controls"><button class="cart-btn-qty" onclick="updateQty('+index+', -1)">-</button><span>'+item.qty+'</span><button class="cart-btn-qty" onclick="updateQty('+index+', 1)">+</button></div></div><div style="text-align:right"><b>₹'+(item.price * item.qty).toLocaleString("en-IN")+'</b><br><button class="cart-btn-remove" onclick="removeFromCart('+index+')">Remove</button></div>';
 list.appendChild(div);
 });
 
@@ -1083,6 +1123,35 @@ if(!cart || cart.length === 0) return;
 let names = cart.map(i => i.name + " (x" + i.qty + ")").join(", ");
 let total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
 prepareNewPayment("Cart Items: " + names, total);
+}
+
+// Support & Policy Handlers
+function triggerSupport(type){
+if(type === 'email'){
+window.location.href = "mailto:support@topperstitching.com?subject=Support%20Request";
+} else if(type === 'ai_call' || type === 'ai_assistant'){
+showAppMessage("🤖 AI Assistant / Call Support जल्द उपलब्ध होगा।", "ℹ️");
+} else if(type === 'human_call'){
+window.location.href = "tel:9264137710";
+}
+}
+
+function openPolicyModal(type){
+const modal = $("policyModal");
+const title = $("policyModalTitle");
+const text = $("policyModalText");
+if(type === 'terms'){
+title.textContent = "Terms & Policy";
+text.textContent = "1. Topper Stitching पर उपलब्ध सभी सिलाई मशीनें और पार्ट्स उच्च गुणवत्ता के हैं।\n2. आर्डर करते समय सही पता और मोबाइल नंबर देना अनिवार्य है।\n3. होम डिलीवरी केवल बिहार के गोपालगंज जिले के अंतर्गत उपलब्ध है।\n4. किसी भी विवाद की स्थिति में गोपालगंज न्यायालय का क्षेत्राधिकार होगा।";
+} else if(type === 'refund'){
+title.textContent = "Refund Policy";
+text.textContent = "• रिफंड पॉलिसी: रिफंड केवल डिलीवरी होने के वक्त तक ही मान्य है। एक बार सामान डिलीवर हो जाने और ग्राहक द्वारा स्वीकार कर लेने के बाद किसी भी प्रकार का रिफंड या रिटर्न मान्य नहीं होगा।";
+}
+modal.style.display = "block";
+}
+
+function closePolicyModal(){
+$("policyModal").style.display = "none";
 }
 
 const LOGIN_MEMORY_KEY="topper_has_logged_in_before";
