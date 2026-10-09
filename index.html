@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,17 +82,21 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-card{width:100%;max-width:360px;background:#fff;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 10px 35px #0005}
 .app-message-icon{font-size:40px;margin-bottom:10px}.app-message-text{font-size:16px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
-#authLoading{position:fixed;inset:0;z-index:999998;background:#fffffffa;display:none;align-items:center;justify-content:center;flex-direction:column}
+#authLoading{position:fixed;inset:0;z-index:999998;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .auth-loader{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
+.auth-loading-title{font-size:17px;font-weight:700;color:#1a237e;margin-top:16px}
+.auth-loading-subtitle{font-size:13px;color:#666;margin-top:6px}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}
 </style>
 </head>
 
 <body>
+
 <div id="authLoading">
   <div class="auth-loader"></div>
-  <div style="margin-top:12px">Loading account...</div>
+  <div class="auth-loading-title">TOPPER STITCHING</div>
+  <div id="authLoadingText" class="auth-loading-subtitle">Checking your account...</div>
 </div>
 
 <header>
@@ -113,6 +116,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 
   <div class="products">
+
     <div class="card">
       <div>
         <div class="img-container"><img src="IMG_20260829_174914.png" alt="Topper SV Tailor"></div>
@@ -265,6 +269,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
         <button class="btn-cart" onclick="toggleCart('Topper Karhai (130K)',7200,this)">🛒 Add to Cart</button>
       </div>
     </div>
+
   </div>
 
   <div class="footer-address">
@@ -303,7 +308,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
         <button style="position:absolute;right:-2px;bottom:0;width:32px;height:32px;border:2px solid #fff;border-radius:50%;background:#0d47a1;color:#fff;font-size:16px" onclick="openAvatarPicker()">✏️</button>
       </div>
       <h3 id="profileName" style="color:#1a237e">Guest User</h3>
-      <p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">Google Account Not Connected</p>
+      <p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">Checking account...</p>
       <div style="margin-top:15px">
         <button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Sign In with Google</button>
       </div>
@@ -444,11 +449,21 @@ let userLocationLink="";
 let ordersQuery=null;
 let cart=[];
 let authBusy=false;
+let authStateResolved=false;
 let locationReady=false;
 let locationRequestBusy=false;
 
 const $=id=>document.getElementById(id);
 const ORDER_DRAFT_KEY="topper_order_draft_v1";
+
+function showLoading(message){
+  $("authLoadingText").textContent=message||"Checking your account...";
+  $("authLoading").style.display="flex";
+}
+
+function hideLoading(){
+  $("authLoading").style.display="none";
+}
 
 function escapeHtml(value){
   return String(value??"")
@@ -502,12 +517,12 @@ function showOutOfStock(){
   showAppMessage("This item is currently out of stock.","❌");
 }
 
-/* Native Google Sign-In */
+/* Google Sign-In */
 async function googleSignIn(){
   if(currentUser||authBusy) return;
 
   authBusy=true;
-  $("authLoading").style.display="flex";
+  showLoading("Opening Google Sign-In...");
 
   try{
     if(window.AndroidApp&&typeof window.AndroidApp.signIn==="function"){
@@ -519,7 +534,7 @@ async function googleSignIn(){
     await auth.signInWithPopup(provider);
   }catch(error){
     authBusy=false;
-    $("authLoading").style.display="none";
+    hideLoading();
     showAuthError("Google sign-in failed: "+(error.message||error));
   }
 }
@@ -527,19 +542,21 @@ async function googleSignIn(){
 async function nativeGoogleLogin(idToken){
   try{
     if(!idToken) throw new Error("Google ID token was not received.");
+
+    showLoading("Signing in to your account...");
     const credential=firebase.auth.GoogleAuthProvider.credential(idToken);
     await auth.signInWithCredential(credential);
   }catch(error){
     showAuthError("Firebase sign-in failed: "+(error.message||error));
   }finally{
     authBusy=false;
-    $("authLoading").style.display="none";
+    if(authStateResolved) hideLoading();
   }
 }
 
 function nativeGoogleLoginError(message){
   authBusy=false;
-  $("authLoading").style.display="none";
+  hideLoading();
   showAuthError("Google sign-in failed: "+String(message||"Unknown error"));
 }
 
@@ -549,11 +566,14 @@ function handleAuthAction(){
 }
 
 function googleSignOut(){
+  showLoading("Signing out...");
   auth.signOut().then(()=>{
     currentUser=null;
     updateAuthUI();
     showAppMessage("You have signed out successfully.","✅");
-  }).catch(error=>showAuthError(error.message||"Sign-out failed."));
+  }).catch(error=>{
+    showAuthError(error.message||"Sign-out failed.");
+  }).finally(hideLoading);
 }
 
 function getSavedAvatar(){
@@ -593,13 +613,27 @@ function updateAuthUI(){
   authBusy=false;
 }
 
+/*
+ * Keep the splash screen visible until Firebase has resolved
+ * whether a saved user session exists.
+ */
 auth.onAuthStateChanged(user=>{
   currentUser=user||null;
+  authStateResolved=true;
+
   updateAuthUI();
-  $("authLoading").style.display="none";
 
   if(user) loadUserOrders(user.uid);
   else clearOrdersListener();
+
+  hideLoading();
+});
+
+/* Also report Firebase authentication initialization errors */
+auth.onIdTokenChanged(user=>{
+  if(user){
+    currentUser=user;
+  }
 });
 
 /* Phone support */
@@ -609,28 +643,51 @@ function openNativeCall(number){
       window.AndroidApp.callPhone(String(number));
       return false;
     }
+
     window.location.href="tel:"+String(number);
   }catch(e){
     showAppMessage("Unable to open the phone dialer.","⚠️");
   }
+
   return false;
 }
 
-/* Open Gmail or the device's default email app */
+/*
+ * Email support:
+ * Open the Android email composer directly with a mailto URI.
+ * Do not call the old AndroidApp.openEmail bridge here, because
+ * that bridge is producing the error shown in the screenshot.
+ */
 function openNativeEmail(email,subject){
   const targetEmail=String(email||"topperstitching@gmail.com");
   const targetSubject=String(subject||"Support Request");
 
+  const mailtoUrl="mailto:"+targetEmail+
+    "?subject="+encodeURIComponent(targetSubject);
+
   try{
     if(window.AndroidApp&&typeof window.AndroidApp.openEmail==="function"){
-      window.AndroidApp.openEmail(targetEmail,targetSubject);
-      return false;
-    }
+      /*
+       * Try the Android bridge first only if it explicitly reports
+       * success. If it returns false or throws, use the mailto URI.
+       */
+      const result=window.AndroidApp.openEmail(targetEmail,targetSubject);
 
-    const mailto="mailto:"+targetEmail+"?subject="+encodeURIComponent(targetSubject);
-    window.location.href=mailto;
-  }catch(e){
-    showAppMessage("Unable to open the email app. Please email topperstitching@gmail.com directly.","⚠️");
+      if(result===true){
+        return false;
+      }
+    }
+  }catch(error){
+    /* Fall through to the mailto URI. */
+  }
+
+  try{
+    window.location.href=mailtoUrl;
+  }catch(error){
+    showAppMessage(
+      "Unable to open an email app. Please install or enable an email app and try again.",
+      "⚠️"
+    );
   }
 
   return false;
@@ -679,8 +736,9 @@ function openPolicyModal(type){
   }else{
     $("policyModalTitle").textContent="Refund Policy";
     $("policyModalText").textContent=
-      "Refund requests are valid only until the order has been delivered. Once delivery is completed, refund requests under this policy will no longer be accepted. Any eligible refund request made before delivery will be reviewed by Topper Stitching according to the order status, payment details and applicable laws. Submitting a refund request does not guarantee approval. For assistance, contact topperstitching@gmail.com.";
+      "Refund requests are accepted only until delivery is completed. Once an order has been delivered, refund requests will not be accepted, except where required by applicable law. For assistance, contact topperstitching@gmail.com.";
   }
+
   $("policyModal").style.display="block";
 }
 
@@ -702,6 +760,7 @@ function switchTab(viewId,btnEl){
 function setUserLocation(lat,lon){
   const latitude=Number(lat);
   const longitude=Number(lon);
+
   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return;
 
   userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude;
@@ -771,7 +830,10 @@ if(tableSliderTrack){
   tableSliderTrack.addEventListener("scroll",()=>{
     const width=tableSliderTrack.clientWidth||1;
     const index=Math.round(tableSliderTrack.scrollLeft/width);
-    if(tableColors[index]) $("selectedTableColorText").textContent=tableColors[index];
+
+    if(tableColors[index]){
+      $("selectedTableColorText").textContent=tableColors[index];
+    }
   });
 }
 
@@ -783,6 +845,7 @@ function slideImages(id,direction){
 function getSelectedTableColor(){
   const track=$("tableSlider");
   if(!track) return tableColors[0];
+
   const index=Math.round(track.scrollLeft/(track.clientWidth||1));
   return tableColors[index]||tableColors[0];
 }
@@ -799,16 +862,23 @@ function requireLogin(){
 function loadCart(){
   try{
     const saved=localStorage.getItem("topper_cart");
+
     if(saved){
       const parsed=JSON.parse(saved);
       if(Array.isArray(parsed)) cart=parsed;
     }
-  }catch(e){cart=[];}
+  }catch(e){
+    cart=[];
+  }
+
   updateCartUI();
 }
 
 function saveCart(){
-  try{localStorage.setItem("topper_cart",JSON.stringify(cart));}catch(e){}
+  try{
+    localStorage.setItem("topper_cart",JSON.stringify(cart));
+  }catch(e){}
+
   updateCartUI();
 }
 
@@ -835,6 +905,7 @@ function updateAllHomepageButtons(){
     const text=btn.getAttribute("onclick")||"";
     const match=text.match(/toggleCart\('([^']+)'/);
     const pName=match?match[1]:null;
+
     if(!pName) return;
 
     const found=cart.some(i=>i.name===pName);
@@ -864,11 +935,13 @@ function updateCartUI(){
   cart.forEach((item,index)=>{
     const qty=Math.max(1,Number(item.qty)||1);
     const price=Math.max(0,Number(item.price)||0);
+
     totalQty+=qty;
     totalPrice+=price*qty;
 
     const div=document.createElement("div");
     div.className="cart-item";
+
     div.innerHTML=
       '<div><b>'+escapeHtml(item.name)+'</b>'+
       '<div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+price.toLocaleString("en-IN")+'</div>'+
@@ -889,12 +962,14 @@ function updateCartUI(){
 
 function updateQty(index,delta){
   if(!cart[index]) return;
+
   cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta);
   saveCart();
 }
 
 function removeFromCart(index){
   if(!cart[index]) return;
+
   cart.splice(index,1);
   saveCart();
   showAppMessage("Item removed from your cart.","ℹ️");
@@ -905,10 +980,11 @@ function checkoutCart(){
 
   const names=cart.map(i=>i.name+" (x"+i.qty+")").join(", ");
   const total=cart.reduce((sum,i)=>sum+(Number(i.price)*Number(i.qty)),0);
+
   prepareNewPayment("Cart Items: "+names,total);
 }
 
-/* Persist the order form until the user presses Cancel */
+/* Persist order details until Cancel or successful submission */
 function saveOrderDraft(){
   try{
     const draft={
@@ -923,6 +999,7 @@ function saveOrderDraft(){
       locationLink:userLocationLink,
       savedAt:Date.now()
     };
+
     localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(draft));
   }catch(e){
     console.warn("Unable to save order draft.",e);
@@ -930,7 +1007,9 @@ function saveOrderDraft(){
 }
 
 function clearOrderDraft(){
-  try{localStorage.removeItem(ORDER_DRAFT_KEY);}catch(e){}
+  try{
+    localStorage.removeItem(ORDER_DRAFT_KEY);
+  }catch(e){}
 }
 
 function restoreOrderDraft(){
@@ -955,6 +1034,7 @@ function restoreOrderDraft(){
 
     $("modalProductInfo").textContent=
       selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN");
+
     $("upiPayAmount").textContent=
       Number(selectedPrice||0).toLocaleString("en-IN");
 
@@ -978,6 +1058,7 @@ function prepareNewPayment(productName,price){
 
   $("modalProductInfo").textContent=
     selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");
+
   $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN");
 
   $("orderModal").style.display="block";
@@ -1000,7 +1081,7 @@ function cancelOrderForm(){
   clearOrderDraft();
 }
 
-/* Save every field as it changes */
+/* Save every form field as it changes */
 ["custName","custPhone","custAddress","termsCheck","utrNumber"].forEach(id=>{
   const el=$(id);
   if(!el) return;
@@ -1014,7 +1095,7 @@ function cancelOrderForm(){
   el.addEventListener("change",saveOrderDraft);
 });
 
-/* Indian mobile number validation */
+/* Mobile number validation */
 function normalizeIndianPhone(value){
   let digits=String(value||"").replace(/\D/g,"");
 
@@ -1094,6 +1175,7 @@ function payViaUpiIntent(){
   }
 
   const amount=Number(selectedPrice||0);
+
   if(!amount){
     showAppMessage("The payment amount is invalid.","⚠️");
     return;
@@ -1106,6 +1188,7 @@ function payViaUpiIntent(){
 
   try{
     saveOrderDraft();
+
     if(window.AndroidApp&&typeof window.AndroidApp.openUpi==="function"){
       window.AndroidApp.openUpi(upiUrl);
     }else{
@@ -1116,7 +1199,7 @@ function payViaUpiIntent(){
   }
 }
 
-/* Submit order and save the entered UTR to Firebase */
+/* Submit order and save the UTR to Firebase */
 async function submitOnlineOrder(){
   if(!currentUser){
     showAppMessage("Please sign in with Google before placing an order.","🔐");
@@ -1250,8 +1333,10 @@ function loadUserOrders(userId){
     }
 
     const orders=[];
+
     snapshot.forEach(child=>{
       const o=child.val();
+
       if(o){
         o._id=child.key;
         orders.push(o);
@@ -1294,8 +1379,11 @@ function loadUserOrders(userId){
 setProfileAvatar(getSavedAvatar());
 loadCart();
 
-window.addEventListener("DOMContentLoaded",()=>{
-  $("authLoading").style.display="none";
+/*
+ * Do not hide the initial loading screen in DOMContentLoaded.
+ * It must remain visible until Firebase's first auth-state callback.
+ */
+document.addEventListener("DOMContentLoaded",()=>{
   restoreOrderDraft();
 });
 
@@ -1311,5 +1399,6 @@ window.addEventListener("pagehide",()=>{
   }
 });
 </script>
+
 </body>
 </html>
