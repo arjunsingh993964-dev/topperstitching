@@ -100,40 +100,57 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <div id="authLoading">
 <div class="auth-loader"></div>          
-<div class="auth-loading-text">Account लोड हो रहा है...</div>          
+<div class="auth-loading-text">Account load ho raha hai...</div>          
 </div>  
 
-<!-- FREE DEVICE PHONE VERIFICATION MODAL -->
-<div id="deviceVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
-<div class="modal-content" style="margin-top:10vh;">
-<h3>📱 मोबाइल नंबर वेरिफिकेशन</h3>
-<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">ऐप का उपयोग करने के लिए अपना 10 अंकों का मोबाइल नंबर दर्ज करें।</p>
+<!-- CLICK-TO-CALL MISSED CALL VERIFICATION MODAL -->
+<div id="missedCallVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
+<div class="modal-content" style="margin-top:8vh;text-align:center;">
+<h3 style="color:#1a237e;">📞 Call Verification (Missed Call)</h3>
+<p style="font-size:13px;color:#666;margin-bottom:15px;">
+App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche diye gaye link par click karke verification poora karein.
+</p>
 
-<div class="form-group">
-<label>मोबाइल नंबर:</label>
-<input type="tel" id="devicePhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
+<div class="form-group" style="text-align:left;">
+<label>Mobile Number:</label>
+<input type="tel" id="callerPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="saveDevicePhone()">मोबाइल नंबर सेव करें</button>
+
+<!-- Yeh wahi link/button hai jisse turant +14844817124 par call lagegi -->
+<div id="verifyActionBox" style="margin-top:15px;display:none;">
+<p style="font-size:12px;color:#2e7d32;font-weight:bold;margin-bottom:8px;">Neeche diye gaye link par click karein (Call 1-2 second mein apne aap cut ho jayegi):</p>
+<a id="autoCallLink" href="tel:+14844817124" onclick="markCallTriggered()" class="btn-online" style="text-decoration:none;background:#2e7d32;padding:12px;display:block;font-size:15px;">
+📲 Verify by Call (+14844817124)
+</a>
+</div>
+
+<button type="button" id="generateLinkBtn" class="btn-submit" style="margin-top:10px;background:#0d47a1;" onclick="generateCallLink()">
+1. Pehle Link Banayein
+</button>
+
+<button type="button" id="confirmDoneBtn" class="btn-submit" style="margin-top:10px;background:#ff9800;display:none;" onclick="finalizeMissedCallVerification()">
+2. Maine Missed Call De Diya, Aage Badhein ✅
+</button>
 </div>
 </div>
 
 <!-- CHANGE PHONE MODAL (FOR PROFILE) -->
 <div id="changePhoneModal" class="modal">  
 <div class="modal-content">
-<h3>🔄 मोबाइल नंबर बदलें</h3>
+<h3>🔄 Mobile Number Badlein</h3>
 <div class="form-group">
-<label>नया मोबाइल नंबर:</label>
-<input type="tel" id="newPhoneInput" placeholder="नया 10 अंकों का नंबर" inputmode="numeric" maxlength="10">
+<label>Naya Mobile Number:</label>
+<input type="tel" id="newPhoneInput" placeholder="Naya 10 ankon ka number" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="updateDevicePhone()">नंबर अपडेट करें</button>
-<button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">रद्द करें</button>
+<button type="button" class="btn-submit" onclick="updateMissedCallPhone()">Number Update Karein</button>
+<button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">Radd Karein</button>
 </div>
 </div>
 
 <header>          
 <div>          
 <div class="brand-title">TOPPER STITCHING</div>          
-<div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>          
+<div class="brand-subtitle">Vishwas aur behtareen quality ki silai masine</div>          
 </div>  
 <button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">Sign In</button>  
 </header>  
@@ -142,8 +159,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <div id="homeView" class="view-section active-view">  
 <div class="banner">          
-<h2>सिलाई मशीन और पार्ट्स के लिए सबसे भरोसेमंद दुकान</h2>          
-<p>बेस्ट क्वालिटी, उचित दाम और बेहतरीन सर्विस</p>          
+<h2>Silai machine aur parts ke liye sabse bharosemand dukan</h2>          
+<p>Best quality, uchit dam aur behtareen service</p>          
 </div>  
 
 <div class="products">  
@@ -156,18 +173,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Topper SV Tailor</h3>          
 <div class="price">₹4,500</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Topper Stitching</div>          
-<div><span>मॉडल:</span> SV tailor</div>          
-<div><span>टाइप:</span> Sewing Machine Only Head</div>          
-<div><span>वारंटी:</span> 5 Years</div>          
-<div><span>गारंटी:</span> 0 Days</div>          
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+<div><span>Brand:</span> Topper Stitching</div>          
+<div><span>Model:</span> SV tailor</div>          
+<div><span>Type:</span> Sewing Machine Only Head</div>          
+<div><span>Warranty:</span> 5 Years</div>          
+<div><span>Guarantee:</span> 0 Days</div>          
+<div><span>Toolbox:</span> Accessories Box Included</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_SV_Tailor" onclick="toggleCart('Topper SV Tailor','4500',this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor" onclick="toggleCart('Topper SV Tailor','4500',this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -180,18 +197,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Topper SV Tailor Deluxe</h3>          
 <div class="price">₹4,500</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Topper Stitching</div>          
-<div><span>मॉडल:</span> SV tailor delox</div>          
-<div><span>टाइप:</span> Sewing Machine Only Head</div>          
-<div><span>वारंटी:</span> 5 Years</div>          
-<div><span>गारंटी:</span> 0 Days</div>          
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+<div><span>Brand:</span> Topper Stitching</div>          
+<div><span>Model:</span> SV tailor delox</div>          
+<div><span>Type:</span> Sewing Machine Only Head</div>          
+<div><span>Warranty:</span> 5 Years</div>          
+<div><span>Guarantee:</span> 0 Days</div>          
+<div><span>Toolbox:</span> Accessories Box Included</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_SV_Tailor_Deluxe" onclick="toggleCart('Topper SV Tailor Deluxe','4500',this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor_Deluxe" onclick="toggleCart('Topper SV Tailor Deluxe','4500',this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -204,18 +221,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Bag Closer Single Needle</h3>          
 <div class="price">₹5,800</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Topper Stitching</div>          
-<div><span>मॉडल:</span> single nidile</div>          
-<div><span>टाइप:</span> Bag Closer Machine Only (Heavy Duty)</div>          
-<div><span>वारंटी:</span> 2 Times Service</div>          
-<div><span>गारंटी:</span> 0 Days</div>          
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+<div><span>Brand:</span> Topper Stitching</div>          
+<div><span>Model:</span> single nidile</div>          
+<div><span>Type:</span> Bag Closer Machine Only (Heavy Duty)</div>          
+<div><span>Warranty:</span> 2 Times Service</div>          
+<div><span>Guarantee:</span> 0 Days</div>          
+<div><span>Toolbox:</span> Accessories Box Included</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Bag_Closer_Single_Needle" onclick="toggleCart('Bag Closer Single Needle','5800',this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Bag_Closer_Single_Needle" onclick="toggleCart('Bag Closer Single Needle','5800',this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -228,18 +245,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Topper TA1 Model</h3>          
 <div class="price">₹6,000</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Topper Stitching</div>          
-<div><span>मॉडल:</span> umbrella</div>          
-<div><span>टाइप:</span> Sewing Machine Only Head</div>          
-<div><span>वारंटी:</span> 5 Years</div>          
-<div><span>गारंटी:</span> 0 Days</div>          
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+<div><span>Brand:</span> Topper Stitching</div>          
+<div><span>Model:</span> umbrella</div>          
+<div><span>Type:</span> Sewing Machine Only Head</div>          
+<div><span>Warranty:</span> 5 Years</div>          
+<div><span>Guarantee:</span> 0 Days</div>          
+<div><span>Toolbox:</span> Accessories Box Included</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_TA1_Model" onclick="toggleCart('Topper TA1 Model','6000',this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Topper_TA1_Model" onclick="toggleCart('Topper TA1 Model','6000',this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -259,16 +276,16 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Sewing Machine Top Table</h3>          
 <div class="price">₹550</div>  
 <div class="specs">          
-<div><span>मॉडल:</span> SV / TA1</div>          
-<div><span>कलर:</span> <span id="selectedTableColorText">Light Wooden</span></div>          
-<div><span>टाइप:</span> Top Table Only</div>          
-<div><span>वारंटी / गारंटी:</span> None</div>          
+<div><span>Model:</span> SV / TA1</div>          
+<div><span>Color:</span> <span id="selectedTableColorText">Light Wooden</span></div>          
+<div><span>Type:</span> Top Table Only</div>          
+<div><span>Warranty / Guarantee:</span> None</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openTableOrderForm()">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Top_Table" onclick="addTableToCart(this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openTableOrderForm()">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Top_Table" onclick="addTableToCart(this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -281,17 +298,17 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h3>Jupiter Scissors</h3>          
 <div class="price">₹300</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Jupiter Scissors</div>          
-<div><span>साइज:</span> Size 10</div>          
-<div><span>टाइप:</span> Scissors Only</div>          
-<div><span>वारंटी / गारंटी:</span> None</div>          
+<div><span>Brand:</span> Jupiter Scissors</div>          
+<div><span>Size:</span> Size 10</div>          
+<div><span>Type:</span> Scissors Only</div>          
+<div><span>Warranty / Guarantee:</span> None</div>          
 <div class="out-of-stock">Out of stock</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="showOutOfStock()">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" onclick="showOutOfStock()">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="showOutOfStock()">💳 Online Payment Karein</button>  
+<button class="btn-cart" onclick="showOutOfStock()">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 
@@ -301,30 +318,30 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <img src="IMG_20260829_174935.png" alt="Topper SV Tailor 130k" onerror="this.style.display='none'">          
 </div>  
 <div class="card-details">          
-<h3>Topper कढ़ाई (130k)</h3>          
+<h3>Topper Karhai (130k)</h3>          
 <div class="price">₹7,200</div>  
 <div class="specs">          
-<div><span>ब्रांड:</span> Topper Stitching</div>          
-<div><span>मॉडल:</span> 130k (कढ़ाई)</div>          
-<div><span>टाइप:</span> Sewing Machine Only Head</div>          
-<div><span>वारंटी:</span> 5 Years</div>          
-<div><span>गारंटी:</span> 0 Days</div>          
-<div><span>टूलबॉक्स:</span> Accessories Box Included</div>          
+<div><span>Brand:</span> Topper Stitching</div>          
+<div><span>Model:</span> 130k (Karhai)</div>          
+<div><span>Type:</span> Sewing Machine Only Head</div>          
+<div><span>Warranty:</span> 5 Years</div>          
+<div><span>Guarantee:</span> 0 Days</div>          
+<div><span>Toolbox:</span> Accessories Box Included</div>          
 </div>          
 </div>          
 </div>  
 <div>          
-<button class="btn-online" onclick="openOrderForm('Topper कढ़ाई (130k)','7200')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_Embroidery_130k" onclick="toggleCart('Topper कढ़ाई (130k)','7200',this)">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-online" onclick="openOrderForm('Topper Karhai (130k)','7200')">💳 Online Payment Karein</button>  
+<button class="btn-cart" id="cartBtn_Topper_Embroidery_130k" onclick="toggleCart('Topper Karhai (130k)','7200',this)">🛒 Cart me Jodein</button>          
 </div>          
 </div>  
 </div>  
 
 <div class="footer-address">  
-<strong>📍 मुख्य स्टोर का पता:</strong> मेन रोड सासामुसा, गोपालगंज, बिहार      
-<br><br>  संपर्क करें: <b>+91 9264137710</b>    
+<strong>📍 Mukhya Store Ka Pata:</strong> Main Road Sasamusa, Gopalganj, Bihar      
+<br><br>  Sampark Karein: <b>+91 9264137710</b>    
 <br>  Gmail: <b>support@topperstitching.com</b>  
-<button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 मेरी Live Location अपडेट करें</button>
+<button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 Meri Live Location Update Karein</button>  
 <div id="locationStatus" class="location-status"></div>  
 </div>  
 </div>  
@@ -332,19 +349,19 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <!-- CART VIEW -->
 <div id="cartView" class="view-section">
 <div class="cart-container">
-<h2 style="color:#1a237e;margin-bottom:15px">🛒 आपकी शॉपिंग कार्ट (Cart)</h2>
-<div id="cartItemsList"><p class="empty-orders">कार्ट खाली है।</p></div>
+<h2 style="color:#1a237e;margin-bottom:15px">🛒 Aapki Shopping Cart</h2>
+<div id="cartItemsList"><p class="empty-orders">Cart khali hai.</p></div>
 <div id="cartSummary" style="display:none;margin-top:20px;background:#fff;padding:15px;border-radius:10px;border:1px solid #e0e0e0;">
-<h3>कुल योग: ₹<span id="cartTotalPrice">0</span></h3>
-<button class="btn-online" style="margin-top:12px;" onclick="checkoutCart()">💳 कार्ट के सभी आइटम का पेमेंट करें</button>
+<h3>Kul Yog: ₹<span id="cartTotalPrice">0</span></h3>
+<button class="btn-online" style="margin-top:12px;" onclick="checkoutCart()">💳 Cart ke sabhi item ka payment karein</button>
 </div>
 </div>
 </div>
 
 <div id="ordersView" class="view-section">  
 <div class="orders-container">  
-<h2 class="orders-title">आपके ऑर्डर्स (My Orders)</h2>  
-<div id="ordersList"><p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p></div>  
+<h2 class="orders-title">Aapke Orders (My Orders)</h2>  
+<div id="ordersList"><p class="empty-orders">Orders load ho rahe hain...</p></div>  
 </div>  
 </div>  
 
@@ -357,9 +374,9 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </div>  
 <h3 id="profileName" style="color:#1a237e">Guest User</h3>  
 <p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">Google Account Not Connected</p>  
-<p style="font-size:13px;color:#2e7d32;margin-top:5px"><b>सत्यापित मोबाइल:</b> <span id="displayVerifiedPhone">--</span> <button onclick="openChangePhoneModal()" style="border:0;background:#0d47a1;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:5px">बदलें</button></p>
+<p style="font-size:13px;color:#2e7d32;margin-top:5px"><b>Verified Mobile:</b> <span id="displayVerifiedPhone">--</span> <button onclick="openChangePhoneModal()" style="border:0;background:#0d47a1;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:5px">Badlein</button></p>
 <div style="margin-top:15px">  
-<button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Google Account से लॉगिन करें</button>  
+<button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Google Account se Login Karein</button>  
 </div>
 </div>
 
@@ -377,7 +394,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <h4>#policy</h4>
 <ul>
 <li onclick="openPolicyModal('terms')">📄 Terms &amp; Policy</li>
-<li onclick="openPolicyModal('refund')">🔄 Refund Policy: रिफंड डिलीवरी हो जाने वक्त तक ही मान्य है, उसके बाद नहीं।</li>
+<li onclick="openPolicyModal('refund')">🔄 Refund Policy: Refund delivery ho jane wakt tak hi many hai, uske baad nahi.</li>
 </ul>
 </div>
 
@@ -397,13 +414,13 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="modal-content">  
 <h3 id="policyModalTitle">Policy</h3>  
 <p id="policyModalText" style="font-size:14px;color:#444;line-height:1.6;margin:15px 0;white-space:pre-line;text-align:left"></p>  
-<button class="btn-close" type="button" onclick="closePolicyModal()">बंद करें</button>  
+<button class="btn-close" type="button" onclick="closePolicyModal()">Band Karein</button>  
 </div>  
 </div>  
 
 <div id="avatarModal" class="modal">  
 <div class="modal-content">  
-<h3>Profile Photo चुनें</h3>  
+<h3>Profile Photo Chunein</h3>  
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">  
 <button style="border:2px solid #e0e0e0;background:#fff;border-radius:12px;padding:6px;cursor:pointer" type="button" onclick="selectAvatar('m1.png')"><img src="m1.png" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px" alt="m1"></button>  
 <button style="border:2px solid #e0e0e0;background:#fff;border-radius:12px;padding:6px;cursor:pointer" type="button" onclick="selectAvatar('m2.png')"><img src="m2.png" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px" alt="m2"></button>  
@@ -412,42 +429,42 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <button style="border:2px solid #e0e0e0;background:#fff;border-radius:12px;padding:6px;cursor:pointer" type="button" onclick="selectAvatar('f1.png')"><img src="f1.png" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px" alt="f1"></button>  
 <button style="border:2px solid #e0e0e0;background:#fff;border-radius:12px;padding:6px;cursor:pointer" type="button" onclick="selectAvatar('f2.png')"><img src="f2.png" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px" alt="f2"></button>  
 </div>  
-<button class="btn-close" type="button" style="margin-top:15px" onclick="closeAvatarPicker()">बंद करें</button>  
+<button class="btn-close" type="button" style="margin-top:15px" onclick="closeAvatarPicker()">Band Karein</button>  
 </div>  
 </div>  
 
 <div id="orderModal" class="modal">  
 <div class="modal-content">  
-<h3>🛒 ऑनलाइन आर्डर और पेमेंट</h3>  
+<h3>🛒 Online Order aur Payment</h3>  
 <div class="delivery-badge">🚚 Home Delivery Only For<br><b>Bihar District: Gopalganj (Area)</b></div>  
 <p id="modalProductInfo"></p>  
 <div class="form-group">          
-<label>आपका पूरा नाम:</label>          
-<input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">          
+<label>Aapka Pura Naam:</label>          
+<input type="text" id="custName" placeholder="Apna naam likhein" autocomplete="name">          
 </div>  
 <div class="form-group">          
-<label>मोबाइल नंबर (सत्यापित & सुरक्षित):</label>          
-<input type="tel" id="custPhone" readonly style="background:#e9ecef;cursor:not-allowed;" title="सत्यापित मोबाइल नंबर बदला नहीं जा सकता">          
+<label>Mobile Number (Verified & Safe):</label>          
+<input type="tel" id="custPhone" readonly style="background:#e9ecef;cursor:not-allowed;" title="Verified mobile number badla nahi ja sakta">          
 </div>  
 <div class="form-group">          
-<label>पूरा पता:</label>          
-<textarea id="custAddress" rows="3" placeholder="गाँव/मोहल्ला, वार्ड नंबर, गोपालगंज"></textarea>          
+<label>Pura Pata:</label>          
+<textarea id="custAddress" rows="3" placeholder="Gaon/Mohalla, Ward number, Gopalganj"></textarea>          
 </div>  
 <div class="terms-group">
 <input type="checkbox" id="termsCheck">
-<label for="termsCheck" style="font-size:13px;cursor:pointer;display:inline">मैं Terms &amp; Conditions और Refund Policy से सहमत हूँ।</label>
+<label for="termsCheck" style="font-size:13px;cursor:pointer;display:inline">Main Terms &amp; Conditions aur Refund Policy se sahamat hu.</label>
 </div>
 <div class="qr-box">  
-<p style="font-size:15px;font-weight:700;color:#333">💳 नीचे Pay बटन दबाकर उपलब्ध UPI App चुनें और भुगतान करें।</p>  
+<p style="font-size:15px;font-weight:700;color:#333">💳 Niche Pay button dabakar uplabdh UPI App chunein aur bhugtan karein.</p>  
 <button type="button" class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">💳 Online Pay ₹<span id="upiPayAmount">0</span></button>  
-<p style="font-size:12px;color:#777;margin-top:8px">Payment के बाद वापस ऐप में आने पर आर्डर सबमिट हो जाएगा।</p>  
+<p style="font-size:12px;color:#777;margin-top:8px">Payment ke baad vapas app me aane par order submit ho jayega.</p>  
 </div>  
 <div class="form-group">          
 <label>UTR / Transaction Number:</label>          
-<input type="text" id="utrNumber" placeholder="Payment के बाद UTR नंबर डालें" autocomplete="off" inputmode="numeric" maxlength="40">          
+<input type="text" id="utrNumber" placeholder="Payment ke baad UTR number dalein" autocomplete="off" inputmode="numeric" maxlength="40">          
 </div>  
-<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">💬 Order सबमिट करें</button>  
-<button class="btn-close" type="button" onclick="cancelOrderForm()">रद्द करें</button>  
+<button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">💬 Order Submit Karein</button>  
+<button class="btn-close" type="button" onclick="cancelOrderForm()">Radd Karein</button>  
 </div>  
 </div>  
 
@@ -493,35 +510,52 @@ let verifiedRawPhone = "";
 const $=id=>document.getElementById(id);
 
 window.addEventListener("DOMContentLoaded", function(){
-const savedPhone = localStorage.getItem("topper_device_verified_phone");
+const savedPhone = localStorage.getItem("topper_missedcall_verified_phone");
 if(savedPhone){
-$("deviceVerifyModal").style.display = "none";
+$("missedCallVerifyModal").style.display = "none";
 $("displayVerifiedPhone").textContent = savedPhone;
 verifiedRawPhone = savedPhone;
 } else {
-$("deviceVerifyModal").style.display = "block";
+$("missedCallVerifyModal").style.display = "block";
 }
 loadCart();
 });
 
-function saveDevicePhone(){
-const phone = $("devicePhoneInput").value.trim();
+function generateCallLink(){
+const phone = $("callerPhoneInput").value.trim();
 if(!/^\d{10}$/.test(phone)){
-showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
+showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
 return;
 }
+window.tempVerifyPhone = phone;
+$("verifyActionBox").style.display = "block";
+$("generateLinkBtn").style.display = "none";
+$("confirmDoneBtn").style.display = "block";
+$("callerPhoneInput").disabled = true;
+}
+
+function markCallTriggered(){
+// User ne link par click karke +14844817124 par call trigger kar diya hai
+}
+
+function finalizeMissedCallVerification(){
+const phone = window.tempVerifyPhone;
+if(!phone) return;
 verifiedRawPhone = phone;
-localStorage.setItem("topper_device_verified_phone", phone);
+localStorage.setItem("topper_missedcall_verified_phone", phone);
 $("displayVerifiedPhone").textContent = phone;
-$("deviceVerifyModal").style.display = "none";
+$("missedCallVerifyModal").style.display = "none";
 
-db.ref("verified_devices").push({
+if(typeof db !== 'undefined'){
+db.ref("missed_call_verifications").push({
 phone: phone,
-deviceId: navigator.userAgent,
-verifiedAt: Date.now()
-});
+targetNumber: "+14844817124",
+verifiedAt: Date.now(),
+method: "Click-to-Call Missed Call"
+}).catch(function(err){});
+}
 
-showAppMessage("मोबाइल नंबर सफलतापूर्वक सेव हो गया!", "✅");
+showAppMessage("Mobile number safalpurvak verify ho gaya!", "✅");
 }
 
 function openChangePhoneModal(){
@@ -529,24 +563,25 @@ $("changePhoneModal").style.display = "block";
 $("newPhoneInput").value = "";
 }
 
-function updateDevicePhone(){
+function updateMissedCallPhone(){
 const phone = $("newPhoneInput").value.trim();
 if(!/^\d{10}$/.test(phone)){
-showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
+showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
 return;
 }
 verifiedRawPhone = phone;
-localStorage.setItem("topper_device_verified_phone", phone);
+localStorage.setItem("topper_missedcall_verified_phone", phone);
 $("displayVerifiedPhone").textContent = phone;
 $("changePhoneModal").style.display = "none";
 
-db.ref("verified_devices").push({
+db.ref("missed_call_verifications").push({
 phone: phone,
-deviceId: navigator.userAgent,
-updatedAt: Date.now()
+targetNumber: "+14844817124",
+updatedAt: Date.now(),
+method: "Updated Missed Call"
 });
 
-showAppMessage("मोबाइल नंबर सफलतापूर्वक बदल दिया गया!", "✅");
+showAppMessage("Mobile number safalpurvak badal diya gaya!", "✅");
 }
 
 function loadCart(){
@@ -571,11 +606,11 @@ const index = cart.findIndex(item => item.name === name);
 if(index > -1){
 cart.splice(index, 1);
 saveCart();
-showAppMessage("🗑️ कार्ट से हटा दिया गया।", "ℹ️");
+showAppMessage("🗑️ Cart se hata diya gaya.", "ℹ️");
 } else {
 cart.push({name: name, price: Number(price), qty: 1});
 saveCart();
-showAppMessage("🛒 कार्ट में जोड़ा गया!", "✅");
+showAppMessage("🛒 Cart me joda gaya!", "✅");
 }
 }
 
@@ -599,7 +634,7 @@ function removeFromCart(index){
 if(cart[index]){
 cart.splice(index, 1);
 saveCart();
-showAppMessage("🗑️ कार्ट से हटा दिया गया।", "ℹ️");
+showAppMessage("🗑️ Cart se hata diya gaya.", "ℹ️");
 }
 }
 
@@ -612,10 +647,10 @@ if(match){
 let pName = match[1];
 let found = cart.find(i => i.name === pName);
 if(found){
-btn.textContent = "❌ कार्ट से हटाएं";
+btn.textContent = "❌ Cart se hatayein";
 btn.classList.add("in-cart");
 } else {
-btn.textContent = "🛒 कार्ट में जोड़ें";
+btn.textContent = "🛒 Cart me jodein";
 btn.classList.remove("in-cart");
 }
 }
@@ -632,7 +667,7 @@ let totalQty = 0;
 let totalPrice = 0;
 
 if(!cart || cart.length === 0){
-list.innerHTML = '<p class="empty-orders">🛒 आपकी कार्ट खाली है।</p>';
+list.innerHTML = '<p class="empty-orders">🛒 Aapki cart khali hai.</p>';
 summary.style.display = "none";
 badge.style.display = "none";
 updateAllHomepageButtons();
@@ -669,7 +704,7 @@ function triggerSupport(type){
 if(type === 'email'){
 window.location.href = "mailto:support@topperstitching.com?subject=Support%20Request";
 } else if(type === 'ai_call' || type === 'ai_assistant'){
-showAppMessage("🤖 AI Assistant / Call Support जल्द उपलब्ध होगा।", "ℹ️");
+showAppMessage("🤖 AI Assistant / Call Support jald uplabdh hoga.", "ℹ️");
 } else if(type === 'human_call'){
 window.location.href = "tel:9264137710";
 }
@@ -681,10 +716,10 @@ const title = $("policyModalTitle");
 const text = $("policyModalText");
 if(type === 'terms'){
 title.textContent = "Terms & Policy";
-text.textContent = "1. Topper Stitching पर उपलब्ध सभी सिलाई मशीनें और पार्ट्स उच्च गुणवत्ता के हैं।\n2. आर्डर करते समय सही पता और मोबाइल नंबर देना अनिवार्य है।\n3. होम डिलीवरी केवल बिहार के गोपालगंज जिले के अंतर्गत उपलब्ध है।\n4. डेटा सुरक्षा: उपयोगकर्ता (User) का सारा डेटा और डिटेल्स क्लाउड (Cloud) पर 100% सुरक्षित और एन्क्रिप्टेड है।\n5. किसी भी विवाद की स्थिति में गोपालगंज न्यायालय का क्षेत्राधिकार होगा।";
+text.textContent = "1. Topper Stitching par uplabdh sabhi silai masine aur parts uchch gunvatta ke hain.\n2. Order karte samay sahi pata aur mobile number dena anivarya hai.\n3. Home delivery kewal Bihar ke Gopalganj jile ke antargat uplabdh hai.\n4. Data suraksha: User ka sara data aur details cloud par 100% surakshit aur encrypted hai.\n5. Kisi bhi vivad ki sthiti me Gopalganj nyayalay ka kshetradhikar hoga.";
 } else if(type === 'refund'){
 title.textContent = "Refund Policy";
-text.textContent = "• रिफंड पॉलिसी: रिफंड केवल डिलीवरी होने के वक्त तक ही मान्य है। एक बार सामान डिलीवर हो जाने और ग्राहक द्वारा स्वीकार कर लेने के बाद किसी भी प्रकार का रिफंड या रिटर्न मान्य नहीं होगा।";
+text.textContent = "• Refund policy: Refund kewal delivery hone ke wakt tak hi many hai. Ek baar saman deliver ho jane aur grahak dwara sweekar kar lene ke baad kisi bhi prakar ka refund ya return many nahi hoga.";
 }
 modal.style.display = "block";
 }
@@ -707,7 +742,7 @@ document.body.appendChild(box);
 }
 
 function showOutOfStock(){
-showAppMessage("यह सामान अभी Out of stock है।","❌");
+showAppMessage("Yeh saman abhi Out of stock hai.","❌");
 }
 
 function showAuthError(message){
@@ -767,7 +802,7 @@ profileBtn.onclick=googleSignOut;
 authBtn.textContent="Sign In";
 name.textContent="Guest User";
 email.textContent="Google Account Not Connected";
-profileBtn.textContent="Google Account से लॉगिन करें";
+profileBtn.textContent="Google Account se Login Karein";
 profileBtn.onclick=googleSignIn;
 }
 authBusy=false;
@@ -787,7 +822,7 @@ localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 }catch(error){
 authBusy=false;
 updateAuthUI();
-showAuthError("❌ Google Login नहीं हुआ: "+error.message);
+showAuthError("❌ Google Login nahi hua: "+error.message);
 }
 }
 
@@ -796,7 +831,7 @@ auth.signOut().then(function(){
 currentUser=null;
 localStorage.removeItem(LOGIN_MEMORY_KEY);
 updateAuthUI();
-showAppMessage("Log Out हो गया!","✅");
+showAppMessage("Log Out ho gaya!","✅");
 });
 }
 
@@ -825,13 +860,13 @@ if(!Number.isFinite(latitude)||!Number.isFinite(longitude))return;
 userLocationLink="https://www.google.com/maps?q="+encodeURIComponent(latitude+","+longitude);
 locationReady=true;
 locationRequestBusy=false;
-document.getElementById("locationStatus").textContent="✅ Live Location उपलब्ध है";
+document.getElementById("locationStatus").textContent="✅ Live Location uplabdh hai";
 }
 
 function requestUserLocation(){
 if(locationReady||locationRequestBusy)return;
 locationRequestBusy=true;
-document.getElementById("locationStatus").textContent="📍 Live Location लोड हो रही है...";
+document.getElementById("locationStatus").textContent="📍 Live Location load ho rahi hai...";
 if(navigator.geolocation){
 navigator.geolocation.getCurrentPosition(
 function(pos){setUserLocation(pos.coords.latitude,pos.coords.longitude);},
@@ -868,7 +903,7 @@ return tableColors[index]||tableColors[0];
 
 function requireLogin(){
 if(currentUser)return true;
-showAppMessage("ऑर्डर करने के लिए पहले Google Account से Sign-In करें!","🔐");
+showAppMessage("Order karne ke liye pehle Google Account se Sign-In karein!","🔐");
 switchTab("profileView",document.querySelectorAll(".nav-item")[3]);
 return false;
 }
@@ -877,7 +912,7 @@ function prepareNewPayment(productName,price){
 selectedProduct=String(productName);
 selectedPrice=String(price);
 $("custName").value="";
-const verifiedPhone = localStorage.getItem("topper_device_verified_phone") || "";
+const verifiedPhone = localStorage.getItem("topper_missedcall_verified_phone") || "";
 $("custPhone").value = verifiedPhone;
 
 $("custAddress").value="";
@@ -905,7 +940,7 @@ $("orderModal").style.display="none";
 
 function payViaUpiIntent(){
 if(!$("termsCheck").checked){
-showAppMessage("कृपया आगे बढ़ने के लिए Terms & Conditions पर टिक करें।","📝");
+showAppMessage("Kripya aage badhne ke liye Terms & Conditions par tick karein.","📝");
 return;
 }
 const amount=Number(selectedPrice||0);
@@ -916,11 +951,11 @@ try{window.location.href=upiUrl;}catch(error){}
 
 async function submitOnlineOrder(){
 if(!currentUser){
-showAppMessage("कृपया पहले Google Account से Login करें!","🔐");
+showAppMessage("Kripya pehle Google Account se Login karein!","🔐");
 return;
 }
 if(!$("termsCheck").checked){
-showAppMessage("कृपया आगे बढ़ने के लिए Terms & Conditions पर टिक करें।","📝");
+showAppMessage("Kripya aage badhne ke liye Terms & Conditions par tick karein.","📝");
 return;
 }
 const name=$("custName").value.trim();
@@ -929,17 +964,17 @@ const address=$("custAddress").value.trim();
 const utr=$("utrNumber").value.trim();
 
 if(!name||!phone||!address){
-showAppMessage("कृपया अपनी सभी जानकारी भरें!","📝");
+showAppMessage("Kripya apni sabhi jankari bharein!","📝");
 return;
 }
 if(!utr){
-showAppMessage("कृपया payment के बाद UTR / Transaction Number डालें!","💳");
+showAppMessage("Kripya payment ke baad UTR / Transaction Number dalein!","💳");
 return;
 }
 
 const btn=$("onlineOrderBtn");
 btn.disabled=true;
-btn.textContent="⏳ Order Firebase में Save हो रहा है...";
+btn.textContent="⏳ Order Firebase me Save ho raha hai...";
 
 const orderData={
 userId:currentUser.uid,
@@ -971,14 +1006,14 @@ saveCart();
 
 $("orderModal").style.display="none";
 btn.disabled=false;
-btn.textContent="💬 Order सबमिट करें";
+btn.textContent="💬 Order Submit Karein";
 
-showAppMessage("आपका Order सफलतापूर्वक सेव हो गया!\n\nOrder ID:\n"+ref.key,"✅");
+showAppMessage("Aapka Order safalpurvak save ho gaya!\n\nOrder ID:\n"+ref.key,"✅");
 switchTab("ordersView",document.querySelectorAll(".nav-item")[2]);
 }catch(error){
 btn.disabled=false;
-btn.textContent="💬 Order सबमिट करें";
-showAppMessage("Order Save नहीं हो पाया!\n\n"+error.message,"❌");
+btn.textContent="💬 Order Submit Karein";
+showAppMessage("Order Save nahi ho paya!\n\n"+error.message,"❌");
 }
 }
 
@@ -987,18 +1022,18 @@ if(ordersQuery){
 ordersQuery.off();
 ordersQuery=null;
 }
-$("ordersList").innerHTML='<p class="empty-orders">📦 Orders देखने के लिए Google से Sign-In करें।</p>';
+$("ordersList").innerHTML='<p class="empty-orders">📦 Orders dekhne ke liye Google se Sign-In karein.</p>';
 }
 
 function loadUserOrders(userId){
 if(ordersQuery){ordersQuery.off();}
 ordersQuery=db.ref("orders").orderByChild("userId").equalTo(userId);
-$("ordersList").innerHTML='<p class="empty-orders">ऑर्डर्स लोड हो रहे हैं...</p>';
+$("ordersList").innerHTML='<p class="empty-orders">Orders load ho rahe hain...</p>';
 ordersQuery.on("value",function(snapshot){
 const list=$("ordersList");
 list.innerHTML="";
 if(!snapshot.exists()){
-list.innerHTML='<p class="empty-orders">📦 अभी कोई Order नहीं मिला।</p>';
+list.innerHTML='<p class="empty-orders">📦 Abhi koi Order nahi mila.</p>';
 return;
 }
 const orders=[];
@@ -1019,7 +1054,7 @@ statusBadgeHTML = '<span class="status-badge status-success">✅ Successful</spa
 statusBadgeHTML = '<span class="status-badge status-failed">❌ Failed</span>';
 }
 
-card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b>'+statusBadgeHTML+'</div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
+card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b>'+statusBadgeHTML+'</div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 Keemat:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 Naam:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 Mobile:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 Pata:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 Tarikh:</b> '+escapeHtml(order.date||"")+'</div>';
 list.appendChild(card);
 });
 });
