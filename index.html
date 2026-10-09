@@ -8,688 +8,94 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>  
 <style>          
-*{          
-box-sizing:border-box;          
-font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;          
-margin:0;          
-padding:0          
-}    
-body{      
-background:#f0f2f5;      
-padding-bottom:90px;      
-color:#222      
-}  
-header{    
-background:linear-gradient(135deg,#1a237e,#0d47a1);    
-color:#fff;    
-padding:15px 12px;    
-text-align:center;    
-position:sticky;    
-top:0;    
-z-index:100;    
-box-shadow:0 4px 10px rgba(0,0,0,.2);    
-display:flex;    
-justify-content:space-between;    
-align-items:center    
-}  
-.brand-title{  
-font-size:20px;  
-font-weight:900;  
-letter-spacing:1px;  
-color:#ffab00;  
-text-transform:uppercase;  
-text-shadow:1px 1px 2px rgba(0,0,0,.5);  
-text-align:left  
-}  
-.brand-subtitle{
-font-size:11px;
-color:#e0e0e0;
-margin-top:2px;
-text-align:left
-}
-
-.auth-header-btn{
-background:#fff;
-color:#1a237e;
-border:0;
-padding:6px 12px;
-border-radius:20px;
-font-weight:bold;
-font-size:12px;
-cursor:pointer;
-display:flex;
-align-items:center;
-gap:5px
-}
-
-.user-pic{
-width:25px;
-height:25px;
-border-radius:50%;
-object-fit:cover
-}
-
-.banner{
-background:#283593;
-color:#fff;
-padding:12px;
-text-align:center;
-border-bottom:3px solid #ffab00
-}
-
-.banner h2{
-font-size:16px
-}
-
-.banner p{
-font-size:12px;
-opacity:.9;
-margin-top:3px
-}
-
-.view-section{
-display:none
-}
-
-.active-view{
-display:block
-}
-
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:16px;
-padding:16px;
-max-width:1200px;
-margin:auto
-}
-
-.card{
-background:#fff;
-border-radius:12px;
-padding:15px;
-box-shadow:0 4px 12px rgba(0,0,0,.06);
-border:1px solid #e0e0e0;
-display:flex;
-flex-direction:column;
-justify-content:space-between
-}
-
-.img-container{
-position:relative;
-width:100%;
-height:200px;
-background:#000;
-border-radius:8px;
-overflow:hidden;
-display:flex;
-align-items:center;
-justify-content:center
-}
-
-.img-container img{
-max-width:100%;
-max-height:100%;
-object-fit:contain
-}
-
-.slider-container{
-position:relative;
-width:100%;
-height:200px;
-background:#fff;
-border-radius:8px;
-overflow:hidden;
-border:1px solid #eee
-}
-
-.slider-track{
-display:flex;
-width:100%;
-height:100%;
-overflow-x:auto;
-scroll-snap-type:x mandatory;
-scrollbar-width:none;
-scroll-behavior:smooth
-}
-
-.slider-track::-webkit-scrollbar{
-display:none
-}
-
-.slide{
-flex:0 0 100%;
-width:100%;
-height:100%;
-scroll-snap-align:start;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#fff;
-position:relative
-}
-
-.slide img{
-max-width:100%;
-max-height:100%;
-object-fit:contain
-}
-
-.slide-name{
-position:absolute;
-bottom:8px;
-background:rgba(0,0,0,.6);
-color:#fff;
-padding:3px 8px;
-font-size:11px;
-border-radius:4px
-}
-
-.slider-btn{
-position:absolute;
-top:50%;
-transform:translateY(-50%);
-background:rgba(0,0,0,.55);
-color:#fff;
-border:0;
-cursor:pointer;
-padding:8px 10px;
-z-index:10;
-font-size:14px;
-border-radius:50%
-}
-
-.slider-prev{
-left:5px
-}
-
-.slider-next{
-right:5px
-}
-
-.card-details{
-margin-top:12px
-}
-
-.card h3{
-font-size:17px;
-color:#1a237e;
-margin-bottom:6px
-}
-
-.price{
-color:#2e7d32;
-font-weight:bold;
-font-size:20px;
-margin-bottom:8px
-}
-
-.specs{
-font-size:12px;
-color:#555;
-line-height:1.6;
-margin-bottom:12px;
-background:#f9f9f9;
-padding:8px 10px;
-border-radius:6px
-}
-
-.specs span{
-font-weight:bold;
-color:#333
-}
-
-.out-of-stock{
-color:#d32f2f!important;
-font-weight:900!important;
-font-size:14px;
-margin-top:5px
-}
-
-.btn-online,
-.btn-submit,
-.btn-close,
-.btn-cart{
-border:0;
-padding:11px;
-border-radius:6px;
-cursor:pointer;
-font-weight:bold;
-width:100%;
-font-size:14px;
-display:block;
-margin-top:6px
-}
-
-.btn-online{
-background:#ff9800;
-color:#fff
-}
-
-.btn-cart{
-background:#2874f0;
-color:#fff
-}
-
-.btn-cart.in-cart{
-background:#d32f2f;
-color:#fff
-}
-
-.btn-submit{
-background:#0d47a1;
-color:#fff
-}
-
-.btn-close{
-background:#d32f2f;
-color:#fff
-}
-
-button:disabled{
-opacity:.7;
-cursor:not-allowed
-}
-
-.modal{
-display:none;
-position:fixed;
-z-index:1000;
-left:0;
-top:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.55);
-overflow-y:auto
-}
-
-.modal-content{
-background:#fff;
-margin:5% auto;
-padding:20px;
-border-radius:15px;
-width:92%;
-max-width:600px;
-box-shadow:0 4px 20px rgba(0,0,0,.3)
-}
-
-.modal-content h3{
-color:#1a237e;
-margin-bottom:10px;
-font-size:24px;
-text-align:center
-}
-
-.delivery-badge{
-background:#e8f5e9;
-color:#2e7d32;
-font-size:14px;
-text-align:center;
-padding:8px;
-border-radius:5px;
-font-weight:bold;
-margin-bottom:15px;
-border:1px dashed #a5d6a7
-}
-
-#modalProductInfo{
-font-size:17px;
-color:#555;
-margin-bottom:15px;
-text-align:center;
-font-weight:bold
-}
-
-.form-group{
-margin-bottom:13px
-}
-
-.form-group label{
-display:block;
-font-size:15px;
-font-weight:bold;
-margin-bottom:5px;
-color:#333
-}
-
-.form-group input,
-.form-group textarea{
-width:100%;
-padding:11px;
-border:1px solid #ccc;
-border-radius:7px;
-font-size:16px;
-background:#fff;
-outline:none
-}
-
-.terms-group{
-display:flex;
-align-items:center;
-gap:8px;
-margin:12px 0;
-font-size:13px;
-color:#444;
-font-weight:600
-}
-
-.terms-group input{
-width:18px;
-height:18px;
-cursor:pointer
-}
-
-.qr-box{
-text-align:center;
-margin:15px 0;
-background:#f9f9f9;
-padding:12px;
-border-radius:8px;
-border:1px dashed #bbb
-}
-
-.qr-box p{
-font-size:13px;
-color:#666;
-margin-top:8px
-}
-
-.footer-address{
-background:#fff;
-padding:16px;
-margin:20px 16px;
-border-radius:10px;
-text-align:center;
-border:1px solid #ddd;
-font-size:13px;
-color:#555
-}
-
-.footer-address strong{
-color:#1a237e;
-font-size:15px;
-display:block;
-margin-bottom:4px
-}
-
-.location-btn{
-background:#2e7d32!important;
-margin-top:12px!important
-}
-
-.location-status{
-margin-top:8px;
-font-size:12px;
-color:#666;
-line-height:1.5
-}
-
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#fff;
-border-top:1px solid #ddd;
-display:flex;
-justify-content:space-around;
-padding:8px 0;
-box-shadow:0 -2px 10px rgba(0,0,0,.08);
-z-index:100
-}
-
-.nav-item{
-border:0;
-background:none;
-flex:1;
-text-align:center;
-color:#666;
-font-size:11px;
-font-weight:bold;
-cursor:pointer;
-position:relative
-}
-
-.nav-item .icon{
-font-size:20px;
-display:block;
-margin-bottom:2px
-}
-
-.nav-item.active{
-color:#0d47a1
-}
-
-.cart-badge{
-position:absolute;
-top:2px;
-right:30%;
-background:#d32f2f;
-color:#fff;
-font-size:10px;
-padding:1px 5px;
-border-radius:10px;
-font-weight:bold
-}
-
-.cart-container, .orders-container{
-padding:16px;
-max-width:800px;
-margin:auto
-}
-
-.cart-item{
-background:#fff;
-border:1px solid #e0e0e0;
-border-radius:10px;
-padding:12px;
-margin-bottom:10px;
-display:flex;
-justify-content:space-between;
-align-items:center
-}
-
-.cart-controls{
-display:flex;
-align-items:center;
-gap:8px;
-margin-top:6px
-}
-
-.cart-btn-qty{
-background:#eee;
-border:0;
-width:26px;
-height:26px;
-font-weight:bold;
-border-radius:4px;
-cursor:pointer
-}
-
-.cart-btn-remove{
-background:#ffebee;
-color:#c62828;
-border:0;
-padding:4px 10px;
-font-size:12px;
-font-weight:bold;
-border-radius:4px;
-cursor:pointer;
-margin-left:auto
-}
-
-.order-card{
-background:#fff;
-border:1px solid #e0e0e0;
-border-radius:12px;
-padding:16px;
-margin-bottom:16px;
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-font-size:13px
-}
-
-.order-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-border-bottom:1px solid #eee;
-padding-bottom:10px;
-margin-bottom:10px
-}
-
-.status-badge{
-padding:4px 10px;
-border-radius:12px;
-font-size:11px;
-font-weight:bold
-}
-
+*{box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0}    
+body{background:#f0f2f5;padding-bottom:90px;color:#222}  
+header{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:15px 12px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 10px rgba(0,0,0,.2);display:flex;justify-content:space-between;align-items:center}  
+.brand-title{font-size:20px;font-weight:900;letter-spacing:1px;color:#ffab00;text-transform:uppercase;text-shadow:1px 1px 2px rgba(0,0,0,.5);text-align:left}  
+.brand-subtitle{font-size:11px;color:#e0e0e0;margin-top:2px;text-align:left}
+.auth-header-btn{background:#fff;color:#1a237e;border:0;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.user-pic{width:25px;height:25px;border-radius:50%;object-fit:cover}
+.banner{background:#283593;color:#fff;padding:12px;text-align:center;border-bottom:3px solid #ffab00}
+.banner h2{font-size:16px}
+.banner p{font-size:12px;opacity:.9;margin-top:3px}
+.view-section{display:none}
+.active-view{display:block}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;padding:16px;max-width:1200px;margin:auto}
+.card{background:#fff;border-radius:12px;padding:15px;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #e0e0e0;display:flex;flex-direction:column;justify-content:space-between}
+.img-container{position:relative;width:100%;height:200px;background:#000;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.img-container img{max-width:100%;max-height:100%;object-fit:contain}
+.slider-container{position:relative;width:100%;height:200px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #eee}
+.slider-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth}
+.slider-track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;background:#fff;position:relative}
+.slide img{max-width:100%;max-height:100%;object-fit:contain}
+.slide-name{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;font-size:11px;border-radius:4px}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border:0;cursor:pointer;padding:8px 10px;z-index:10;font-size:14px;border-radius:50%}
+.slider-prev{left:5px}
+.slider-next{right:5px}
+.card-details{margin-top:12px}
+.card h3{font-size:17px;color:#1a237e;margin-bottom:6px}
+.price{color:#2e7d32;font-weight:bold;font-size:20px;margin-bottom:8px}
+.specs{font-size:12px;color:#555;line-height:1.6;margin-bottom:12px;background:#f9f9f9;padding:8px 10px;border-radius:6px}
+.specs span{font-weight:bold;color:#333}
+.out-of-stock{color:#d32f2f!important;font-weight:900!important;font-size:14px;margin-top:5px}
+.btn-online,.btn-submit,.btn-close,.btn-cart{border:0;padding:11px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;font-size:14px;display:block;margin-top:6px}
+.btn-online{background:#ff9800;color:#fff}
+.btn-cart{background:#2874f0;color:#fff}
+.btn-cart.in-cart{background:#d32f2f;color:#fff}
+.btn-submit{background:#0d47a1;color:#fff}
+.btn-close{background:#d32f2f;color:#fff}
+button:disabled{opacity:.7;cursor:not-allowed}
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.55);overflow-y:auto}
+.modal-content{background:#fff;margin:5% auto;padding:20px;border-radius:15px;width:92%;max-width:600px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.modal-content h3{color:#1a237e;margin-bottom:10px;font-size:24px;text-align:center}
+.delivery-badge{background:#e8f5e9;color:#2e7d32;font-size:14px;text-align:center;padding:8px;border-radius:5px;font-weight:bold;margin-bottom:15px;border:1px dashed #a5d6a7}
+#modalProductInfo{font-size:17px;color:#555;margin-bottom:15px;text-align:center;font-weight:bold}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:15px;font-weight:bold;margin-bottom:5px;color:#333}
+.form-group input,.form-group textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:#fff;outline:none}
+.terms-group{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:13px;color:#444;font-weight:600}
+.terms-group input{width:18px;height:18px;cursor:pointer}
+.qr-box{text-align:center;margin:15px 0;background:#f9f9f9;padding:12px;border-radius:8px;border:1px dashed #bbb}
+.qr-box p{font-size:13px;color:#666;margin-top:8px}
+.footer-address{background:#fff;padding:16px;margin:20px 16px;border-radius:10px;text-align:center;border:1px solid #ddd;font-size:13px;color:#555}
+.footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}
+.location-btn{background:#2e7d32!important;margin-top:12px!important}
+.location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px rgba(0,0,0,.08);z-index:100}
+.nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}
+.nav-item .icon{font-size:20px;display:block;margin-bottom:2px}
+.nav-item.active{color:#0d47a1}
+.cart-badge{position:absolute;top:2px;right:30%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px;font-weight:bold}
+.cart-container,.orders-container{padding:16px;max-width:800px;margin:auto}
+.cart-item{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.cart-controls{display:flex;align-items:center;gap:8px;margin-top:6px}
+.cart-btn-qty{background:#eee;border:0;width:26px;height:26px;font-weight:bold;border-radius:4px;cursor:pointer}
+.cart-btn-remove{background:#ffebee;color:#c62828;border:0;padding:4px 10px;font-size:12px;font-weight:bold;border-radius:4px;cursor:pointer;margin-left:auto}
+.order-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);font-size:13px}
+.order-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
+.status-badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold}
 .status-processing{background:#e3f2fd;color:#1565c0}
 .status-success{background:#d4edda;color:#155724}
 .status-failed{background:#f8d7da;color:#721c24}
-
-.profile-container{
-background:#fff;
-padding:20px;
-border-radius:10px;
-max-width:600px;
-margin:20px auto;
-border:1px solid #e0e0e0
-}
-
-.profile-section-box{
-background:#f9f9f9;
-border:1px solid #e0e0e0;
-border-radius:8px;
-padding:12px 15px;
-margin-top:15px;
-text-align:left
-}
-
-.profile-section-box h4{
-color:#1a237e;
-font-size:15px;
-margin-bottom:8px;
-border-bottom:2px solid #ffab00;
-padding-bottom:4px;
-display:inline-block
-}
-
-.profile-section-box ul{
-list-style:none;
-padding-left:0
-}
-
-.profile-section-box li{
-font-size:13px;
-color:#444;
-padding:6px 0;
-border-bottom:1px dashed #eee;
-cursor:pointer
-}
-
-.profile-section-box li:hover{
-color:#0d47a1;
-font-weight:600
-}
-
-.profile-section-box li:last-child{
-border-bottom:0
-}
-
-.auth-error{
-display:none;
-background:#ffebee;
-color:#b71c1c;
-padding:10px;
-margin:12px 16px;
-border-radius:8px;
-font-size:12px;
-text-align:center
-}
-
-.empty-orders{
-text-align:center;
-color:#777;
-margin-top:30px
-}
-
-#appMessageBox{
-position:fixed;
-inset:0;
-z-index:999999
-}
-
-#appMessageBox .app-message-overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.55);
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px
-}
-
-#appMessageBox .app-message-card{
-width:100%;
-max-width:360px;
-background:#fff;
-border-radius:18px;
-padding:24px 20px;
-text-align:center;
-box-shadow:0 10px 35px rgba(0,0,0,.3)
-}
-
-.app-message-icon{
-font-size:40px;
-margin-bottom:10px
-}
-
-.app-message-text{
-font-size:17px;
-font-weight:600;
-color:#222;
-line-height:1.5;
-margin-bottom:20px;
-white-space:pre-line
-}
-
-.app-message-ok{
-border:0;
-background:#1565c0;
-color:#fff;
-padding:11px 32px;
-border-radius:10px;
-font-size:15px;
-font-weight:bold;
-cursor:pointer
-}
-
-#authLoading{
-position:fixed;
-inset:0;
-z-index:999998;
-background:rgba(255,255,255,.98);
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column
-}
-
-.auth-loader{
-width:44px;
-height:44px;
-border:4px solid #e0e0e0;
-border-top-color:#1565c0;
-border-radius:50%;
-animation:authSpin .8s linear infinite
-}
-
-@keyframes authSpin{
-to{
-transform:rotate(360deg)
-}
-}
+.profile-container{background:#fff;padding:20px;border-radius:10px;max-width:600px;margin:20px auto;border:1px solid #e0e0e0}
+.profile-section-box{background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;padding:12px 15px;margin-top:15px;text-align:left}
+.profile-section-box h4{color:#1a237e;font-size:15px;margin-bottom:8px;border-bottom:2px solid #ffab00;padding-bottom:4px;display:inline-block}
+.profile-section-box ul{list-style:none;padding-left:0}
+.profile-section-box li{font-size:13px;color:#444;padding:6px 0;border-bottom:1px dashed #eee;cursor:pointer}
+.profile-section-box li:hover{color:#0d47a1;font-weight:600}
+.profile-section-box li:last-child{border-bottom:0}
+.auth-error{display:none;background:#ffebee;color:#b71c1c;padding:10px;margin:12px 16px;border-radius:8px;font-size:12px;text-align:center}
+.empty-orders{text-align:center;color:#777;margin-top:30px}
+#appMessageBox{position:fixed;inset:0;z-index:999999}
+#appMessageBox .app-message-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px}
+#appMessageBox .app-message-card{width:100%;max-width:360px;background:#fff;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,.3)}
+.app-message-icon{font-size:40px;margin-bottom:10px}
+.app-message-text{font-size:17px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line}
+.app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
+#authLoading{position:fixed;inset:0;z-index:999998;background:rgba(255,255,255,.98);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.auth-loader{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
+@keyframes authSpin{to{transform:rotate(360deg)}}
 </style>  
 </head>  
 <body>  
@@ -699,29 +105,28 @@ transform:rotate(360deg)
 <div class="auth-loading-text">Account लोड हो रहा है...</div>          
 </div>  
 
-<!-- OFFICIAL FIREBASE SMS OTP MODAL -->
+<!-- PHONE VERIFICATION MODAL -->
 <div id="phoneVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
 <div class="modal-content" style="margin-top:10vh;">
-<h3>📱 मोबाइल नंबर वेरिफिकेशन (SMS OTP)</h3>
-<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">मोबाइल नंबर पर रियल SMS OTP प्राप्त करने के लिए नंबर दर्ज करें।</p>
+<h3>📱 मोबाइल नंबर वेरिफिकेशन</h3>
+<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">ऐप का उपयोग करने के लिए अपना 10 अंकों का मोबाइल नंबर सत्यापित करें।</p>
 
 <div id="phoneStep1">
 <div class="form-group">
-<label>मोबाइल नंबर (10 अंक):</label>
+<label>मोबाइल नंबर:</label>
 <input type="tel" id="verifyPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="sendOfficialSmsOtp()">OTP भेजें</button>
+<button type="button" class="btn-submit" onclick="sendRealSmsOtp()">OTP भेजें</button>
 </div>
 
 <div id="phoneStep2" style="display:none;margin-top:15px;">
 <div class="form-group">
-<label>SMS में प्राप्त 6 अंकों का OTP दर्ज करें:</label>
+<label>6 अंकों का OTP दर्ज करें:</label>
 <input type="text" id="otpCodeInput" placeholder="123456" inputmode="numeric" maxlength="6">
 </div>
-<button type="button" class="btn-submit" onclick="verifyOfficialSmsOtp()">OTP सत्यापित करें</button>
+<button type="button" class="btn-submit" onclick="verifyRealSmsOtp()">OTP सत्यापित करें</button>
 </div>
 
-<!-- reCAPTCHA container -->
 <div id="recaptcha-container" style="margin-top:10px;"></div>
 </div>
 </div>
@@ -735,7 +140,7 @@ transform:rotate(360deg)
 <label>नया मोबाइल नंबर:</label>
 <input type="tel" id="newPhoneInput" placeholder="नया 10 अंकों का नंबर" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="sendChangeOfficialOtp()">नया OTP भेजें</button>
+<button type="button" class="btn-submit" onclick="sendChangeRealOtp()">नया OTP भेजें</button>
 </div>
 
 <div id="changePhoneStep2" style="display:none;margin-top:15px;">
@@ -743,7 +148,7 @@ transform:rotate(360deg)
 <label>6 अंकों का OTP दर्ज करें:</label>
 <input type="text" id="newOtpInput" placeholder="123456" inputmode="numeric" maxlength="6">
 </div>
-<button type="button" class="btn-submit" onclick="verifyChangeOfficialOtp()">नंबर अपडेट करें</button>
+<button type="button" class="btn-submit" onclick="verifyChangeRealOtp()">नंबर अपडेट करें</button>
 </div>
 <div id="change-recaptcha-container" style="margin-top:10px;"></div>
 <button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">रद्द करें</button>
@@ -755,9 +160,7 @@ transform:rotate(360deg)
 <div class="brand-title">TOPPER STITCHING</div>          
 <div class="brand-subtitle">विश्वास और बेहतरीन क्वालिटी की सिलाई मशीनें</div>          
 </div>  
-<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">          
-Sign In          
-</button>  
+<button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">Sign In</button>  
 </header>  
 
 <div id="authError" class="auth-error"></div>  
@@ -1124,12 +527,12 @@ $("displayVerifiedPhone").textContent = savedPhone;
 verifiedRawPhone = savedPhone;
 } else {
 $("phoneVerifyModal").style.display = "block";
-initRecaptcha('recaptcha-container');
+setupRecaptcha('recaptcha-container');
 }
 loadCart();
 });
 
-function initRecaptcha(containerId){
+function setupRecaptcha(containerId){
 if(!window.recaptchaVerifier){
 try{
 window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, {
@@ -1141,7 +544,7 @@ window.recaptchaVerifier.render();
 }
 }
 
-function sendOfficialSmsOtp(){
+function sendRealSmsOtp(){
 const rawPhone = $("verifyPhoneInput").value.trim();
 if(!/^\d{10}$/.test(rawPhone)){
 showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
@@ -1149,7 +552,7 @@ return;
 }
 verifiedRawPhone = rawPhone;
 const phoneNumber = "+91" + rawPhone;
-initRecaptcha('recaptcha-container');
+setupRecaptcha('recaptcha-container');
 const appVerifier = window.recaptchaVerifier;
 
 showAuthLoading();
@@ -1162,8 +565,8 @@ $("phoneStep2").style.display = "block";
 showAppMessage("📲 Firebase से आपके मोबाइल पर रियल SMS OTP भेज दिया गया है!", "✅");
 }).catch(function (error) {
 hideAuthLoading();
-if(window.recaptchaVerifier) {
-window.recaptchaVerifier.render().then(function(widgetId) {
+if(window.recaptchaVerifier){
+window.recaptchaVerifier.render().then(function(widgetId){
 grecaptcha.reset(widgetId);
 });
 }
@@ -1171,7 +574,7 @@ showAppMessage("SMS भेजने में त्रुटि: " + error.mess
 });
 }
 
-function verifyOfficialSmsOtp(){
+function verifyRealSmsOtp(){
 const code = $("otpCodeInput").value.trim();
 if(!code || code.length !== 6){
 showAppMessage("कृपया 6 अंकों का सही OTP दर्ज करें।", "🔢");
@@ -1202,10 +605,10 @@ $("changePhoneStep1").style.display = "block";
 $("changePhoneStep2").style.display = "none";
 $("newPhoneInput").value = "";
 $("newOtpInput").value = "";
-setTimeout(function(){ initRecaptcha('change-recaptcha-container'); }, 500);
+setTimeout(function(){ setupRecaptcha('change-recaptcha-container'); }, 500);
 }
 
-function sendChangeOfficialOtp(){
+function sendChangeRealOtp(){
 const rawPhone = $("newPhoneInput").value.trim();
 if(!/^\d{10}$/.test(rawPhone)){
 showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
@@ -1213,7 +616,7 @@ return;
 }
 verifiedRawPhone = rawPhone;
 const phoneNumber = "+91" + rawPhone;
-initRecaptcha('change-recaptcha-container');
+setupRecaptcha('change-recaptcha-container');
 const appVerifier = window.recaptchaVerifier;
 
 showAuthLoading();
@@ -1226,8 +629,8 @@ $("changePhoneStep2").style.display = "block";
 showAppMessage("📲 नए नंबर पर रियल SMS OTP भेज दिया गया है!", "✅");
 }).catch(function (error) {
 hideAuthLoading();
-if(window.recaptchaVerifier) {
-window.recaptchaVerifier.render().then(function(widgetId) {
+if(window.recaptchaVerifier){
+window.recaptchaVerifier.render().then(function(widgetId){
 grecaptcha.reset(widgetId);
 });
 }
@@ -1235,7 +638,7 @@ showAppMessage("SMS भेजने में त्रुटि: " + error.mess
 });
 }
 
-function verifyChangeOfficialOtp(){
+function verifyChangeRealOtp(){
 const code = $("newOtpInput").value.trim();
 if(!code || code.length !== 6){
 showAppMessage("कृपया 6 अंकों का सही OTP दर्ज करें।", "🔢");
