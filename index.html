@@ -108,7 +108,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="modal-content" style="margin-top:8vh;text-align:center;">
 <h3 style="color:#1a237e;">📞 Verification by Call</h3>
 <p style="font-size:13px;color:#666;margin-bottom:15px;">
-App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche diye gaye button par click karein.
+App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche diye gaye link par click karein.
 </p>
 
 <div class="form-group" style="text-align:left;">
@@ -116,9 +116,12 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <input type="tel" id="callerPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
 
-<button type="button" class="btn-submit" style="margin-top:10px;background:#2e7d32;font-size:16px;padding:14px;" onclick="triggerNativeCallVerification('callerPhoneInput', 'missedCallVerifyModal')">
+<!-- Native Link to open phone dialer directly without web error -->
+<a id="nativeCallLink" href="tel:+14844817124" onclick="handleNativeCallVerification('callerPhoneInput', 'missedCallVerifyModal')" style="text-decoration:none;display:block;margin-top:12px;">
+<div class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;text-align:center;color:#fff;">
 📲 Verification by Call (+14844817124)
-</button>
+</div>
+</a>
 </div>
 </div>
 
@@ -130,9 +133,11 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <label>Naya Mobile Number:</label>
 <input type="tel" id="newPhoneInput" placeholder="Naya 10 ankon ka number" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;" onclick="triggerNativeCallVerification('newPhoneInput', 'changePhoneModal')">
+<a id="nativeChangeLink" href="tel:+14844817124" onclick="handleNativeCallVerification('newPhoneInput', 'changePhoneModal')" style="text-decoration:none;display:block;margin-top:12px;">
+<div class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;text-align:center;color:#fff;">
 📲 Verification by Call (+14844817124)
-</button>
+</div>
+</a>
 <button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">Radd Karein</button>
 </div>
 </div>
@@ -511,14 +516,16 @@ $("missedCallVerifyModal").style.display = "block";
 loadCart();
 });
 
-// NATIVE CALL TRIGGER FUNCTION (FIXES ERR_UNKNOWN_URL_SCHEME)
-function triggerNativeCallVerification(inputId, modalId){
+// NATIVE LINK HANDLER FOR APP WEBVIEW
+function handleNativeCallVerification(inputId, modalId){
 const phoneInput = $(inputId);
 if(!phoneInput) return;
 const phone = phoneInput.value.trim();
 
 if(!/^\d{10}$/.test(phone)){
 showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
+// Stop link navigation if validation fails
+event.preventDefault();
 return;
 }
 
@@ -542,12 +549,7 @@ method: "Native Call Verification"
 }).catch(function(err){});
 }
 
-showAppMessage("Mobile number safalpurvak save ho gaya!\nAb call lag rahi hai...", "✅");
-
-// 2. Open Native Phone Dialer safely using location assignment to prevent web crash
-setTimeout(function(){
-window.location.href = "tel:+14844817124";
-}, 800);
+// Allow the native `tel:` link to open the phone dialer naturally
 }
 
 function openChangePhoneModal(){
