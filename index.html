@@ -192,9 +192,35 @@ function updateAuthUI(){
 }
 function handleAuthAction(){currentUser?googleSignOut():googleSignIn()}
 async function googleSignIn(){
- if(currentUser||authBusy)return;authBusy=true;const provider=new firebase.auth.GoogleAuthProvider();
- try{await auth.signInWithPopup(provider)}catch(error){authBusy=false;updateAuthUI();showAuthError("❌ Google Login नहीं हुआ: "+error.message)}
+ if(currentUser||authBusy)return;
+ // Android app में native Google account chooser खोलें.
+ if(window.AndroidGoogleSignIn && typeof window.AndroidGoogleSignIn.signIn === "function"){
+   try { authBusy=true; window.AndroidGoogleSignIn.signIn(); }
+   catch(error){ authBusy=false; updateAuthUI(); showAuthError("Native Google Sign-In शुरू नहीं हुआ: "+(error.message||error)); }
+   return;
+ }
+ // Browser/GitHub Pages पर native bridge नहीं होता, इसलिए web fallback.
+ authBusy=true;
+ const provider=new firebase.auth.GoogleAuthProvider();
+ try{await auth.signInWithPopup(provider)}
+ catch(error){authBusy=false;updateAuthUI();showAuthError("❌ Google Login नहीं हुआ: "+error.message)}
 }
+
+// Android Kotlin bridge native Google Sign-In से ID token वापस भेजेगा.
+window.onNativeGoogleSignInSuccess = async function(idToken, accessToken, displayName, email, photoUrl){
+ try{
+   if(!idToken) throw new Error("Google ID token नहीं मिला।");
+   const credential=firebase.auth.GoogleAuthProvider.credential(idToken, accessToken || null);
+   await auth.signInWithCredential(credential);
+ }catch(error){
+   authBusy=false;updateAuthUI();
+   showAuthError("❌ Firebase Google Login नहीं हुआ: "+(error.message||error));
+ }
+};
+window.onNativeGoogleSignInError = function(message){
+ authBusy=false;updateAuthUI();
+ if(message && message !== "12501" && message !== "Sign-in cancelled") showAuthError("❌ Google Sign-In: "+message);
+};
 function googleSignOut(){auth.signOut().then(()=>{currentUser=null;updateAuthUI();showAppMessage("Log Out हो गया!","✅")}).catch(e=>showAuthError(e.message))}
 auth.onAuthStateChanged(user=>{currentUser=user||null;updateAuthUI();hideAuthLoading();if(user)loadUserOrders(user.uid);else clearOrdersListener()});
 
