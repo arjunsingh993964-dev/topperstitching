@@ -271,6 +271,11 @@ background:#2874f0;
 color:#fff
 }
 
+.btn-cart.in-cart{
+background:#d32f2f;
+color:#fff
+}
+
 .btn-submit{
 background:#0d47a1;
 color:#fff
@@ -513,6 +518,37 @@ cursor:pointer;
 margin-left:auto
 }
 
+.order-card{
+background:#fff;
+border:1px solid #e0e0e0;
+border-radius:12px;
+padding:16px;
+margin-bottom:16px;
+box-shadow:0 2px 8px rgba(0,0,0,.05);
+font-size:13px
+}
+
+.order-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid #eee;
+padding-bottom:10px;
+margin-bottom:10px
+}
+
+.status-badge{
+padding:4px 10px;
+border-radius:12px;
+font-size:11px;
+font-weight:bold
+}
+
+.status-pending{
+background:#fff3e0;
+color:#e65100
+}
+
 .profile-container{
 background:#fff;
 padding:20px;
@@ -671,7 +707,7 @@ transform:rotate(360deg)
 </div>  
 <button id="authBtn" class="auth-header-btn" onclick="handleAuthAction()">          
 Sign In          
-</button>          
+</button>  
 </header>  
 
 <div id="authError" class="auth-error"></div>  
@@ -703,7 +739,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_SV_Tailor" onclick="addToCart('Topper SV Tailor','4500')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor" onclick="toggleCart('Topper SV Tailor','4500',this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -727,7 +763,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe','4500')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_SV_Tailor_Deluxe" onclick="addToCart('Topper SV Tailor Deluxe','4500')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_SV_Tailor_Deluxe" onclick="toggleCart('Topper SV Tailor Deluxe','4500',this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -751,7 +787,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle','5800')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Bag_Closer_Single_Needle" onclick="addToCart('Bag Closer Single Needle','5800')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Bag_Closer_Single_Needle" onclick="toggleCart('Bag Closer Single Needle','5800',this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -775,7 +811,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper TA1 Model','6000')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_TA1_Model" onclick="addToCart('Topper TA1 Model','6000')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_TA1_Model" onclick="toggleCart('Topper TA1 Model','6000',this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -804,7 +840,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openTableOrderForm()">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Top_Table" onclick="addTableToCart()">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Top_Table" onclick="addTableToCart(this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 
@@ -851,7 +887,7 @@ Sign In
 </div>  
 <div>          
 <button class="btn-online" onclick="openOrderForm('Topper कढ़ाई (130k)','7200')">💳 ऑनलाइन पेमेंट करें</button>  
-<button class="btn-cart" id="cartBtn_Topper_Embroidery_130k" onclick="addToCart('Topper कढ़ाई (130k)','7200')">🛒 कार्ट में जोड़ें</button>          
+<button class="btn-cart" id="cartBtn_Topper_Embroidery_130k" onclick="toggleCart('Topper कढ़ाई (130k)','7200',this)">🛒 कार्ट में जोड़ें</button>          
 </div>          
 </div>  
 </div>  
@@ -1033,6 +1069,7 @@ const saved=localStorage.getItem("topper_cart");
 if(saved) cart=JSON.parse(saved);
 }catch(e){cart=[];}
 updateCartUI();
+updateAllHomepageButtons();
 }
 
 function saveCart(){
@@ -1040,24 +1077,28 @@ try{
 localStorage.setItem("topper_cart",JSON.stringify(cart));
 }catch(e){}
 updateCartUI();
+updateAllHomepageButtons();
 }
 
-function addToCart(name, price){
-const existing = cart.find(item => item.name === name);
-if(existing){
-existing.qty += 1;
-}else{
-cart.push({name: name, price: Number(price), qty: 1});
-}
+function toggleCart(name, price, btnEl){
+const index = cart.findIndex(item => item.name === name);
+if(index > -1){
+// Already in cart, so remove it
+cart.splice(index, 1);
 saveCart();
-updateProductButtonState(name, true);
+showAppMessage("🗑️ कार्ट से हटा दिया गया।", "ℹ️");
+} else {
+// Add to cart
+cart.push({name: name, price: Number(price), qty: 1});
+saveCart();
 showAppMessage("🛒 कार्ट में जोड़ा गया!", "✅");
 }
+}
 
-function addTableToCart(){
+function addTableToCart(btnEl){
 const color = getSelectedTableColor();
 const name = "Sewing Machine Top Table [" + color + "]";
-addToCart(name, 550);
+toggleCart(name, 550, btnEl);
 }
 
 function updateQty(index, delta){
@@ -1072,16 +1113,32 @@ saveCart();
 
 function removeFromCart(index){
 if(cart[index]){
-let name = cart[index].name;
 cart.splice(index, 1);
 saveCart();
-updateProductButtonState(name, false);
-showAppMessage("🗑️ आइटम कार्ट से हटा दिया गया।", "ℹ️");
+showAppMessage("🗑️ कार्ट से हटा दिया गया।", "ℹ️");
 }
 }
 
-function updateProductButtonState(name, inCart){
-// Find buttons on homepage matching product name
+function updateAllHomepageButtons(){
+const buttons = document.querySelectorAll(".btn-cart");
+buttons.forEach(btn => {
+if(btn.onclick && btn.onclick.toString().includes("toggleCart") || btn.onclick.toString().includes("addTableToCart")){
+// extract product name from onclick string
+let onclickStr = btn.getAttribute("onclick") || "";
+let match = onclickStr.match(/'([^']+)'/);
+if(match){
+let pName = match[1];
+let found = cart.find(i => i.name === pName);
+if(found){
+btn.textContent = "❌ कार्ट से हटाएं";
+btn.classList.add("in-cart");
+} else {
+btn.textContent = "🛒 कार्ट में जोड़ें";
+btn.classList.remove("in-cart");
+}
+}
+}
+});
 }
 
 function updateCartUI(){
@@ -1097,6 +1154,7 @@ if(!cart || cart.length === 0){
 list.innerHTML = '<p class="empty-orders">🛒 आपकी कार्ट खाली है।</p>';
 summary.style.display = "none";
 badge.style.display = "none";
+updateAllHomepageButtons();
 return;
 }
 
@@ -1115,6 +1173,7 @@ badge.textContent = totalQty;
 badge.style.display = "inline-block";
 totalPriceEl.textContent = totalPrice.toLocaleString("en-IN");
 summary.style.display = "block";
+updateAllHomepageButtons();
 }
 
 function checkoutCart(){
@@ -1473,7 +1532,7 @@ orders.sort(function(a,b){return Number(b.createdAt||0)-Number(a.createdAt||0);}
 orders.forEach(function(order){
 const card=document.createElement("div");
 card.className="order-card";
-card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge status-pending">⏳ Pending</span></div><div><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
+card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge status-pending">⏳ Pending</span></div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
 list.appendChild(card);
 });
 });
