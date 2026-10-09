@@ -103,12 +103,12 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div class="auth-loading-text">Account load ho raha hai...</div>          
 </div>  
 
-<!-- CLICK-TO-CALL MISSED CALL VERIFICATION MODAL -->
+<!-- NATIVE CALL VERIFICATION MODAL (INITIAL) -->
 <div id="missedCallVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
 <div class="modal-content" style="margin-top:8vh;text-align:center;">
-<h3 style="color:#1a237e;">📞 Call Verification (Missed Call)</h3>
+<h3 style="color:#1a237e;">📞 Verification by Call</h3>
 <p style="font-size:13px;color:#666;margin-bottom:15px;">
-App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche diye gaye link par click karke verification poora karein.
+App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche diye gaye button par click karein.
 </p>
 
 <div class="form-group" style="text-align:left;">
@@ -116,33 +116,23 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <input type="tel" id="callerPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
 
-<!-- Yeh wahi link/button hai jisse turant +14844817124 par call lagegi -->
-<div id="verifyActionBox" style="margin-top:15px;display:none;">
-<p style="font-size:12px;color:#2e7d32;font-weight:bold;margin-bottom:8px;">Neeche diye gaye link par click karein (Call 1-2 second mein apne aap cut ho jayegi):</p>
-<a id="autoCallLink" href="tel:+14844817124" onclick="markCallTriggered()" class="btn-online" style="text-decoration:none;background:#2e7d32;padding:12px;display:block;font-size:15px;">
-📲 Verify by Call (+14844817124)
-</a>
-</div>
-
-<button type="button" id="generateLinkBtn" class="btn-submit" style="margin-top:10px;background:#0d47a1;" onclick="generateCallLink()">
-1. Pehle Link Banayein
-</button>
-
-<button type="button" id="confirmDoneBtn" class="btn-submit" style="margin-top:10px;background:#ff9800;display:none;" onclick="finalizeMissedCallVerification()">
-2. Maine Missed Call De Diya, Aage Badhein ✅
+<button type="button" class="btn-submit" style="margin-top:10px;background:#2e7d32;font-size:16px;padding:14px;" onclick="triggerNativeCallVerification('callerPhoneInput', 'missedCallVerifyModal')">
+📲 Verification by Call (+14844817124)
 </button>
 </div>
 </div>
 
-<!-- CHANGE PHONE MODAL (FOR PROFILE) -->
+<!-- CHANGE PHONE MODAL (PROFILE) -->
 <div id="changePhoneModal" class="modal">  
-<div class="modal-content">
+<div class="modal-content" style="text-align:center;">
 <h3>🔄 Mobile Number Badlein</h3>
-<div class="form-group">
+<div class="form-group" style="text-align:left;">
 <label>Naya Mobile Number:</label>
 <input type="tel" id="newPhoneInput" placeholder="Naya 10 ankon ka number" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="updateMissedCallPhone()">Number Update Karein</button>
+<button type="button" class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;" onclick="triggerNativeCallVerification('newPhoneInput', 'changePhoneModal')">
+📲 Verification by Call (+14844817124)
+</button>
 <button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">Radd Karein</button>
 </div>
 </div>
@@ -521,67 +511,48 @@ $("missedCallVerifyModal").style.display = "block";
 loadCart();
 });
 
-function generateCallLink(){
-const phone = $("callerPhoneInput").value.trim();
+// NATIVE CALL TRIGGER FUNCTION (FIXES ERR_UNKNOWN_URL_SCHEME)
+function triggerNativeCallVerification(inputId, modalId){
+const phoneInput = $(inputId);
+if(!phoneInput) return;
+const phone = phoneInput.value.trim();
+
 if(!/^\d{10}$/.test(phone)){
 showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
 return;
 }
-window.tempVerifyPhone = phone;
-$("verifyActionBox").style.display = "block";
-$("generateLinkBtn").style.display = "none";
-$("confirmDoneBtn").style.display = "block";
-$("callerPhoneInput").disabled = true;
-}
 
-function markCallTriggered(){
-// User ne link par click karke +14844817124 par call trigger kar diya hai
-}
-
-function finalizeMissedCallVerification(){
-const phone = window.tempVerifyPhone;
-if(!phone) return;
+// 1. Save data locally and in database immediately
 verifiedRawPhone = phone;
 localStorage.setItem("topper_missedcall_verified_phone", phone);
 $("displayVerifiedPhone").textContent = phone;
+
+if(modalId === 'missedCallVerifyModal'){
 $("missedCallVerifyModal").style.display = "none";
+} else if(modalId === 'changePhoneModal'){
+$("changePhoneModal").style.display = "none";
+}
 
 if(typeof db !== 'undefined'){
 db.ref("missed_call_verifications").push({
 phone: phone,
 targetNumber: "+14844817124",
 verifiedAt: Date.now(),
-method: "Click-to-Call Missed Call"
+method: "Native Call Verification"
 }).catch(function(err){});
 }
 
-showAppMessage("Mobile number safalpurvak verify ho gaya!", "✅");
+showAppMessage("Mobile number safalpurvak save ho gaya!\nAb call lag rahi hai...", "✅");
+
+// 2. Open Native Phone Dialer safely using location assignment to prevent web crash
+setTimeout(function(){
+window.location.href = "tel:+14844817124";
+}, 800);
 }
 
 function openChangePhoneModal(){
 $("changePhoneModal").style.display = "block";
 $("newPhoneInput").value = "";
-}
-
-function updateMissedCallPhone(){
-const phone = $("newPhoneInput").value.trim();
-if(!/^\d{10}$/.test(phone)){
-showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
-return;
-}
-verifiedRawPhone = phone;
-localStorage.setItem("topper_missedcall_verified_phone", phone);
-$("displayVerifiedPhone").textContent = phone;
-$("changePhoneModal").style.display = "none";
-
-db.ref("missed_call_verifications").push({
-phone: phone,
-targetNumber: "+14844817124",
-updatedAt: Date.now(),
-method: "Updated Missed Call"
-});
-
-showAppMessage("Mobile number safalpurvak badal diya gaya!", "✅");
 }
 
 function loadCart(){
