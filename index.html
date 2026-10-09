@@ -275,7 +275,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="footer-address">
     <strong>📍 Store Address</strong>
     Main Road, Sasamusa, Gopalganj, Bihar
-    <br><br>Phone: <b>+91 9264137710</b>
+    <br><br>Phone: <b>+14844817124</b>
     <br>Email: <b>topperstitching@gmail.com</b>
     <button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 Update My Live Location</button>
     <div id="locationStatus" class="location-status"></div>
@@ -319,7 +319,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <ul>
         <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
-        <li><a href="tel:+919264137710" onclick="return openNativeCall('9264137710')">📞 Human Call Support</a></li>
+        <li><a href="tel:+14844817124" onclick="return openNativeCall('+14844817124')">📞 Human Call Support</a></li>
         <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>
       </ul>
     </div>
@@ -613,10 +613,7 @@ function updateAuthUI(){
   authBusy=false;
 }
 
-/*
- * Keep the splash screen visible until Firebase has resolved
- * whether a saved user session exists.
- */
+/* Wait for Firebase to resolve the saved login session. */
 auth.onAuthStateChanged(user=>{
   currentUser=user||null;
   authStateResolved=true;
@@ -629,7 +626,6 @@ auth.onAuthStateChanged(user=>{
   hideLoading();
 });
 
-/* Also report Firebase authentication initialization errors */
 auth.onIdTokenChanged(user=>{
   if(user){
     currentUser=user;
@@ -638,13 +634,15 @@ auth.onIdTokenChanged(user=>{
 
 /* Phone support */
 function openNativeCall(number){
+  const phoneNumber=String(number||"+14844817124");
+
   try{
     if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){
-      window.AndroidApp.callPhone(String(number));
+      window.AndroidApp.callPhone(phoneNumber);
       return false;
     }
 
-    window.location.href="tel:"+String(number);
+    window.location.href="tel:"+phoneNumber;
   }catch(e){
     showAppMessage("Unable to open the phone dialer.","⚠️");
   }
@@ -653,33 +651,18 @@ function openNativeCall(number){
 }
 
 /*
- * Email support:
- * Open the Android email composer directly with a mailto URI.
- * Do not call the old AndroidApp.openEmail bridge here, because
- * that bridge is producing the error shown in the screenshot.
+ * Email Support:
+ * Open the email app using a mailto link.
+ * Recipient and subject are included directly in the URL.
+ * Do not use AndroidApp.openEmail here because the native
+ * bridge may open the composer without filling the recipient.
  */
 function openNativeEmail(email,subject){
-  const targetEmail=String(email||"topperstitching@gmail.com");
+  const targetEmail=String(email||"topperstitching@gmail.com").trim();
   const targetSubject=String(subject||"Support Request");
 
-  const mailtoUrl="mailto:"+targetEmail+
+  const mailtoUrl="mailto:"+encodeURIComponent(targetEmail)+
     "?subject="+encodeURIComponent(targetSubject);
-
-  try{
-    if(window.AndroidApp&&typeof window.AndroidApp.openEmail==="function"){
-      /*
-       * Try the Android bridge first only if it explicitly reports
-       * success. If it returns false or throws, use the mailto URI.
-       */
-      const result=window.AndroidApp.openEmail(targetEmail,targetSubject);
-
-      if(result===true){
-        return false;
-      }
-    }
-  }catch(error){
-    /* Fall through to the mailto URI. */
-  }
 
   try{
     window.location.href=mailtoUrl;
@@ -1379,10 +1362,6 @@ function loadUserOrders(userId){
 setProfileAvatar(getSavedAvatar());
 loadCart();
 
-/*
- * Do not hide the initial loading screen in DOMContentLoaded.
- * It must remain visible until Firebase's first auth-state callback.
- */
 document.addEventListener("DOMContentLoaded",()=>{
   restoreOrderDraft();
 });
