@@ -116,7 +116,7 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <input type="tel" id="callerPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
 
-<!-- Native Link to open phone dialer directly without web error -->
+<!-- Native Link for App WebView -->
 <a id="nativeCallLink" href="tel:+14844817124" onclick="handleNativeCallVerification('callerPhoneInput', 'missedCallVerifyModal')" style="text-decoration:none;display:block;margin-top:12px;">
 <div class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;text-align:center;color:#fff;">
 📲 Verification by Call (+14844817124)
@@ -380,8 +380,8 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <ul>
 <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
 <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
-<li onclick="triggerSupport('human_call')">📞 Human Call Support</li>
-<li onclick="triggerSupport('email')">📧 Email Support (Click to Send Email)</li>
+<li><a href="tel:9264137710" style="text-decoration:none;color:inherit;display:block;">📞 Human Call Support</a></li>
+<li><a href="mailto:support@topperstitching.com?subject=Support%20Request" style="text-decoration:none;color:inherit;display:block;">📧 Email Support (Click to Send Email)</a></li>
 </ul>
 </div>
 
@@ -524,7 +524,6 @@ const phone = phoneInput.value.trim();
 
 if(!/^\d{10}$/.test(phone)){
 showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
-// Stop link navigation if validation fails
 event.preventDefault();
 return;
 }
@@ -549,7 +548,7 @@ method: "Native Call Verification"
 }).catch(function(err){});
 }
 
-// Allow the native `tel:` link to open the phone dialer naturally
+// Allow native tel link to open dialer automatically
 }
 
 function openChangePhoneModal(){
@@ -674,12 +673,8 @@ prepareNewPayment("Cart Items: " + names, total);
 }
 
 function triggerSupport(type){
-if(type === 'email'){
-window.location.href = "mailto:support@topperstitching.com?subject=Support%20Request";
-} else if(type === 'ai_call' || type === 'ai_assistant'){
+if(type === 'ai_call' || type === 'ai_assistant'){
 showAppMessage("🤖 AI Assistant / Call Support jald uplabdh hoga.", "ℹ️");
-} else if(type === 'human_call'){
-window.location.href = "tel:9264137710";
 }
 }
 
