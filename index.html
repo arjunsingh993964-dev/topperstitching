@@ -116,7 +116,7 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <input type="tel" id="callerPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
 
-<!-- Native Link for App WebView -->
+<!-- Native Link to open phone dialer directly without web error -->
 <a id="nativeCallLink" href="tel:+14844817124" onclick="handleNativeCallVerification('callerPhoneInput', 'missedCallVerifyModal')" style="text-decoration:none;display:block;margin-top:12px;">
 <div class="btn-submit" style="background:#2e7d32;font-size:16px;padding:14px;text-align:center;color:#fff;">
 📲 Verification by Call (+14844817124)
@@ -380,8 +380,8 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <ul>
 <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
 <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
-<li><a href="tel:9264137710" style="text-decoration:none;color:inherit;display:block;">📞 Human Call Support</a></li>
-<li><a href="mailto:support@topperstitching.com?subject=Support%20Request" style="text-decoration:none;color:inherit;display:block;">📧 Email Support (Click to Send Email)</a></li>
+<li onclick="triggerSupport('human_call')">📞 Human Call Support</li>
+<li onclick="triggerSupport('email')">📧 Email Support (Click to Send Email)</li>
 </ul>
 </div>
 
@@ -450,7 +450,7 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <label for="termsCheck" style="font-size:13px;cursor:pointer;display:inline">Main Terms &amp; Conditions aur Refund Policy se sahamat hu.</label>
 </div>
 <div class="qr-box">  
-<p style="font-size:15px;font-weight:700;color:#333">💳 Niche Pay button dabakar uplabdh hra App chunein aur bhugtan karein.</p>  
+<p style="font-size:15px;font-weight:700;color:#333">💳 Niche Pay button dabakar uplabdh UPI App chunein aur bhugtan karein.</p>  
 <button type="button" class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">💳 Online Pay ₹<span id="upiPayAmount">0</span></button>  
 <p style="font-size:12px;color:#777;margin-top:8px">Payment ke baad vapas app me aane par order submit ho jayega.</p>  
 </div>  
@@ -524,6 +524,7 @@ const phone = phoneInput.value.trim();
 
 if(!/^\d{10}$/.test(phone)){
 showAppMessage("Kripya 10 ankon ka sahi mobile number darj karein.", "📱");
+// Stop link navigation if validation fails
 event.preventDefault();
 return;
 }
@@ -547,6 +548,8 @@ verifiedAt: Date.now(),
 method: "Native Call Verification"
 }).catch(function(err){});
 }
+
+// Allow the native `tel:` link to open the phone dialer naturally
 }
 
 function openChangePhoneModal(){
@@ -671,8 +674,12 @@ prepareNewPayment("Cart Items: " + names, total);
 }
 
 function triggerSupport(type){
-if(type === 'ai_call' || type === 'ai_assistant'){
+if(type === 'email'){
+window.location.href = "mailto:support@topperstitching.com?subject=Support%20Request";
+} else if(type === 'ai_call' || type === 'ai_assistant'){
 showAppMessage("🤖 AI Assistant / Call Support jald uplabdh hoga.", "ℹ️");
+} else if(type === 'human_call'){
+window.location.href = "tel:9264137710";
 }
 }
 
@@ -682,7 +689,7 @@ const title = $("policyModalTitle");
 const text = $("policyModalText");
 if(type === 'terms'){
 title.textContent = "Terms & Policy";
-text.textContent = "1. Topper Stitching par uplabdh sabhi silai masine aur parts uchch gunvatta ke hain.\n2. Order karte samay sahi pata aur mobile number dena anivarya hai.\n3. Home delivery kewal Bihar ke Gopalganj jile ke antargat uplabdh hai.\n4. Data suraksha: User ka sara data aur details cloud par 100% surakshit aur encrypted hai.";
+text.textContent = "1. Topper Stitching par uplabdh sabhi silai masine aur parts uchch gunvatta ke hain.\n2. Order karte samay sahi pata aur mobile number dena anivarya hai.\n3. Home delivery kewal Bihar ke Gopalganj jile ke antargat uplabdh hai.\n4. Data suraksha: User ka sara data aur details cloud par 100% surakshit aur encrypted hai.\n5. Kisi bhi vivad ki sthiti me Gopalganj nyayalay ka kshetradhikar hoga.";
 } else if(type === 'refund'){
 title.textContent = "Refund Policy";
 text.textContent = "• Refund policy: Refund kewal delivery hone ke wakt tak hi many hai. Ek baar saman deliver ho jane aur grahak dwara sweekar kar lene ke baad kisi bhi prakar ka refund ya return many nahi hoga.";
@@ -781,7 +788,6 @@ if(currentUser){googleSignOut();}else{googleSignIn();}
 async function googleSignIn(){
 if(currentUser||authBusy)return;
 authBusy=true;
-showAuthLoading();
 const provider=new firebase.auth.GoogleAuthProvider();
 try{
 await auth.signInWithPopup(provider);
@@ -789,7 +795,6 @@ localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 }catch(error){
 authBusy=false;
 updateAuthUI();
-hideAuthLoading();
 showAuthError("❌ Google Login nahi hua: "+error.message);
 }
 }
