@@ -84,12 +84,11 @@ button:disabled{opacity:.7;cursor:not-allowed}
 #authLoading{position:fixed;inset:0;z-index:999998;background:#fffffffa;display:none;align-items:center;justify-content:center;flex-direction:column}
 .auth-loader{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
 @keyframes authSpin{to{transform:rotate(360deg)}}
-@media(max-width:480px){.products{grid-template-columns:1fr;padding:12px}.modal-content{margin:4% auto;padding:16px}.brand-title{font-size:17px}}
+@media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}
 </style>
 </head>
 
 <body>
-
 <div id="authLoading">
   <div class="auth-loader"></div>
   <div style="margin-top:12px">Account load ho raha hai...</div>
@@ -272,7 +271,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <strong>📍 Mukhya Store Ka Pata:</strong>
     Main Road Sasamusa, Gopalganj, Bihar
     <br><br>Sampark Karein: <b>+91 9264137710</b>
-    <br>Gmail: <b>support@topperstitching.com</b>
+    <br>Email: <b>support@topperstitching.com</b>
     <button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 Meri Live Location Update Karein</button>
     <div id="locationStatus" class="location-status"></div>
   </div>
@@ -315,8 +314,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <ul>
         <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
-        <li onclick="openNativeCall('9264137710')">📞 Human Call Support</li>
-        <li onclick="openNativeEmail('support@topperstitching.com','Support Request')">📧 Email Support (Click to Send Email)</li>
+        <li><a href="tel:+919264137710" onclick="return openNativeCall('9264137710')">📞 Human Call Support</a></li>
+        <li><a href="mailto:support@topperstitching.com?subject=Support%20Request" onclick="return openNativeEmail('support@topperstitching.com','Support Request')">📧 Email Support (Click to Send Email)</a></li>
       </ul>
     </div>
 
@@ -369,7 +368,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
     <div class="form-group">
       <label>Aapka Pura Naam:</label>
-      <input type="text" id="custName" placeholder="Apna naam likhein" autocomplete="name" required>
+      <input type="text" id="custName" placeholder="Apna naam likhein" autocomplete="name">
     </div>
 
     <div class="form-group">
@@ -379,7 +378,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
     <div class="form-group">
       <label>Pura Pata:</label>
-      <textarea id="custAddress" rows="3" placeholder="Gaon/Mohalla, Ward number, Gopalganj" required></textarea>
+      <textarea id="custAddress" rows="3" placeholder="Gaon/Mohalla, Ward number, Gopalganj"></textarea>
     </div>
 
     <div class="terms-group">
@@ -413,7 +412,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <script>
 "use strict";
 
-/* FIREBASE CONFIGURATION */
+/* Firebase */
 const firebaseConfig={
   apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",
   authDomain:"toppersewingmachine.firebaseapp.com",
@@ -434,7 +433,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
 let currentUser=null;
 let selectedProduct="";
-let selectedPrice=0;
+let selectedPrice="";
 let userLocationLink="";
 let ordersQuery=null;
 let cart=[];
@@ -444,7 +443,20 @@ let locationRequestBusy=false;
 
 const $=id=>document.getElementById(id);
 
-/* MESSAGE BOX */
+/* HTML escaping: corrected */
+function escapeHtml(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function escapeAttribute(value){
+  return escapeHtml(value);
+}
+
 function showAppMessage(message,icon="⚠️"){
   const old=$("appMessageBox");
   if(old) old.remove();
@@ -462,16 +474,16 @@ function showAppMessage(message,icon="⚠️"){
   iconEl.className="app-message-icon";
   iconEl.textContent=icon;
 
-  const messageEl=document.createElement("div");
-  messageEl.className="app-message-text";
-  messageEl.textContent=message;
+  const textEl=document.createElement("div");
+  textEl.className="app-message-text";
+  textEl.textContent=message;
 
-  const ok=document.createElement("button");
-  ok.className="app-message-ok";
-  ok.textContent="OK";
-  ok.onclick=()=>box.remove();
+  const button=document.createElement("button");
+  button.className="app-message-ok";
+  button.textContent="OK";
+  button.onclick=()=>box.remove();
 
-  card.append(iconEl,messageEl,ok);
+  card.append(iconEl,textEl,button);
   overlay.appendChild(card);
   box.appendChild(overlay);
   document.body.appendChild(box);
@@ -488,9 +500,11 @@ function showOutOfStock(){
   showAppMessage("Yeh saman abhi Out of stock hai.","❌");
 }
 
-/* NATIVE GOOGLE SIGN-IN
-   Android WebView mein AndroidAuth.signInWithGoogle() expose hona chahiye.
-   Native login ke baad Firebase ID token callback mein bhejein. */
+/* =====================================================
+   NATIVE GOOGLE LOGIN
+   Kotlin bridge name: AndroidApp
+   Kotlin callback: nativeGoogleLogin(idToken)
+   ===================================================== */
 async function googleSignIn(){
   if(currentUser||authBusy) return;
 
@@ -498,9 +512,9 @@ async function googleSignIn(){
   $("authLoading").style.display="flex";
 
   try{
-    if(window.AndroidAuth &&
-       typeof window.AndroidAuth.signInWithGoogle==="function"){
-      window.AndroidAuth.signInWithGoogle();
+    if(window.AndroidApp &&
+       typeof window.AndroidApp.signIn==="function"){
+      window.AndroidApp.signIn();
       return;
     }
 
@@ -514,47 +528,49 @@ async function googleSignIn(){
   }
 }
 
-/* Kotlin Android bridge se call hone wala callback.
-   idToken Firebase Authentication ka Google ID token hona chahiye. */
-window.onNativeGoogleSignInSuccess=async function(idToken,displayName,email,photoURL){
+/* Kotlin MainActivity.kt calls this with the Google ID token. */
+async function nativeGoogleLogin(idToken){
   try{
     if(!idToken) throw new Error("Google ID token nahi mila.");
 
     const credential=firebase.auth.GoogleAuthProvider.credential(idToken);
     await auth.signInWithCredential(credential);
-
-    authBusy=false;
-    $("authLoading").style.display="none";
   }catch(error){
+    showAuthError("Firebase login error: "+(error.message||error));
+  }finally{
     authBusy=false;
     $("authLoading").style.display="none";
-    showAuthError("Firebase login error: "+(error.message||error));
   }
-};
+}
 
-window.onNativeGoogleSignInError=function(message){
+/* Kotlin MainActivity.kt error callback */
+function nativeGoogleLoginError(message){
   authBusy=false;
   $("authLoading").style.display="none";
   showAuthError("Google Login nahi hua: "+String(message||"Unknown error"));
-};
+}
 
 function handleAuthAction(){
   if(currentUser) googleSignOut();
   else googleSignIn();
 }
 
-async function googleSignOut(){
-  try{
-    await auth.signOut();
+function googleSignOut(){
+  auth.signOut().then(()=>{
     currentUser=null;
     updateAuthUI();
     showAppMessage("Log Out ho gaya!","✅");
-  }catch(error){
-    showAuthError(error.message||"Logout nahi ho paya.");
+  }).catch(error=>showAuthError(error.message||"Logout nahi hua."));
+}
+
+function getSavedAvatar(){
+  try{
+    return localStorage.getItem("topperProfileAvatar")||"u1.png";
+  }catch(e){
+    return "u1.png";
   }
 }
 
-/* AUTH UI */
 function updateAuthUI(){
   const authBtn=$("authBtn");
   const name=$("profileName");
@@ -564,17 +580,18 @@ function updateAuthUI(){
 
   if(currentUser){
     authBtn.innerHTML="";
-    const image=document.createElement("img");
-    image.src=currentUser.photoURL||avatar;
-    image.className="user-pic";
-    image.alt="Profile";
-    authBtn.appendChild(image);
+    const img=document.createElement("img");
+    img.src=avatar;
+    img.className="user-pic";
+    img.alt="Profile";
+    authBtn.appendChild(img);
     authBtn.appendChild(document.createTextNode(" Logout"));
 
     name.textContent=currentUser.displayName||"Google User";
     email.textContent=currentUser.email||"";
     profileBtn.textContent="Logout";
     profileBtn.onclick=googleSignOut;
+    setProfileAvatar(avatar);
   }else{
     authBtn.textContent="Sign In";
     name.textContent="Guest User";
@@ -582,80 +599,69 @@ function updateAuthUI(){
     profileBtn.textContent="Google Account se Login Karein";
     profileBtn.onclick=googleSignIn;
   }
-
   authBusy=false;
 }
 
 auth.onAuthStateChanged(user=>{
   currentUser=user||null;
   updateAuthUI();
-
   $("authLoading").style.display="none";
 
   if(user) loadUserOrders(user.uid);
   else clearOrdersListener();
 });
 
-/* NATIVE EMAIL SUPPORT */
-function openNativeEmail(email,subject){
-  const mailSubject=subject||"Support Request";
-
+/* =====================================================
+   NATIVE CALL + EMAIL
+   These methods require Kotlin bridge methods below.
+   ===================================================== */
+function openNativeCall(number){
   try{
-    if(window.AndroidSupport &&
-       typeof window.AndroidSupport.openEmail==="function"){
-      window.AndroidSupport.openEmail(email,mailSubject);
+    if(window.AndroidApp &&
+       typeof window.AndroidApp.callPhone==="function"){
+      window.AndroidApp.callPhone(String(number));
+      return false;
+    }
+
+    window.location.href="tel:"+String(number);
+  }catch(e){
+    showAppMessage("Phone dialer nahi khul paya.","⚠️");
+  }
+  return false;
+}
+
+function openNativeEmail(email,subject){
+  try{
+    if(window.AndroidApp &&
+       typeof window.AndroidApp.openEmail==="function"){
+      window.AndroidApp.openEmail(
+        String(email),
+        String(subject||"Support Request")
+      );
       return false;
     }
 
     window.location.href="mailto:"+encodeURIComponent(email)+
-      "?subject="+encodeURIComponent(mailSubject);
-  }catch(error){
+      "?subject="+encodeURIComponent(subject||"Support Request");
+  }catch(e){
     showAppMessage("Email app nahi khul paya.","⚠️");
   }
-
   return false;
 }
 
-/* NATIVE HUMAN CALL SUPPORT */
-function openNativeCall(number){
-  const phone=String(number||"").replace(/[^\d+]/g,"");
-
-  try{
-    if(window.AndroidSupport &&
-       typeof window.AndroidSupport.callPhone==="function"){
-      window.AndroidSupport.callPhone(phone);
-      return false;
-    }
-
-    window.location.href="tel:"+phone;
-  }catch(error){
-    showAppMessage("Phone dialer nahi khul paya.","⚠️");
-  }
-
-  return false;
-}
-
-/* SUPPORT OPTIONS */
 function triggerSupport(type){
   if(type==="ai_call"||type==="ai_assistant"){
     showAppMessage("AI Assistant / Call Support jald uplabdh hoga.","ℹ️");
   }
 }
 
-/* PROFILE AVATAR */
-function getSavedAvatar(){
-  try{
-    return localStorage.getItem("topperProfileAvatar")||"u1.png";
-  }catch(error){
-    return "u1.png";
-  }
-}
-
+/* Profile avatar */
 function setProfileAvatar(src){
-  $("profilePageImg").src=src;
+  const img=$("profilePageImg");
+  if(img) img.src=src;
 
   const topPic=document.querySelector("#authBtn .user-pic");
-  if(topPic) topPic.src=currentUser?.photoURL||src;
+  if(topPic) topPic.src=src;
 }
 
 function openAvatarPicker(){
@@ -669,13 +675,12 @@ function closeAvatarPicker(){
 function selectAvatar(fileName){
   try{
     localStorage.setItem("topperProfileAvatar",fileName);
-  }catch(error){}
-
+  }catch(e){}
   setProfileAvatar(fileName);
   closeAvatarPicker();
 }
 
-/* POLICY */
+/* Policies */
 function openPolicyModal(type){
   if(type==="terms"){
     $("policyModalTitle").textContent="Terms & Policy";
@@ -690,7 +695,6 @@ function openPolicyModal(type){
     $("policyModalText").textContent=
       "Order place karne se pehle product ki details check karein. Refund, return aur cancellation ka faisla order ki sthiti, product ki condition aur lagu kanoon ke anusar kiya jayega. Samasya ke liye support@topperstitching.com par sampark karein.";
   }
-
   $("policyModal").style.display="block";
 }
 
@@ -698,45 +702,48 @@ function closePolicyModal(){
   $("policyModal").style.display="none";
 }
 
-/* BOTTOM NAVIGATION */
 function switchTab(viewId,btnEl){
-  document.querySelectorAll(".view-section").forEach(view=>{
-    view.classList.remove("active-view");
-  });
-
-  document.querySelectorAll(".nav-item").forEach(button=>{
-    button.classList.remove("active");
-  });
+  document.querySelectorAll(".view-section").forEach(v=>v.classList.remove("active-view"));
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
 
   const view=$(viewId);
   if(view) view.classList.add("active-view");
   if(btnEl) btnEl.classList.add("active");
 }
 
-/* LOCATION */
+/* =====================================================
+   NATIVE LOCATION CALLBACKS
+   Kotlin may send either Google Maps URL or coordinates.
+   ===================================================== */
 function setUserLocation(lat,lon){
   const latitude=Number(lat);
   const longitude=Number(lon);
 
   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return;
 
-  userLocationLink="https://www.google.com/maps?q="+
-    encodeURIComponent(latitude+","+longitude);
-
+  userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude;
   locationReady=true;
   locationRequestBusy=false;
   $("locationStatus").textContent="✅ Live Location uplabdh hai";
 }
 
-/* Native Kotlin code chahe to is callback ko call kar sakta hai. */
-window.onNativeLocationReceived=function(lat,lon){
+function nativeLocationSuccess(lat,lon){
   setUserLocation(lat,lon);
-};
+}
 
-window.onNativeLocationError=function(message){
+function nativeLocationReceived(locationUrl){
+  if(typeof locationUrl==="string" && locationUrl.trim()){
+    userLocationLink=locationUrl;
+    locationReady=true;
+    locationRequestBusy=false;
+    $("locationStatus").textContent="✅ Live Location uplabdh hai";
+  }
+}
+
+function nativeLocationError(message){
   locationRequestBusy=false;
-  $("locationStatus").textContent=String(message||"Location nahi mil payi.");
-};
+  $("locationStatus").textContent=String(message||"Location nahi mil paayi.");
+}
 
 function requestUserLocation(){
   if(locationReady||locationRequestBusy) return;
@@ -744,15 +751,20 @@ function requestUserLocation(){
   locationRequestBusy=true;
   $("locationStatus").textContent="📍 Live Location load ho rahi hai...";
 
-  /* Android native location bridge, agar available ho */
-  if(window.AndroidSupport &&
-     typeof window.AndroidSupport.requestLocation==="function"){
+  /* Android native location permission/location manager */
+  if(window.AndroidApp &&
+     typeof window.AndroidApp.getLocation==="function"){
     try{
-      window.AndroidSupport.requestLocation();
+      window.AndroidApp.getLocation();
       return;
-    }catch(error){}
+    }catch(e){
+      locationRequestBusy=false;
+      $("locationStatus").textContent="Native location request nahi ho paayi.";
+      return;
+    }
   }
 
+  /* Browser fallback */
   if(!navigator.geolocation){
     locationRequestBusy=false;
     $("locationStatus").textContent="Location is device par uplabdh nahi hai.";
@@ -760,9 +772,7 @@ function requestUserLocation(){
   }
 
   navigator.geolocation.getCurrentPosition(
-    position=>{
-      setUserLocation(position.coords.latitude,position.coords.longitude);
-    },
+    pos=>setUserLocation(pos.coords.latitude,pos.coords.longitude),
     ()=>{
       locationRequestBusy=false;
       $("locationStatus").textContent="Location permission dein aur dobara try karein.";
@@ -771,21 +781,14 @@ function requestUserLocation(){
   );
 }
 
-/* TABLE IMAGE SLIDER */
-const tableColors=[
-  "Light Wooden",
-  "Grey Wooden",
-  "Light Dark Wooden",
-  "Dark Wooden"
-];
-
+/* Sewing table image slider */
+const tableColors=["Light Wooden","Grey Wooden","Light Dark Wooden","Dark Wooden"];
 const tableSliderTrack=$("tableSlider");
 
 if(tableSliderTrack){
   tableSliderTrack.addEventListener("scroll",()=>{
     const width=tableSliderTrack.clientWidth||1;
     const index=Math.round(tableSliderTrack.scrollLeft/width);
-
     if(tableColors[index]){
       $("selectedTableColorText").textContent=tableColors[index];
     }
@@ -794,53 +797,42 @@ if(tableSliderTrack){
 
 function slideImages(id,direction){
   const track=$(id);
-  if(track){
-    track.scrollBy({
-      left:direction*track.clientWidth,
-      behavior:"smooth"
-    });
-  }
+  if(track) track.scrollBy({left:direction*track.clientWidth,behavior:"smooth"});
 }
 
 function getSelectedTableColor(){
   const track=$("tableSlider");
   if(!track) return tableColors[0];
-
   const index=Math.round(track.scrollLeft/(track.clientWidth||1));
   return tableColors[index]||tableColors[0];
 }
 
-/* LOGIN REQUIRED */
 function requireLogin(){
   if(currentUser) return true;
 
   showAppMessage("Order karne ke liye pehle Google Account se Sign-In karein!","🔐");
   switchTab("profileView",document.querySelectorAll(".nav-item")[3]);
-
   return false;
 }
 
-/* CART */
+/* Cart */
 function loadCart(){
   try{
     const saved=localStorage.getItem("topper_cart");
-
     if(saved){
       const parsed=JSON.parse(saved);
       if(Array.isArray(parsed)) cart=parsed;
     }
-  }catch(error){
+  }catch(e){
     cart=[];
   }
-
   updateCartUI();
 }
 
 function saveCart(){
   try{
     localStorage.setItem("topper_cart",JSON.stringify(cart));
-  }catch(error){}
-
+  }catch(e){}
   updateCartUI();
 }
 
@@ -852,34 +844,25 @@ function toggleCart(name,price,btnEl){
     saveCart();
     showAppMessage("Cart se hata diya gaya.","ℹ️");
   }else{
-    cart.push({
-      name:String(name),
-      price:Number(price),
-      qty:1
-    });
-
+    cart.push({name:name,price:Number(price),qty:1});
     saveCart();
     showAppMessage("Cart me joda gaya!","✅");
   }
 }
 
 function addTableToCart(btnEl){
-  toggleCart(
-    "Sewing Machine Top Table ["+getSelectedTableColor()+"]",
-    550,
-    btnEl
-  );
+  toggleCart("Sewing Machine Top Table ["+getSelectedTableColor()+"]",550,btnEl);
 }
 
 function updateAllHomepageButtons(){
   document.querySelectorAll(".btn-cart").forEach(btn=>{
     const text=btn.getAttribute("onclick")||"";
     const match=text.match(/toggleCart\('([^']+)'/);
-    const productName=match?match[1]:null;
+    const pName=match?match[1]:null;
 
-    if(!productName) return;
+    if(!pName) return;
 
-    const found=cart.some(item=>item.name===productName);
+    const found=cart.some(i=>i.name===pName);
     btn.textContent=found?"❌ Cart se hatayein":"🛒 Cart me Jodein";
     btn.classList.toggle("in-cart",found);
   });
@@ -906,21 +889,16 @@ function updateCartUI(){
   cart.forEach((item,index)=>{
     const qty=Math.max(1,Number(item.qty)||1);
     const price=Math.max(0,Number(item.price)||0);
-
     totalQty+=qty;
     totalPrice+=price*qty;
 
     const div=document.createElement("div");
     div.className="cart-item";
-
     div.innerHTML=
       '<div><b>'+escapeHtml(item.name)+'</b>'+
       '<div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+price.toLocaleString("en-IN")+'</div>'+
-      '<div class="cart-controls">'+
-      '<button class="cart-btn-qty" onclick="updateQty('+index+',-1)">-</button>'+
-      '<span>'+qty+'</span>'+
-      '<button class="cart-btn-qty" onclick="updateQty('+index+',1)">+</button>'+
-      '</div></div>'+
+      '<div class="cart-controls"><button class="cart-btn-qty" onclick="updateQty('+index+',-1)">-</button>'+
+      '<span>'+qty+'</span><button class="cart-btn-qty" onclick="updateQty('+index+',1)">+</button></div></div>'+
       '<div style="text-align:right"><b>₹'+(price*qty).toLocaleString("en-IN")+'</b>'+
       '<br><button class="cart-btn-remove" onclick="removeFromCart('+index+')">Remove</button></div>';
 
@@ -929,27 +907,19 @@ function updateCartUI(){
 
   badge.textContent=totalQty;
   badge.style.display="inline-block";
-
   $("cartTotalPrice").textContent=totalPrice.toLocaleString("en-IN");
   summary.style.display="block";
-
   updateAllHomepageButtons();
 }
 
 function updateQty(index,delta){
   if(!cart[index]) return;
-
-  cart[index].qty=Math.max(
-    1,
-    (Number(cart[index].qty)||1)+delta
-  );
-
+  cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta);
   saveCart();
 }
 
 function removeFromCart(index){
   if(!cart[index]) return;
-
   cart.splice(index,1);
   saveCart();
   showAppMessage("Cart se hata diya gaya.","ℹ️");
@@ -958,19 +928,15 @@ function removeFromCart(index){
 function checkoutCart(){
   if(!requireLogin()||!cart.length) return;
 
-  const names=cart.map(item=>item.name+" (x"+item.qty+")").join(", ");
-  const total=cart.reduce(
-    (sum,item)=>sum+(Number(item.price)*Number(item.qty)),
-    0
-  );
-
+  const names=cart.map(i=>i.name+" (x"+i.qty+")").join(", ");
+  const total=cart.reduce((sum,i)=>sum+(Number(i.price)*Number(i.qty)),0);
   prepareNewPayment("Cart Items: "+names,total);
 }
 
-/* ORDER FORM */
+/* Order form */
 function prepareNewPayment(productName,price){
   selectedProduct=String(productName);
-  selectedPrice=Number(price);
+  selectedPrice=String(price);
 
   $("custName").value=currentUser?.displayName||"";
   $("custPhone").value="";
@@ -979,26 +945,20 @@ function prepareNewPayment(productName,price){
   $("termsCheck").checked=false;
 
   $("modalProductInfo").textContent=
-    selectedProduct+" - ₹"+selectedPrice.toLocaleString("en-IN");
+    selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");
 
-  $("upiPayAmount").textContent=selectedPrice.toLocaleString("en-IN");
+  $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN");
   $("orderModal").style.display="block";
-
   requestUserLocation();
 }
 
 function openOrderForm(productName,price){
-  if(requireLogin()){
-    prepareNewPayment(productName,price);
-  }
+  if(requireLogin()) prepareNewPayment(productName,price);
 }
 
 function openTableOrderForm(){
   if(requireLogin()){
-    prepareNewPayment(
-      "Sewing Machine Top Table ["+getSelectedTableColor()+"]",
-      550
-    );
+    prepareNewPayment("Sewing Machine Top Table ["+getSelectedTableColor()+"]",550);
   }
 }
 
@@ -1006,9 +966,7 @@ function cancelOrderForm(){
   $("orderModal").style.display="none";
 }
 
-/* UPI PAYMENT
-   Payment success ka final confirmation payment panel/server se karein.
-   UTR submit hone ka matlab apne-aap payment successful hona nahi hai. */
+/* UPI native intent */
 function payViaUpiIntent(){
   if(!$("termsCheck").checked){
     showAppMessage("Kripya Terms & Conditions par tick karein.","📝");
@@ -1016,32 +974,26 @@ function payViaUpiIntent(){
   }
 
   const amount=Number(selectedPrice||0);
+  if(!amount) return;
 
-  if(!Number.isFinite(amount)||amount<=0){
-    showAppMessage("Payment amount sahi nahi hai.","⚠️");
-    return;
-  }
-
-  const upiUrl="upi://pay?pa="+
-    encodeURIComponent("topperstitching@naviaxis")+
+  const upiUrl="upi://pay?pa="+encodeURIComponent("topperstitching@naviaxis")+
     "&pn="+encodeURIComponent("Topper Stitching")+
     "&am="+encodeURIComponent(amount.toFixed(2))+
     "&cu=INR";
 
   try{
-    if(window.AndroidSupport &&
-       typeof window.AndroidSupport.openUpiPayment==="function"){
-      window.AndroidSupport.openUpiPayment(upiUrl);
-      return;
+    if(window.AndroidApp &&
+       typeof window.AndroidApp.openUpi==="function"){
+      window.AndroidApp.openUpi(upiUrl);
+    }else{
+      window.location.href=upiUrl;
     }
-
-    window.location.href=upiUrl;
-  }catch(error){
+  }catch(e){
     showAppMessage("UPI app nahi khul paya.","⚠️");
   }
 }
 
-/* ORDER SUBMISSION */
+/* Submit order to Firebase Realtime Database */
 async function submitOnlineOrder(){
   if(!currentUser){
     showAppMessage("Kripya pehle Google Account se Login karein!","🔐");
@@ -1060,11 +1012,6 @@ async function submitOnlineOrder(){
 
   if(!name||!address){
     showAppMessage("Kripya naam aur pura pata bharein.","📝");
-    return;
-  }
-
-  if(phone && !/^[0-9+\-\s()]{7,15}$/.test(phone)){
-    showAppMessage("Kripya sahi mobile number likhein.","📞");
     return;
   }
 
@@ -1092,15 +1039,11 @@ async function submitOnlineOrder(){
     paymentStatus:"submitted",
     paymentMethod:"UPI",
     createdAt:Date.now(),
-    date:new Date().toLocaleString("en-IN",{
-      dateStyle:"medium",
-      timeStyle:"short"
-    })
+    date:new Date().toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})
   };
 
   try{
     const ref=db.ref("orders").push();
-
     orderData.orderId=ref.key;
     await ref.set(orderData);
 
@@ -1110,63 +1053,47 @@ async function submitOnlineOrder(){
     }
 
     $("orderModal").style.display="none";
-
-    showAppMessage(
-      "Aapka order submit ho gaya!\n\nOrder ID:\n"+ref.key+
-      "\n\nPayment verification pending hai.",
-      "✅"
-    );
-
+    showAppMessage("Aapka order save ho gaya!\n\nOrder ID:\n"+ref.key,"✅");
     switchTab("ordersView",document.querySelectorAll(".nav-item")[2]);
   }catch(error){
-    showAppMessage("Order save nahi ho paya.\n"+error.message,"❌");
+    showAppMessage("Order save nahi ho paya.\n"+(error.message||error),"❌");
   }finally{
     btn.disabled=false;
     btn.textContent="💬 Order Submit Karein";
   }
 }
 
-/* ORDER LISTENER */
+/* Orders */
 function clearOrdersListener(){
   if(ordersQuery){
     ordersQuery.off();
     ordersQuery=null;
   }
-
   $("ordersList").innerHTML=
     '<p class="empty-orders">📦 Orders dekhne ke liye Google se Sign-In karein.</p>';
 }
 
 function loadUserOrders(userId){
-  if(ordersQuery){
-    ordersQuery.off();
-  }
+  if(ordersQuery) ordersQuery.off();
 
-  ordersQuery=db.ref("orders")
-    .orderByChild("userId")
-    .equalTo(userId);
-
-  $("ordersList").innerHTML=
-    '<p class="empty-orders">Orders load ho rahe hain...</p>';
+  ordersQuery=db.ref("orders").orderByChild("userId").equalTo(userId);
+  $("ordersList").innerHTML='<p class="empty-orders">Orders load ho rahe hain...</p>';
 
   ordersQuery.on("value",snapshot=>{
     const list=$("ordersList");
     list.innerHTML="";
 
     if(!snapshot.exists()){
-      list.innerHTML=
-        '<p class="empty-orders">📦 Abhi koi Order nahi mila.</p>';
+      list.innerHTML='<p class="empty-orders">📦 Abhi koi Order nahi mila.</p>';
       return;
     }
 
     const orders=[];
-
     snapshot.forEach(child=>{
-      const order=child.val();
-
-      if(order){
-        order._id=child.key;
-        orders.push(order);
+      const o=child.val();
+      if(o){
+        o._id=child.key;
+        orders.push(o);
       }
     });
 
@@ -1177,91 +1104,37 @@ function loadUserOrders(userId){
       card.className="order-card";
 
       const status=String(order.status||"processing").toLowerCase();
-
-      let badge=
-        '<span class="status-badge status-processing">🔄 Processing</span>';
+      let badge='<span class="status-badge status-processing">🔄 Processing</span>';
 
       if(status==="successful"||status==="success"){
-        badge=
-          '<span class="status-badge status-success">✅ Successful</span>';
+        badge='<span class="status-badge status-success">✅ Successful</span>';
       }else if(status==="failed"||status==="failure"){
-        badge=
-          '<span class="status-badge status-failed">❌ Failed</span>';
+        badge='<span class="status-badge status-failed">❌ Failed</span>';
       }
 
       card.innerHTML=
-        '<div class="order-header"><b>'+
-        escapeHtml(order.product||"Product")+'</b>'+badge+'</div>'+
-        '<div><b>🆔 Order ID:</b> '+
-        escapeHtml(order.orderId||order._id)+'</div>'+
-        '<div style="margin-top:6px"><b>💰 Keemat:</b> ₹'+
-        Number(order.price||0).toLocaleString("en-IN")+'</div>'+
-        '<div style="margin-top:6px"><b>👤 Naam:</b> '+
-        escapeHtml(order.customerName||"")+'</div>'+
-        '<div style="margin-top:6px"><b>📞 Mobile:</b> '+
-        escapeHtml(order.customerPhone||"Nahi diya")+'</div>'+
-        '<div style="margin-top:6px"><b>🏠 Pata:</b> '+
-        escapeHtml(order.address||"")+'</div>'+
-        '<div style="margin-top:6px"><b>🧾 UTR:</b> '+
-        escapeHtml(order.utrNumber||"")+'</div>'+
-        '<div style="margin-top:6px"><b>💳 Payment:</b> '+
-        escapeHtml(order.paymentStatus||"submitted")+'</div>'+
-        '<div style="margin-top:6px"><b>🕐 Tarikh:</b> '+
-        escapeHtml(order.date||"")+'</div>';
+        '<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b>'+badge+'</div>'+
+        '<div><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div>'+
+        '<div style="margin-top:6px"><b>💰 Keemat:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div>'+
+        '<div style="margin-top:6px"><b>👤 Naam:</b> '+escapeHtml(order.customerName||"")+'</div>'+
+        '<div style="margin-top:6px"><b>📞 Mobile:</b> '+escapeHtml(order.customerPhone||"Nahi diya")+'</div>'+
+        '<div style="margin-top:6px"><b>🏠 Pata:</b> '+escapeHtml(order.address||"")+'</div>'+
+        '<div style="margin-top:6px"><b>🕐 Tarikh:</b> '+escapeHtml(order.date||"")+'</div>';
 
       list.appendChild(card);
     });
   },error=>{
-    $("ordersList").innerHTML=
-      '<p class="empty-orders">Orders load nahi hue: '+
-      escapeHtml(error.message)+'</p>';
+    $("ordersList").textContent="Orders load nahi hue: "+(error.message||error);
   });
 }
 
-/* SAFE HTML HELPERS */
-function escapeHtml(value){
-  return String(value)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-/* INITIALIZE */
+/* Initialize page */
 setProfileAvatar(getSavedAvatar());
 loadCart();
 
 window.addEventListener("DOMContentLoaded",()=>{
   $("authLoading").style.display="none";
 });
-
-/* MODALS CLOSE WHEN OUTSIDE IS CLICKED */
-window.addEventListener("click",event=>{
-  ["policyModal","avatarModal","orderModal"].forEach(id=>{
-    const modal=$(id);
-    if(event.target===modal){
-      modal.style.display="none";
-    }
-  });
-});
-
-/* ANDROID BACK BUTTON CAN CALL THIS THROUGH JAVASCRIPT */
-window.closeCurrentModal=function(){
-  const modalIds=["orderModal","avatarModal","policyModal"];
-
-  for(const id of modalIds){
-    const modal=$(id);
-
-    if(modal && modal.style.display==="block"){
-      modal.style.display="none";
-      return true;
-    }
-  }
-
-  return false;
-};
 </script>
-
 </body>
 </html>
