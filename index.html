@@ -85,7 +85,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 #authLoading{position:fixed;inset:0;z-index:999998;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .auth-loader{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite}
 .auth-loading-title{font-size:17px;font-weight:700;color:#1a237e;margin-top:16px}
-.auth-loading-subtitle{font-size:13px;color:#666;margin-top:6px}
+.auth-loading-subtitle{font-size:13px;color:#666;margin-top:6px;text-align:center;padding:0 20px}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}
 </style>
@@ -275,7 +275,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="footer-address">
     <strong>📍 Store Address</strong>
     Main Road, Sasamusa, Gopalganj, Bihar
-    <br><br>Phone: <b>+91 9264137710</b>
+    <br><br>Phone: <b>+14844817124</b>
     <br>Email: <b>topperstitching@gmail.com</b>
     <button type="button" class="btn-submit location-btn" onclick="requestUserLocation()">📍 Update My Live Location</button>
     <div id="locationStatus" class="location-status"></div>
@@ -319,7 +319,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <ul>
         <li onclick="triggerSupport('ai_call')">🤖 AI Call Support</li>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant</li>
-        <li><a href="tel:+919264137710" onclick="return openNativeCall('9264137710')">📞 Human Call Support</a></li>
+        <li><a href="tel:+14844817124" onclick="return openNativeCall('+14844817124')">📞 Human Call Support</a></li>
         <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>
       </ul>
     </div>
@@ -463,6 +463,22 @@ function showLoading(message){
 
 function hideLoading(){
   $("authLoading").style.display="none";
+}
+
+/*
+ * Prevent an endless splash screen if Firebase authentication
+ * takes too long or its initial state callback never arrives.
+ */
+let authFallbackTimer=setTimeout(()=>{
+  authStateResolved=true;
+  hideLoading();
+  $("authLoadingText").textContent="Account check timed out.";
+},8000);
+
+function finishInitialAuth(){
+  authStateResolved=true;
+  clearTimeout(authFallbackTimer);
+  hideLoading();
 }
 
 function escapeHtml(value){
@@ -614,80 +630,54 @@ function updateAuthUI(){
 }
 
 /*
- * Keep the splash screen visible until Firebase has resolved
- * whether a saved user session exists.
+ * The splash screen is hidden as soon as Firebase reports the
+ * initial auth state. The timeout above prevents an infinite loop.
  */
 auth.onAuthStateChanged(user=>{
   currentUser=user||null;
-  authStateResolved=true;
-
   updateAuthUI();
 
   if(user) loadUserOrders(user.uid);
   else clearOrdersListener();
 
-  hideLoading();
+  finishInitialAuth();
+},error=>{
+  finishInitialAuth();
+  showAuthError("Unable to check your account. You can still browse the store.");
 });
 
-/* Also report Firebase authentication initialization errors */
 auth.onIdTokenChanged(user=>{
   if(user){
     currentUser=user;
+    updateAuthUI();
   }
 });
 
 /* Phone support */
 function openNativeCall(number){
+  const telUrl="tel:"+String(number||"");
   try{
-    if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){
-      window.AndroidApp.callPhone(String(number));
-      return false;
-    }
-
-    window.location.href="tel:"+String(number);
+    window.location.href=telUrl;
   }catch(e){
     showAppMessage("Unable to open the phone dialer.","⚠️");
   }
-
   return false;
 }
 
-/*
- * Email support:
- * Open the Android email composer directly with a mailto URI.
- * Do not call the old AndroidApp.openEmail bridge here, because
- * that bridge is producing the error shown in the screenshot.
- */
+/* Email support: open the email composer with the recipient filled in. */
 function openNativeEmail(email,subject){
-  const targetEmail=String(email||"topperstitching@gmail.com");
-  const targetSubject=String(subject||"Support Request");
+  const targetEmail=String(email||"topperstitching@gmail.com").trim();
+  const targetSubject=String(subject||"Support Request").trim();
+  const mailtoUrl="mailto:"+targetEmail+"?subject="+encodeURIComponent(targetSubject);
 
-  const mailtoUrl="mailto:"+targetEmail+
-    "?subject="+encodeURIComponent(targetSubject);
-
-  try{
-    if(window.AndroidApp&&typeof window.AndroidApp.openEmail==="function"){
-      /*
-       * Try the Android bridge first only if it explicitly reports
-       * success. If it returns false or throws, use the mailto URI.
-       */
-      const result=window.AndroidApp.openEmail(targetEmail,targetSubject);
-
-      if(result===true){
-        return false;
-      }
-    }
-  }catch(error){
-    /* Fall through to the mailto URI. */
-  }
-
+  /*
+   * Use mailto directly. This lets Android's installed email app
+   * receive the recipient and subject through the system intent.
+   */
   try{
     window.location.href=mailtoUrl;
   }catch(error){
-    showAppMessage(
-      "Unable to open an email app. Please install or enable an email app and try again.",
-      "⚠️"
-    );
+    showAppMessage("Unable to open an email app. Please check that an email app is installed.","⚠️");
   }
 
   return false;
@@ -1379,12 +1369,22 @@ function loadUserOrders(userId){
 setProfileAvatar(getSavedAvatar());
 loadCart();
 
-/*
- * Do not hide the initial loading screen in DOMContentLoaded.
- * It must remain visible until Firebase's first auth-state callback.
- */
+/* Initialize the page even if Firebase is slow to respond. */
 document.addEventListener("DOMContentLoaded",()=>{
   restoreOrderDraft();
+
+  /*
+   * Fail-safe: never leave the app blocked behind the splash screen.
+   * The auth listener will still update the account when it responds.
+   */
+  if(!authStateResolved){
+    setTimeout(()=>{
+      if(!authStateResolved){
+        finishInitialAuth();
+        $("profileEmail").textContent="Sign in to connect your Google account";
+      }
+    },5000);
+  }
 });
 
 document.addEventListener("visibilitychange",()=>{
