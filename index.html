@@ -544,10 +544,9 @@ font-size:11px;
 font-weight:bold
 }
 
-.status-processing{
-background:#e3f2fd;
-color:#1565c0
-}
+.status-processing{background:#e3f2fd;color:#1565c0}
+.status-success{background:#d4edda;color:#155724}
+.status-failed{background:#f8d7da;color:#721c24}
 
 .profile-container{
 background:#fff;
@@ -700,16 +699,55 @@ transform:rotate(360deg)
 <div class="auth-loading-text">Account लोड हो रहा है...</div>          
 </div>  
 
-<!-- PHONE VERIFICATION MODAL (FIRST OPEN) -->
+<!-- REAL PHONE OTP VERIFICATION MODAL -->
 <div id="phoneVerifyModal" class="modal" style="display:block;z-index:999999;background:rgba(0,0,0,0.85);">  
-<div class="modal-content" style="margin-top:15vh;">
-<h3>📱 मोबाइल नंबर वेरिफिकेशन</h3>
-<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">ऐप का उपयोग करने के लिए कृपया अपना मोबाइल नंबर सत्यापित करें।</p>
+<div class="modal-content" style="margin-top:10vh;">
+<h3>📱 मोबाइल नंबर वेरिफिकेशन (OTP)</h3>
+<p style="font-size:13px;color:#666;text-align:center;margin-bottom:15px;">सुरक्षित उपयोग के लिए Firebase OTP से नंबर सत्यापित करें।</p>
+
+
+<div id="phoneStep1">
 <div class="form-group">
-<label>मोबाइल नंबर (10 अंक):</label>
-<input type="tel" id="verifyPhoneInput" placeholder="अपना मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">
+<label>मोबाइल नंबर (दस अंक):</label>
+<input type="tel" id="verifyPhoneInput" placeholder="9876543210" inputmode="numeric" maxlength="10">
 </div>
-<button type="button" class="btn-submit" onclick="verifyAndSavePhone()">नंबर वेरीफाई करें</button>
+<button type="button" class="btn-submit" onclick="sendOtpCode()">OTP भेजें</button>
+</div>
+
+<div id="phoneStep2" style="display:none;margin-top:15px;">
+<div class="form-group">
+<label>6 अंकों का OTP दर्ज करें:</label>
+<input type="text" id="otpCodeInput" placeholder="123456" inputmode="numeric" maxlength="6">
+</div>
+<button type="button" class="btn-submit" onclick="verifyOtpCode()">OTP सत्यापित करें</button>
+</div>
+
+<!-- Invisible reCAPTCHA container -->
+<div id="recaptcha-container" style="margin-top:10px;"></div>
+</div>
+</div>
+
+<!-- CHANGE PHONE MODAL (FOR PROFILE) -->
+<div id="changePhoneModal" class="modal">  
+<div class="modal-content">
+<h3>🔄 मोबाइल नंबर बदलें</h3>
+<div id="changePhoneStep1">
+<div class="form-group">
+<label>नया मोबाइल नंबर:</label>
+<input type="tel" id="newPhoneInput" placeholder="नया 10 अंकों का नंबर" inputmode="numeric" maxlength="10">
+</div>
+<button type="button" class="btn-submit" onclick="sendChangeOtp()">नया OTP भेजें</button>
+</div>
+
+<div id="changePhoneStep2" style="display:none;margin-top:15px;">
+<div class="form-group">
+<label>6 अंकों का OTP दर्ज करें:</label>
+<input type="text" id="newOtpInput" placeholder="123456" inputmode="numeric" maxlength="6">
+</div>
+<button type="button" class="btn-submit" onclick="verifyChangeOtp()">नंबर अपडेट करें</button>
+</div>
+<div id="change-recaptcha-container" style="margin-top:10px;"></div>
+<button class="btn-close" type="button" style="margin-top:10px;" onclick="$('changePhoneModal').style.display='none'">रद्द करें</button>
 </div>
 </div>
 
@@ -942,6 +980,7 @@ Sign In
 </div>  
 <h3 id="profileName" style="color:#1a237e">Guest User</h3>  
 <p id="profileEmail" style="color:#666;font-size:13px;margin-top:4px">Google Account Not Connected</p>  
+<p style="font-size:13px;color:#2e7d32;margin-top:5px"><b>सत्यापित मोबाइल:</b> <span id="displayVerifiedPhone">--</span> <button onclick="openChangePhoneModal()" style="border:0;background:#0d47a1;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:5px">बदलें</button></p>
 <div style="margin-top:15px">  
 <button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Google Account से लॉगिन करें</button>  
 </div>
@@ -1010,8 +1049,8 @@ Sign In
 <input type="text" id="custName" placeholder="अपना नाम लिखें" autocomplete="name">          
 </div>  
 <div class="form-group">          
-<label>मोबाइल नंबर:</label>          
-<input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" inputmode="numeric" maxlength="10">          
+<label>मोबाइल नंबर (सत्यापित & सुरक्षित):</label>          
+<input type="tel" id="custPhone" readonly style="background:#e9ecef;cursor:not-allowed;" title="सत्यापित मोबाइल नंबर बदला नहीं जा सकता">          
 </div>  
 <div class="form-group">          
 <label>पूरा पता:</label>          
@@ -1072,40 +1111,132 @@ let cart=[];
 let authBusy=false;
 let locationReady=false;
 let locationRequestBusy=false;
+let confirmationResultGlobal = null;
+let changeConfirmationResultGlobal = null;
 
 const $=id=>document.getElementById(id);
 
-// First Open Phone Verification Check
+// First Open Phone Verification Setup (Firebase OTP)
 window.addEventListener("DOMContentLoaded", function(){
 const verifiedPhone = localStorage.getItem("topper_verified_phone");
 if(verifiedPhone){
 $("phoneVerifyModal").style.display = "none";
+$("displayVerifiedPhone").textContent = verifiedPhone;
 } else {
 $("phoneVerifyModal").style.display = "block";
+setupRecaptcha('recaptcha-container');
 }
 loadCart();
 });
 
-function verifyAndSavePhone(){
-const phone = $("verifyPhoneInput").value.trim();
-if(!/^\d{10}$/.test(phone)){
+function setupRecaptcha(containerId){
+if(!window.recaptchaVerifier){
+try{
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, {
+'size': 'invisible',
+'callback': function(response) {}
+});
+window.recaptchaVerifier.render();
+}catch(e){}
+}
+}
+
+function sendOtpCode(){
+const rawPhone = $("verifyPhoneInput").value.trim();
+if(!/^\d{10}$/.test(rawPhone)){
 showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
 return;
 }
-// Save to Firebase Database under verified_phones
-const ref = db.ref("verified_phones").push();
-ref.set({
-phone: phone,
-verifiedAt: Date.now(),
-timestamp: new Date().toISOString()
-}).then(function(){
-localStorage.setItem("topper_verified_phone", phone);
+const phoneNumber = "+91" + rawPhone;
+setupRecaptcha('recaptcha-container');
+const appVerifier = window.recaptchaVerifier;
+
+showAuthLoading();
+auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+.then(function (confirmationResult) {
+confirmationResultGlobal = confirmationResult;
+hideAuthLoading();
+$("phoneStep1").style.display = "none";
+$("phoneStep2").style.display = "block";
+showAppMessage("OTP आपके मोबाइल पर भेज दिया गया है!", "✅");
+}).catch(function (error) {
+hideAuthLoading();
+showAppMessage("OTP भेजने में त्रुटि: " + error.message, "❌");
+});
+}
+
+function verifyOtpCode(){
+const code = $("otpCodeInput").value.trim();
+if(!code || code.length !== 6){
+showAppMessage("कृपया 6 अंकों का सही OTP दर्ज करें।", "🔢");
+return;
+}
+showAuthLoading();
+confirmationResultGlobal.confirm(code).then(function (result) {
+hideAuthLoading();
+const rawPhone = $("verifyPhoneInput").value.trim();
+localStorage.setItem("topper_verified_phone", rawPhone);
+$("displayVerifiedPhone").textContent = rawPhone;
 $("phoneVerifyModal").style.display = "none";
 showAppMessage("मोबाइल नंबर सफलतापूर्वक सत्यापित हो गया!", "✅");
-}).catch(function(error){
-localStorage.setItem("topper_verified_phone", phone);
-$("phoneVerifyModal").style.display = "none";
-showAppMessage("मोबाइल नंबर सेव हो गया!", "✅");
+// Save to database
+db.ref("verified_phones").push({phone: rawPhone, verifiedAt: Date.now()});
+}).catch(function (error) {
+hideAuthLoading();
+showAppMessage("गलत OTP! कृपया पुनः प्रयास करें।", "❌");
+});
+}
+
+// Change Phone Modal Handlers
+function openChangePhoneModal(){
+$("changePhoneModal").style.display = "block";
+$("changePhoneStep1").style.display = "block";
+$("changePhoneStep2").style.display = "none";
+setTimeout(function(){ setupRecaptcha('change-recaptcha-container'); }, 500);
+}
+
+function sendChangeOtp(){
+const rawPhone = $("newPhoneInput").value.trim();
+if(!/^\d{10}$/.test(rawPhone)){
+showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "📱");
+return;
+}
+const phoneNumber = "+91" + rawPhone;
+setupRecaptcha('change-recaptcha-container');
+const appVerifier = window.recaptchaVerifier;
+
+showAuthLoading();
+auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+.then(function (confirmationResult) {
+changeConfirmationResultGlobal = confirmationResult;
+hideAuthLoading();
+$("changePhoneStep1").style.display = "none";
+$("changePhoneStep2").style.display = "block";
+showAppMessage("नया OTP भेज दिया गया है!", "✅");
+}).catch(function (error) {
+hideAuthLoading();
+showAppMessage("OTP भेजने में त्रुटि: " + error.message, "❌");
+});
+}
+
+function verifyChangeOtp(){
+const code = $("newOtpInput").value.trim();
+if(!code || code.length !== 6){
+showAppMessage("कृपया 6 अंकों का सही OTP दर्ज करें।", "🔢");
+return;
+}
+showAuthLoading();
+changeConfirmationResultGlobal.confirm(code).then(function (result) {
+hideAuthLoading();
+const rawPhone = $("newPhoneInput").value.trim();
+localStorage.setItem("topper_verified_phone", rawPhone);
+$("displayVerifiedPhone").textContent = rawPhone;
+$("changePhoneModal").style.display = "none";
+showAppMessage("मोबाइल नंबर सफलतापूर्वक बदल दिया गया!", "✅");
+db.ref("verified_phones").push({phone: rawPhone, updated: Date.now()});
+}).catch(function (error) {
+hideAuthLoading();
+showAppMessage("गलत OTP! कृपया पुनः प्रयास करें।", "❌");
 });
 }
 
@@ -1439,7 +1570,10 @@ function prepareNewPayment(productName,price){
 selectedProduct=String(productName);
 selectedPrice=String(price);
 $("custName").value="";
-$("custPhone").value="";
+// Auto-fill verified phone number and make it readonly
+const verifiedPhone = localStorage.getItem("topper_verified_phone") || "";
+$("custPhone").value = verifiedPhone;
+
 $("custAddress").value="";
 $("utrNumber").value="";
 $("termsCheck").checked=false;
@@ -1490,10 +1624,6 @@ const utr=$("utrNumber").value.trim();
 
 if(!name||!phone||!address){
 showAppMessage("कृपया अपनी सभी जानकारी भरें!","📝");
-return;
-}
-if(!/^\d{10}$/.test(phone)){
-showAppMessage("कृपया 10 अंकों का सही मोबाइल नंबर डालें!","📱");
 return;
 }
 if(!utr){
@@ -1574,7 +1704,16 @@ orders.sort(function(a,b){return Number(b.createdAt||0)-Number(a.createdAt||0);}
 orders.forEach(function(order){
 const card=document.createElement("div");
 card.className="order-card";
-card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b><span class="status-badge status-processing">🔄 Processing</span></div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
+
+let statusKey = String(order.status || "processing").toLowerCase();
+let statusBadgeHTML = '<span class="status-badge status-processing">🔄 Processing</span>';
+if(statusKey === "successful" || statusKey === "success"){
+statusBadgeHTML = '<span class="status-badge status-success">✅ Successful</span>';
+} else if(statusKey === "failed" || statusKey === "failure"){
+statusBadgeHTML = '<span class="status-badge status-failed">❌ Failed</span>';
+}
+
+card.innerHTML='<div class="order-header"><b>'+escapeHtml(order.product||"Product")+'</b>'+statusBadgeHTML+'</div><div style="margin-top:6px"><b>🆔 Order ID:</b> '+escapeHtml(order.orderId||order._id)+'</div><div style="margin-top:6px"><b>💰 कीमत:</b> ₹'+Number(order.price||0).toLocaleString("en-IN")+'</div><div style="margin-top:6px"><b>👤 नाम:</b> '+escapeHtml(order.customerName||"")+'</div><div style="margin-top:6px"><b>📞 मोबाइल:</b> '+escapeHtml(order.customerPhone||"")+'</div><div style="margin-top:6px"><b>🏠 पता:</b> '+escapeHtml(order.address||"")+'</div><div style="margin-top:6px"><b>🕐 तारीख:</b> '+escapeHtml(order.date||"")+'</div>';
 list.appendChild(card);
 });
 });
