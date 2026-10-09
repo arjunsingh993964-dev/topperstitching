@@ -450,7 +450,7 @@ App ka use karne ke liye apna 10 ankon ka mobile number darj karein aur niche di
 <label for="termsCheck" style="font-size:13px;cursor:pointer;display:inline">Main Terms &amp; Conditions aur Refund Policy se sahamat hu.</label>
 </div>
 <div class="qr-box">  
-<p style="font-size:15px;font-weight:700;color:#333">💳 Niche Pay button dabakar uplabdh UPI App chunein aur bhugtan karein.</p>  
+<p style="font-size:15px;font-weight:700;color:#333">💳 Niche Pay button dabakar uplabdh hra App chunein aur bhugtan karein.</p>  
 <button type="button" class="btn-submit" style="margin-top:10px;background:#1565c0" onclick="payViaUpiIntent()">💳 Online Pay ₹<span id="upiPayAmount">0</span></button>  
 <p style="font-size:12px;color:#777;margin-top:8px">Payment ke baad vapas app me aane par order submit ho jayega.</p>  
 </div>  
@@ -547,8 +547,6 @@ verifiedAt: Date.now(),
 method: "Native Call Verification"
 }).catch(function(err){});
 }
-
-// Allow native tel link to open dialer automatically
 }
 
 function openChangePhoneModal(){
@@ -684,7 +682,7 @@ const title = $("policyModalTitle");
 const text = $("policyModalText");
 if(type === 'terms'){
 title.textContent = "Terms & Policy";
-text.textContent = "1. Topper Stitching par uplabdh sabhi silai masine aur parts uchch gunvatta ke hain.\n2. Order karte samay sahi pata aur mobile number dena anivarya hai.\n3. Home delivery kewal Bihar ke Gopalganj jile ke antargat uplabdh hai.\n4. Data suraksha: User ka sara data aur details cloud par 100% surakshit aur encrypted hai.\n5. Kisi bhi vivad ki sthiti me Gopalganj nyayalay ka kshetradhikar hoga.";
+text.textContent = "1. Topper Stitching par uplabdh sabhi silai masine aur parts uchch gunvatta ke hain.\n2. Order karte samay sahi pata aur mobile number dena anivarya hai.\n3. Home delivery kewal Bihar ke Gopalganj jile ke antargat uplabdh hai.\n4. Data suraksha: User ka sara data aur details cloud par 100% surakshit aur encrypted hai.";
 } else if(type === 'refund'){
 title.textContent = "Refund Policy";
 text.textContent = "• Refund policy: Refund kewal delivery hone ke wakt tak hi many hai. Ek baar saman deliver ho jane aur grahak dwara sweekar kar lene ke baad kisi bhi prakar ka refund ya return many nahi hoga.";
@@ -783,6 +781,7 @@ if(currentUser){googleSignOut();}else{googleSignIn();}
 async function googleSignIn(){
 if(currentUser||authBusy)return;
 authBusy=true;
+showAuthLoading();
 const provider=new firebase.auth.GoogleAuthProvider();
 try{
 await auth.signInWithPopup(provider);
@@ -790,6 +789,7 @@ localStorage.setItem(LOGIN_MEMORY_KEY,"1");
 }catch(error){
 authBusy=false;
 updateAuthUI();
+hideAuthLoading();
 showAuthError("❌ Google Login nahi hua: "+error.message);
 }
 }
