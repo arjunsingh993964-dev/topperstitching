@@ -65,8 +65,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .tracker-timeline{margin:12px 0 6px 0;padding-left:10px;border-left:2px dashed #1565c0;display:flex;flex-direction:column;gap:8px}
 .tracker-step{display:flex;align-items:center;gap:10px;font-size:13px;color:#555}
 .tracker-step.completed{color:#2e7d32;font-weight:bold}
+.tracker-step.failed{color:#d32f2f;font-weight:bold}
 .tracker-dot{width:10px;height:10px;border-radius:50%;background:#ccc;margin-left:-16px;border:2px solid #fff}
 .tracker-step.completed .tracker-dot{background:#2e7d32}
+.tracker-step.failed .tracker-dot{background:#d32f2f}
 .profile-container{background:#fff;padding:20px;border-radius:10px;max-width:600px;margin:20px auto;border:1px solid #e0e0e0} 
 .profile-section-box{background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;padding:12px 15px;margin-top:15px;text-align:left} 
 .profile-section-box h4{color:#1a237e;font-size:15px;margin-bottom:8px;border-bottom:2px solid #ffab00;padding-bottom:4px;display:inline-block} 
@@ -301,7 +303,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div id="profileView" class="view-section">
   <div class="profile-container">
     <div style="text-align:center;margin-bottom:15px">
-      <img id="profilePageImg" src="u1.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">
+      <img id="profilePageImg" src="m1.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">
       <div style="font-size:11px;color:#666;margin-top:4px">Tap photo to change avatar</div>
       <h3 id="profileName" style="color:#1a237e;margin-top:8px">Guest User</h3>
       <p id="profileEmail" style="font-size:13px;color:#666">Google Account Not Connected</p>
@@ -406,12 +408,12 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="modal-content" style="max-width:320px;text-align:center">
     <h3>Choose Profile Photo</h3>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0">
-      <img src="u1.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u1.png')" alt="Avatar 1">
-      <img src="u2.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u2.png')" alt="Avatar 2">
-      <img src="u3.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u3.png')" alt="Avatar 3">
-      <img src="u4.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u4.png')" alt="Avatar 4">
-      <img src="u5.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u5.png')" alt="Avatar 5">
-      <img src="u6.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('u6.png')" alt="Avatar 6">
+      <img src="m1.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('m1.png')" alt="m1">
+      <img src="m2.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('m2.png')" alt="m2">
+      <img src="m3.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('m3.png')" alt="m3">
+      <img src="m4.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('m4.png')" alt="m4">
+      <img src="f1.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('f1.png')" alt="f1">
+      <img src="f2.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;object-fit:cover;margin:auto" onclick="selectAvatar('f2.png')" alt="f2">
     </div>
     <button class="btn-close" onclick="closeAvatarPicker()">Close</button>
   </div>
@@ -560,7 +562,7 @@ function googleSignOut(){
 } 
 
 function getSavedAvatar(){ 
-  try{return localStorage.getItem("topperProfileAvatar")||"u1.png";} catch(e){return "u1.png";} 
+  try{return localStorage.getItem("topperProfileAvatar")||"m1.png";} catch(e){return "m1.png";} 
 } 
 
 function updateAuthUI(){ 
@@ -971,6 +973,15 @@ function payViaUpiIntent(){
   } 
 } 
 
+function getDefaultDeliveryDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 10);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 async function submitOnlineOrder(){ 
   if(!currentUser){ 
     showAppMessage("Please sign in with Google before placing an order.","🔐"); 
@@ -1004,8 +1015,8 @@ async function submitOnlineOrder(){
     address:address, 
     utrNumber:utr, 
     location:userLocationLink||"", 
-    stepIndex: 1, // 1: Order Placed
-    deliveredDate: "",
+    stepIndex: 1, 
+    deliveredDate: getDefaultDeliveryDate(),
     createdAt:Date.now(), 
     date:new Date().toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"}) 
   }; 
@@ -1059,11 +1070,45 @@ function loadUserOrders(userId){
       card.className="order-card"; 
       
       const stepIdx = Number(order.stepIndex || 1);
+      const isFailed = stepIdx === 5;
       const isStep1 = stepIdx >= 1;
       const isStep2 = stepIdx >= 2;
       const isStep3 = stepIdx >= 3;
       const isStep4 = stepIdx >= 4;
       const delDateStr = order.deliveredDate ? escapeHtml(order.deliveredDate) : "dd/mm/yyyy";
+
+      let timelineHtml = "";
+      if (isFailed) {
+        timelineHtml = `
+          <div class="tracker-timeline">
+            <div class="tracker-step failed">
+              <div class="tracker-dot"></div>
+              <span>❌ Order Failed</span>
+            </div>
+          </div>
+        `;
+      } else {
+        timelineHtml = `
+          <div class="tracker-timeline">
+            <div class="tracker-step ${isStep1 ? 'completed' : ''}">
+              <div class="tracker-dot"></div>
+              <span>O - Order placed</span>
+            </div>
+            <div class="tracker-step ${isStep2 ? 'completed' : ''}">
+              <div class="tracker-dot"></div>
+              <span>O - Payment successful</span>
+            </div>
+            <div class="tracker-step ${isStep3 ? 'completed' : ''}">
+              <div class="tracker-dot"></div>
+              <span>O - Preparing for delivery</span>
+            </div>
+            <div class="tracker-step ${isStep4 ? 'completed' : ''}">
+              <div class="tracker-dot"></div>
+              <span>O - Order delivered (Delivered on: ${delDateStr})</span>
+            </div>
+          </div>
+        `;
+      }
 
       card.innerHTML= `
         <div class="order-header"><b>${escapeHtml(order.product||"Product")}</b></div>
@@ -1074,25 +1119,7 @@ function loadUserOrders(userId){
         <div style="margin-top:6px"><b>🏠 Address:</b> ${escapeHtml(order.address||"")}</div>
         <div style="margin-top:6px"><b>💳 UTR / Reference:</b> ${escapeHtml(order.utrNumber||"Not provided")}</div>
         <div style="margin-top:6px"><b>🕐 Date:</b> ${escapeHtml(order.date||"")}</div>
-        
-        <div class="tracker-timeline">
-          <div class="tracker-step ${isStep1 ? 'completed' : ''}">
-            <div class="tracker-dot"></div>
-            <span>O - Order placed</span>
-          </div>
-          <div class="tracker-step ${isStep2 ? 'completed' : ''}">
-            <div class="tracker-dot"></div>
-            <span>O - Payment successful</span>
-          </div>
-          <div class="tracker-step ${isStep3 ? 'completed' : ''}">
-            <div class="tracker-dot"></div>
-            <span>O - Preparing for delivery</span>
-          </div>
-          <div class="tracker-step ${isStep4 ? 'completed' : ''}">
-            <div class="tracker-dot"></div>
-            <span>O - Order delivered ${isStep4 ? '(Delivered on: ' + delDateStr + ')' : ''}</span>
-          </div>
-        </div>
+        ${timelineHtml}
       `; 
       list.appendChild(card); 
     }); 
