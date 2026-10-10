@@ -1185,7 +1185,7 @@ document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); });
 <script>
 "use strict";
 /* ============ AI CONFIG ============ */
-const GEMINI_API_KEY = "AQ.Ab8RN6I68fSS3vAxTNvVgIJ3mWVvLtbNXsQV91e-9mHhNCjEGQ";
+const GEMINI_API_KEY = "AQ.Ab8RN6LP_hM1hDF2NPZ-65Ng7YhMXALq_Zl5EMd4Itk8TLnIJg";
 const GEMINI_CHAT_MODEL = "gemini-2.5-flash";
 const GEMINI_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
 const GEMINI_VOICE_NAME = "Aoede";
@@ -1228,6 +1228,10 @@ let aiBusy = false;
 
 function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
 function addAIMsg(role,text){
+  if(role==="sys"){
+    const last=$("aiMessages").lastElementChild;
+    if(last&&last.classList.contains("sys")&&last.textContent===text){ aiScroll(); return last; }
+  }
   const d=document.createElement("div");
   d.className="ai-msg "+role;
   d.textContent=text;
@@ -1294,7 +1298,9 @@ async function sendAIText(){
   }catch(err){
     aiHistory.pop();
     typing.remove();
-    addAIMsg("sys","AI abhi jawab nahi de pa raha: "+(err.message||err)+"\nKripya dobara try karein ya Human Call Support use karein.");
+    const em=String(err.message||err);
+    const keyBad=/credential|API key|API_KEY|OAuth|PERMISSION_DENIED|not valid/i.test(em);
+    addAIMsg("sys",keyBad?"AI ki API key valid nahi hai. Google AI Studio ki key ko Copy key se copy karke GEMINI_API_KEY mein dobara paste karein (bina extra space ke).":"AI abhi jawab nahi de pa raha: "+em+"\nKripya dobara try karein ya Human Call Support use karein.");
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
