@@ -17,7 +17,7 @@ header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#1a237
 .brand-title{font-size:19px;font-weight:900;color:#ffab00}
 .brand-subtitle{font-size:11px;margin-top:4px}
 button{cursor:pointer;border:0;border-radius:7px;padding:10px;font-weight:bold}
-button:disabled{opacity:.6}
+button:disabled{opacity:.6;cursor:not-allowed}
 .auth-header-btn{background:white;color:#1a237e}
 .banner{background:#283593;color:white;text-align:center;padding:15px;border-bottom:3px solid #ffab00}
 .banner h2{font-size:17px}.banner p{font-size:12px;margin-top:5px}
@@ -29,13 +29,14 @@ button:disabled{opacity:.6}
 .card h3{font-size:17px;color:#1a237e;margin-top:12px}
 .price{font-size:20px;font-weight:bold;color:#2e7d32;margin:7px 0}
 .specs{font-size:12px;line-height:1.7;background:#f8f8f8;padding:9px;border-radius:6px;color:#555;margin:10px 0}
-.specs b{color:#333}
-.out-of-stock{color:#d32f2f;font-weight:bold}
+.specs b{color:#333}.out-of-stock{color:#d32f2f;font-weight:bold}
 .btn-online{background:#ff9800;color:white;width:100%;margin-top:6px}
 .btn-cart{background:#2874f0;color:white;width:100%;margin-top:6px}
-.in-cart{background:#d32f2f}
+.btn-view-cart{background:#2e7d32;color:white;width:100%;margin-top:6px}
 .btn-submit{background:#0d47a1;color:white;width:100%;margin-top:8px}
 .btn-close{background:#d32f2f;color:white;width:100%;margin-top:8px}
+.btn-google{background:#fff;color:#333;border:1px solid #ccc;width:100%;margin-top:8px}
+.btn-account{background:#ffab00;color:#222;width:100%;margin-top:8px}
 .slider-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;scroll-snap-align:start}
 .slide-name{position:absolute;bottom:5px;background:#000a;color:white;padding:4px 8px;font-size:11px}
@@ -74,6 +75,7 @@ button:disabled{opacity:.6}
 #authLoading{position:fixed;inset:0;background:white;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .loader{width:40px;height:40px;border:4px solid #ddd;border-top-color:#1565c0;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.status-note{font-size:12px;line-height:1.6;background:#fff8e1;padding:10px;border-radius:7px;margin:10px 0;color:#694f00}
 @media(max-width:380px){.brand-title{font-size:16px}.products{padding:9px;gap:9px}}
 </style>
 </head>
@@ -118,7 +120,7 @@ button:disabled{opacity:.6}
     <div id="cartItemsList"></div>
     <div id="cartSummary" style="display:none;background:white;padding:15px;border-radius:9px">
       <h3>Total: ₹<span id="cartTotalPrice">0</span></h3>
-      <button class="btn-online" onclick="checkoutCart()">💳 Pay for All Items</button>
+      <button class="btn-online" onclick="checkoutCart()">💳 Proceed to Order</button>
     </div>
   </div>
 </div>
@@ -138,8 +140,14 @@ button:disabled{opacity:.6}
     <p id="profileEmail" class="help">Account not connected</p>
     <p id="savedPhoneText" class="help"></p>
 
-    <button class="btn-submit" onclick="openRegistration()">📱 Verify Mobile and Email</button>
-    <button id="profileAuthBtn" class="btn-submit" onclick="googleSignIn()">Sign In with Google</button>
+    <button id="profileAuthBtn" class="btn-google" onclick="googleSignIn()">Sign In with Google</button>
+    <button id="createAccountBtn" class="btn-account" onclick="openRegistration()">➕ Create an Account</button>
+    <button class="btn-submit" onclick="openRegistration()">📱 Verify / Update Mobile Number</button>
+
+    <div class="profile-section-box">
+      <h4>Account Information</h4>
+      <p id="accountStatus" class="help">Sign in or create an account to save your details.</p>
+    </div>
 
     <div class="profile-section-box">
       <h4>Support</h4>
@@ -169,11 +177,11 @@ button:disabled{opacity:.6}
   </div>
 </div>
 
-<!-- Mobile and email registration -->
+<!-- Account creation / mobile and email verification -->
 <div id="registrationModal" class="modal">
   <div class="modal-content">
-    <h3>📱 Mobile and Email Verification</h3>
-    <p class="help">पहले अपना मोबाइल नंबर सत्यापित करें, फिर ईमेल लिंक से साइन-इन पूरा करें।</p>
+    <h3>➕ Create an Account</h3>
+    <p class="help">पहले Truecaller से अपना मोबाइल सत्यापित करें। फिर ईमेल पर भेजे गए लिंक से ईमेल साइन-इन पूरा करें।</p>
 
     <div class="form-group">
       <label for="regPhone">Mobile Number</label>
@@ -181,7 +189,7 @@ button:disabled{opacity:.6}
         placeholder="Enter 10-digit Indian mobile number">
     </div>
 
-    <button class="btn-submit" onclick="startTruecallerVerification()">Verify Mobile with Truecaller</button>
+    <button class="btn-submit" id="truecallerBtn" onclick="startTruecallerVerification()">Verify Mobile with Truecaller</button>
     <p id="mobileVerifyStatus" class="help">Mobile number not verified.</p>
 
     <div class="form-group">
@@ -190,10 +198,12 @@ button:disabled{opacity:.6}
         placeholder="Enter your email address" autocomplete="email">
     </div>
 
-    <button class="btn-submit" onclick="sendEmailLink()">Send Email Verification Link</button>
+    <button class="btn-submit" id="emailLinkBtn" onclick="sendEmailLink()">Send Email Sign-In Link</button>
+    <p class="help">ईमेल लिंक खोलने पर Firebase उसी ईमेल से अकाउंट बनाएगा या पुराने अकाउंट में साइन-इन करेगा। यह ईमेल verification link के जरिए होता है।</p>
 
-    <p class="help">लिंक खोलने के बाद उसी ईमेल से साइन-इन पूरा करें। लिंक दूसरे ब्राउज़र में खुले तो उसी ईमेल को दोबारा दर्ज करना पड़ सकता है।</p>
-
+    <div class="status-note">
+      मोबाइल नंबर केवल असली Truecaller verification callback आने पर verified माना जाएगा। ईमेल लिंक अपने-आप मोबाइल verification नहीं करता।
+    </div>
     <button class="btn-close" onclick="closeRegistration()">Close</button>
   </div>
 </div>
@@ -201,6 +211,7 @@ button:disabled{opacity:.6}
 <div id="orderModal" class="modal">
   <div class="modal-content">
     <h3>🛒 Order and Payment</h3>
+
     <div class="delivery-badge">
       🚚 Home Delivery Available Only In<br><b>Gopalganj District, Bihar</b>
     </div>
@@ -213,8 +224,8 @@ button:disabled{opacity:.6}
     </div>
 
     <div class="form-group">
-      <label for="custPhone">Mobile Number</label>
-      <input id="custPhone" type="tel" maxlength="16" autocomplete="tel" placeholder="Enter mobile number">
+      <label for="custPhone">Verified Mobile Number</label>
+      <input id="custPhone" type="tel" maxlength="16" autocomplete="tel" placeholder="Verify your mobile in Profile">
       <small id="phoneStatus" class="help">Verify your mobile number before ordering.</small>
     </div>
 
@@ -230,17 +241,17 @@ button:disabled{opacity:.6}
 
     <div class="qr-box">
       <b>💳 Pay using your UPI app</b>
-      <button class="btn-submit" onclick="payViaUpiIntent()">Pay ₹<span id="upiPayAmount">0</span></button>
-      <p class="help">Payment receipt का reference number नीचे दर्ज करें।</p>
+      <button class="btn-submit" onclick="payViaUpiIntent()">Open UPI App — ₹<span id="upiPayAmount">0</span></button>
+      <p id="paymentInstruction" class="help">UPI app में भुगतान पूरा करने के बाद वापस आकर order submit करें। ऐप खुलना payment confirmation नहीं है।</p>
     </div>
 
     <div class="form-group">
-      <label for="utrNumber">UTR / Transaction Reference</label>
-      <input id="utrNumber" maxlength="22" placeholder="Enter payment reference number">
-      <small class="help">केवल reference number दर्ज करें। इससे भुगतान अपने-आप सत्यापित नहीं होता।</small>
+      <label for="utrNumber">UTR / Transaction Reference (if paid)</label>
+      <input id="utrNumber" maxlength="22" placeholder="Enter reference number after payment">
+      <small class="help">UTR दर्ज करने से payment अपने-आप verify नहीं होता। दुकान द्वारा भुगतान जाँचने के बाद ही इसे paid माना जाना चाहिए।</small>
     </div>
 
-    <button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">Submit Order</button>
+    <button id="onlineOrderBtn" class="btn-submit" onclick="submitOnlineOrder()">Submit Order for Confirmation</button>
     <button class="btn-close" onclick="cancelOrderForm()">Cancel</button>
   </div>
 </div>
@@ -288,9 +299,11 @@ let currentUser = null;
 let cart = [];
 let selectedProduct = "";
 let selectedPrice = 0;
+let selectedOrderItems = [];
 let verifiedMobileNumber = "";
 let ordersQuery = null;
 let userLocationLink = "";
+let upiAppOpened = false;
 
 const EMAIL_LINK_SETTINGS = {
   url: "https://arjunsingh993964-dev.github.io/topperstitching/",
@@ -341,6 +354,11 @@ function normalizeIndianPhone(value) {
   return /^[6-9]\d{9}$/.test(digits) ? "+91" + digits : "";
 }
 
+function openTabById(id) {
+  const index = {homeView:0,cartView:1,ordersView:2,profileView:3}[id] ?? 0;
+  switchTab(id, document.querySelectorAll(".nav-item")[index]);
+}
+
 function renderProducts() {
   const root = $("products");
 
@@ -371,7 +389,7 @@ function renderProducts() {
         <h3>${escapeHtml(p.name)}</h3>
         <div class="price">₹${money(p.price)}</div>
         <div class="specs">${specs}${p.stock === false ? '<div class="out-of-stock">Out of Stock</div>' : ""}</div>
-        <button class="btn-online" onclick="buyProduct(${i})">💳 Pay Online</button>
+        <button class="btn-online" onclick="buyProduct(${i})">💳 Buy Now</button>
         <button id="cartBtn${i}" class="btn-cart" onclick="addProductToCart(${i})">🛒 Add to Cart</button>
       </div>`;
   }).join("");
@@ -395,12 +413,15 @@ function switchTab(id, button) {
   document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active-view"));
   document.querySelectorAll(".nav-item").forEach(v => v.classList.remove("active"));
   $(id).classList.add("active-view");
-  button.classList.add("active");
+  if (button) button.classList.add("active");
 }
 
 /* Google sign-in: native Android Credential Manager first */
 async function googleSignIn() {
-  if (currentUser) return googleSignOut();
+  if (currentUser) {
+    await googleSignOut();
+    return;
+  }
 
   try {
     if (window.AndroidApp && typeof window.AndroidApp.signIn === "function") {
@@ -430,7 +451,6 @@ async function googleSignOut() {
   }
 }
 
-/* Called by native Android after Google Credential Manager returns an ID token */
 window.nativeGoogleLogin = async function(idToken) {
   try {
     if (!idToken) throw new Error("Google ID token missing.");
@@ -448,22 +468,25 @@ window.nativeGoogleLoginError = function(message) {
   showMessage(message || "Google sign-in failed.", "❌");
 };
 
-/* Registration */
+/* Create account */
 function openRegistration() {
   $("regPhone").value = verifiedMobileNumber.replace(/^\+91/, "");
-  $("regEmail").value = currentUser?.email || "";
+  $("regEmail").value = currentUser?.email || localStorage.getItem(EMAIL_KEY) || "";
   $("registrationModal").style.display = "block";
+  updateMobileStatus();
 }
 
 function closeRegistration() {
   $("registrationModal").style.display = "none";
 }
 
-/*
- * This starts the Android SDK request only.
- * The phone is NOT considered verified until the native SDK returns
- * a genuine verified number via onTruecallerSuccess.
- */
+function updateMobileStatus() {
+  $("mobileVerifyStatus").textContent = verifiedMobileNumber
+    ? "Current verified mobile: " + verifiedMobileNumber
+    : "Mobile number not verified.";
+}
+
+/* Truecaller native bridge */
 function startTruecallerVerification() {
   const phone = normalizeIndianPhone($("regPhone").value);
 
@@ -474,58 +497,66 @@ function startTruecallerVerification() {
 
   if (!window.AndroidApp ||
       typeof window.AndroidApp.verifyMobileViaTruecaller !== "function") {
-    showMessage("Truecaller verification requires the configured Android app.", "⚠️");
+    showMessage("Truecaller verification requires the configured Android app and native SDK.", "⚠️");
     return;
   }
 
   $("mobileVerifyStatus").textContent = "Waiting for Truecaller verification...";
-  window.AndroidApp.verifyMobileViaTruecaller(phone);
+  $("truecallerBtn").disabled = true;
+
+  try {
+    window.AndroidApp.verifyMobileViaTruecaller(phone);
+  } catch (e) {
+    $("truecallerBtn").disabled = false;
+    $("mobileVerifyStatus").textContent = "Could not start verification.";
+    showMessage("Could not start Truecaller: " + (e.message || e), "❌");
+  }
 }
 
-/* Native code must send the actual verified number, not a placeholder string. */
+/* Only the genuine native SDK callback should call this function. */
 window.onTruecallerSuccess = async function(phoneNumber) {
+  $("truecallerBtn").disabled = false;
   const phone = normalizeIndianPhone(phoneNumber);
 
   if (!phone) {
-    $("mobileVerifyStatus").textContent = "A valid verified number was not returned.";
+    $("mobileVerifyStatus").textContent = "Valid verified number was not returned.";
     showMessage("Truecaller did not return a valid mobile number.", "❌");
     return;
   }
 
   verifiedMobileNumber = phone;
+  $("regPhone").value = phone.replace(/^\+91/, "");
+  $("mobileVerifyStatus").textContent = "✓ Mobile verified: " + phone;
 
   try {
     localStorage.setItem(PHONE_KEY, phone);
   } catch (e) {}
 
-  $("regPhone").value = phone.replace(/^\+91/, "");
-  $("mobileVerifyStatus").textContent = "✓ Mobile verified: " + phone;
-
-  if ($("custPhone")) {
-    $("custPhone").value = phone.replace(/^\+91/, "");
-  }
+  if ($("custPhone")) $("custPhone").value = phone.replace(/^\+91/, "");
 
   if (currentUser) {
     try {
       await saveVerifiedProfile(currentUser, phone, true);
-      await fillSavedPhone();
+      await fillSavedProfile();
+      showMessage("Verified mobile number saved to your account.", "✅");
     } catch (e) {
-      showMessage("Mobile verified, but profile could not be saved: " + e.message, "⚠️");
+      showMessage("Mobile verified, but saving profile failed: " + e.message, "⚠️");
     }
   } else {
-    showMessage("Mobile verification completed. Now send the email link.", "✅");
+    showMessage("Mobile verification completed. Now send the email sign-in link.", "✅");
   }
 };
 
 window.onTruecallerError = function(error) {
+  $("truecallerBtn").disabled = false;
   $("mobileVerifyStatus").textContent = "Mobile verification failed.";
   showMessage("Truecaller verification failed: " + String(error || ""), "❌");
 };
 
-/* Email-link sign-in */
+/* Email link account creation / existing account sign-in */
 async function sendEmailLink() {
   const email = $("regEmail").value.trim().toLowerCase();
-  const phone = verifiedMobileNumber || localStorage.getItem(PHONE_KEY) || "";
+  const phone = verifiedMobileNumber;
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showMessage("Enter a valid email address.", "📧");
@@ -537,17 +568,25 @@ async function sendEmailLink() {
     return;
   }
 
+  const btn = $("emailLinkBtn");
+  btn.disabled = true;
+  btn.textContent = "Sending Link...";
+
   try {
     await auth.sendSignInLinkToEmail(email, EMAIL_LINK_SETTINGS);
-
     localStorage.setItem(EMAIL_KEY, email);
+    localStorage.setItem(PHONE_KEY, phone);
+
     showMessage(
-      "Verification link sent to " + email +
-      ". Open the link to finish signing in.",
+      "Sign-in link sent to " + email +
+      ". Open the link on this device to finish creating or accessing your account.",
       "📧"
     );
   } catch (e) {
     showMessage("Could not send email link: " + (e.message || e), "❌");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Send Email Sign-In Link";
   }
 }
 
@@ -560,7 +599,10 @@ async function completeEmailLinkSignIn() {
     email = prompt("Enter the email address that received the sign-in link:") || "";
   }
 
-  if (!email.trim()) return;
+  if (!email.trim()) {
+    showMessage("Email address is required to complete sign-in.", "📧");
+    return;
+  }
 
   try {
     showLoading("Verifying email link...");
@@ -572,24 +614,40 @@ async function completeEmailLinkSignIn() {
 
     localStorage.removeItem(EMAIL_KEY);
 
-    /*
-     * The link may open in another browser, where the original phone
-     * may not be available. Never mark it verified unless a genuine
-     * native verification result or trusted existing profile is present.
-     */
-    const phone = verifiedMobileNumber || localStorage.getItem(PHONE_KEY) || "";
+    const savedPhone = localStorage.getItem(PHONE_KEY) || "";
+    const normalized = normalizeIndianPhone(savedPhone);
 
-    if (normalizeIndianPhone(phone)) {
-      await saveVerifiedProfile(result.user, phone, true);
+    if (normalized) {
+      /*
+       * Save the number as verified only when this browser has the
+       * phone saved from the native Truecaller success callback.
+       * For cross-device flows, re-run Truecaller verification.
+       */
+      await saveVerifiedProfile(result.user, normalized, true);
+    } else {
+      await saveBasicProfile(result.user);
     }
 
     history.replaceState({}, document.title, window.location.pathname);
-    showMessage("Email sign-in completed.", "✅");
+    closeRegistration();
+    showMessage("Email sign-in completed. Your account is ready.", "✅");
   } catch (e) {
     showMessage("Email sign-in failed: " + (e.message || e), "❌");
   } finally {
     hideLoading();
   }
+}
+
+async function saveBasicProfile(user) {
+  if (!user) return;
+
+  await db.ref("users/" + user.uid).update({
+    uid: user.uid,
+    email: user.email || "",
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  });
 }
 
 async function saveVerifiedProfile(user, phone, mobileVerified) {
@@ -601,6 +659,8 @@ async function saveVerifiedProfile(user, phone, mobileVerified) {
   await db.ref("users/" + user.uid).update({
     uid: user.uid,
     email: user.email || "",
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
     mobileNumber: normalized,
     mobileVerified: mobileVerified === true,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
@@ -610,33 +670,46 @@ async function saveVerifiedProfile(user, phone, mobileVerified) {
   localStorage.setItem(PHONE_KEY, normalized);
 }
 
-async function fillSavedPhone() {
+async function fillSavedProfile() {
   if (!currentUser) return;
 
   try {
     const snapshot = await db.ref("users/" + currentUser.uid).once("value");
-    const profile = snapshot.val();
+    const profile = snapshot.val() || {};
 
-    if (!profile || !profile.mobileNumber) return;
+    if (profile.mobileNumber) {
+      const normalized = normalizeIndianPhone(profile.mobileNumber);
 
-    verifiedMobileNumber = profile.mobileNumber;
+      if (normalized) {
+        verifiedMobileNumber = normalized;
 
-    try {
-      localStorage.setItem(PHONE_KEY, profile.mobileNumber);
-    } catch (e) {}
+        try {
+          localStorage.setItem(PHONE_KEY, normalized);
+        } catch (e) {}
 
-    if ($("custPhone") && !$("custPhone").value.trim()) {
-      $("custPhone").value = profile.mobileNumber.replace(/^\+91/, "");
-      $("phoneStatus").textContent = profile.mobileVerified
-        ? "Saved verified number loaded."
-        : "Saved number loaded; verification is still required.";
+        $("savedPhoneText").textContent =
+          "Saved mobile: " + normalized +
+          (profile.mobileVerified === true ? " ✓ Verified" : " — Not verified");
+
+        if ($("custPhone") && !$("custPhone").value.trim()) {
+          $("custPhone").value = normalized.replace(/^\+91/, "");
+          $("phoneStatus").textContent = profile.mobileVerified === true
+            ? "Saved verified number loaded."
+            : "Saved number is not verified. Verify it in Profile.";
+        }
+
+        if ($("regPhone")) $("regPhone").value = normalized.replace(/^\+91/, "");
+        updateMobileStatus();
+      }
+    } else {
+      $("savedPhoneText").textContent = "No mobile number saved yet.";
     }
 
-    $("savedPhoneText").textContent =
-      "Saved mobile: " + profile.mobileNumber +
-      (profile.mobileVerified ? " ✓ Verified" : " — Not verified");
+    $("accountStatus").textContent =
+      "Account saved: " + (profile.email || currentUser.email || "Email unavailable");
   } catch (e) {
     console.error("Profile loading failed:", e);
+    $("accountStatus").textContent = "Could not load profile. Check Firebase Database Rules.";
   }
 }
 
@@ -650,8 +723,17 @@ auth.onAuthStateChanged(async user => {
     $("profileEmail").textContent = user.email || "";
     $("profileAuthBtn").textContent = "Sign Out";
     $("profileAuthBtn").onclick = googleSignOut;
+    $("createAccountBtn").textContent = "Account Created ✓";
 
-    await fillSavedPhone();
+    if (user.photoURL) $("profilePageImg").src = user.photoURL;
+
+    try {
+      await saveBasicProfile(user);
+      await fillSavedProfile();
+    } catch (e) {
+      console.error("Account profile sync failed:", e);
+    }
+
     loadUserOrders(user.uid);
   } else {
     $("authBtn").textContent = "Sign In";
@@ -660,6 +742,8 @@ auth.onAuthStateChanged(async user => {
     $("savedPhoneText").textContent = "";
     $("profileAuthBtn").textContent = "Sign In with Google";
     $("profileAuthBtn").onclick = googleSignIn;
+    $("createAccountBtn").textContent = "➕ Create an Account";
+    $("accountStatus").textContent = "Sign in or create an account to save your details.";
     clearOrdersListener();
   }
 
@@ -670,7 +754,10 @@ auth.onAuthStateChanged(async user => {
 function loadCart() {
   try {
     const value = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-    cart = Array.isArray(value) ? value : [];
+    cart = Array.isArray(value) ? value.filter(item =>
+      item && typeof item.name === "string" &&
+      Number(item.price) >= 0 && Number(item.qty) > 0
+    ) : [];
   } catch (e) {
     cart = [];
   }
@@ -678,30 +765,43 @@ function loadCart() {
 }
 
 function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (e) {
+    showMessage("Cart could not be saved on this device.", "⚠️");
+  }
   updateCartUI();
+}
+
+function getProductCartName(p) {
+  return p.table ? p.name + " [" + selectedTableColor() + "]" : p.name;
 }
 
 function addProductToCart(index) {
   const p = products[index];
+
   if (!p || p.stock === false) {
     showMessage("This item is out of stock.", "❌");
     return;
   }
 
-  const name = p.table
-    ? p.name + " [" + selectedTableColor() + "]"
-    : p.name;
-
+  const name = getProductCartName(p);
   const found = cart.find(item => item.name === name);
 
   if (found) {
-    found.qty++;
-  } else {
-    cart.push({name, price:p.price, qty:1});
+    /* Do not add a second copy from the product card. */
+    openTabById("cartView");
+    showMessage("This product is already in your cart. You can change its quantity in Cart.", "🛒");
+    return;
   }
 
+  cart.push({name, price:Number(p.price), qty:1});
   saveCart();
+  showMessage("Added to cart.", "✅");
+}
+
+function openCart() {
+  openTabById("cartView");
 }
 
 function updateCartUI() {
@@ -716,7 +816,7 @@ function updateCartUI() {
       <div class="cart-item">
         <div>
           <b>${escapeHtml(item.name)}</b>
-          <div style="color:#2e7d32;margin-top:5px">₹${money(item.price)}</div>
+          <div style="color:#2e7d32;margin-top:5px">₹${money(item.price)} each</div>
           <div class="cart-controls">
             <button class="qty-btn" onclick="changeQty(${index},-1)">−</button>
             <span>${Number(item.qty) || 1}</span>
@@ -736,17 +836,23 @@ function updateCartUI() {
     $("cartSummary").style.display = "block";
   }
 
-  const quantity = cart.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
+  const quantity = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
   $("cartCountBadge").textContent = quantity;
   $("cartCountBadge").style.display = quantity ? "inline-block" : "none";
 
   products.forEach((p, i) => {
     const btn = $("cartBtn" + i);
     if (!btn) return;
-    const name = p.table ? p.name + " [" + selectedTableColor() + "]" : p.name;
+
+    const name = getProductCartName(p);
     const found = cart.some(item => item.name === name);
-    btn.textContent = found ? "🛒 In Cart" : "🛒 Add to Cart";
-    btn.classList.toggle("in-cart", found);
+
+    btn.textContent = found ? "✓ View in Cart" : "🛒 Add to Cart";
+    btn.classList.toggle("btn-view-cart", found);
+    btn.classList.toggle("btn-cart", !found);
+
+    /* Button always opens the cart when the product is already added. */
+    btn.onclick = found ? openCart : () => addProductToCart(i);
   });
 }
 
@@ -764,7 +870,7 @@ function removeCartItem(index) {
 function requireLogin() {
   if (currentUser) return true;
   showMessage("Please sign in before placing an order.", "🔐");
-  switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+  openTabById("profileView");
   return false;
 }
 
@@ -778,25 +884,30 @@ function buyProduct(index) {
 
   if (!requireLogin()) return;
 
-  const name = p.table
-    ? p.name + " [" + selectedTableColor() + "]"
-    : p.name;
-
-  prepareOrder(name, p.price);
+  const name = getProductCartName(p);
+  prepareOrder(name, p.price, [{name, price:p.price, qty:1}]);
 }
 
 function checkoutCart() {
   if (!requireLogin() || !cart.length) return;
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const name = "Cart Items: " + cart.map(i => i.name + " (x" + i.qty + ")").join(", ");
+  const items = cart.map(item => ({
+    name:item.name,
+    price:Number(item.price),
+    qty:Number(item.qty)
+  }));
 
-  prepareOrder(name, total);
+  const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const name = "Cart Items: " + items.map(i => i.name + " (x" + i.qty + ")").join(", ");
+
+  prepareOrder(name, total, items);
 }
 
-async function prepareOrder(name, price) {
+async function prepareOrder(name, price, items) {
   selectedProduct = name;
   selectedPrice = Number(price);
+  selectedOrderItems = items || [];
+  upiAppOpened = false;
 
   $("modalProductInfo").textContent = name + " — ₹" + money(price);
   $("upiPayAmount").textContent = money(price);
@@ -804,13 +915,14 @@ async function prepareOrder(name, price) {
   $("custAddress").value = "";
   $("utrNumber").value = "";
   $("termsCheck").checked = false;
-
   $("custPhone").value = "";
   $("phoneStatus").textContent = "Loading saved mobile number...";
+  $("paymentInstruction").textContent =
+    "UPI app में भुगतान पूरा करने के बाद वापस आकर order submit करें। ऐप खुलना payment confirmation नहीं है।";
 
   $("orderModal").style.display = "block";
 
-  await fillSavedPhone();
+  await fillSavedProfile();
 
   if (!$("custPhone").value.trim()) {
     $("phoneStatus").textContent = "Verify your mobile number in Profile.";
@@ -821,7 +933,7 @@ function cancelOrderForm() {
   $("orderModal").style.display = "none";
 }
 
-/* UPI payment intent */
+/* UPI payment intent. Opening a UPI app does not verify payment. */
 function payViaUpiIntent() {
   if (!$("termsCheck").checked) {
     showMessage("Accept the Terms and Conditions first.", "📝");
@@ -838,14 +950,23 @@ function payViaUpiIntent() {
     "&am=" + encodeURIComponent(selectedPrice.toFixed(2)) +
     "&cu=INR";
 
-  if (window.AndroidApp && typeof window.AndroidApp.openUpi === "function") {
-    window.AndroidApp.openUpi(url);
-  } else {
-    window.location.href = url;
+  try {
+    if (window.AndroidApp && typeof window.AndroidApp.openUpi === "function") {
+      window.AndroidApp.openUpi(url);
+      upiAppOpened = true;
+      $("paymentInstruction").textContent =
+        "UPI app launch request sent. Payment status is still unverified until the merchant confirms it.";
+    } else {
+      window.location.href = url;
+      upiAppOpened = true;
+    }
+  } catch (e) {
+    upiAppOpened = false;
+    showMessage("Could not open UPI app: " + (e.message || e), "❌");
   }
 }
 
-/* Order submission */
+/* Submit an order; never mark UPI as paid based only on a client-entered UTR. */
 async function submitOnlineOrder() {
   if (!currentUser) {
     showMessage("Please sign in before ordering.", "🔐");
@@ -865,17 +986,15 @@ async function submitOnlineOrder() {
   if (!name) return showMessage("Enter your full name.", "📝");
   if (!phone) return showMessage("Enter a valid Indian mobile number.", "📱");
   if (!address || address.length < 8) return showMessage("Enter your complete delivery address.", "🏠");
-  if (!/^[A-Za-z0-9]{12,22}$/.test(utr)) return showMessage("Enter a valid 12–22 character transaction reference.", "💳");
+  if (utr && !/^[A-Za-z0-9]{8,22}$/.test(utr)) {
+    return showMessage("Check the transaction reference number.", "💳");
+  }
 
   const btn = $("onlineOrderBtn");
   btn.disabled = true;
-  btn.textContent = "Saving Order...";
+  btn.textContent = "Submitting Order...";
 
   try {
-    /*
-     * The database Rules must also enforce user ownership.
-     * A client-provided UTR is NOT proof of payment.
-     */
     const profileSnap = await db.ref("users/" + currentUser.uid).once("value");
     const profile = profileSnap.val();
 
@@ -894,12 +1013,13 @@ async function submitOnlineOrder() {
       customerPhone: phone,
       customerPhoto: currentUser.photoURL || "",
       product: selectedProduct,
+      items: selectedOrderItems,
       price: selectedPrice,
-      address,
+      address: address,
       utrNumber: utr,
       location: userLocationLink,
-      status: "processing",
-      paymentStatus: "submitted_unverified",
+      status: "pending_confirmation",
+      paymentStatus: utr ? "submitted_unverified" : "not_confirmed",
       paymentMethod: "UPI",
       createdAt: Date.now(),
       date: new Date().toLocaleString("en-IN")
@@ -907,19 +1027,26 @@ async function submitOnlineOrder() {
 
     await ref.set(order);
 
+    /*
+     * Cart is cleared only after Firebase confirms that the order was saved.
+     */
     if (selectedProduct.startsWith("Cart Items:")) {
       cart = [];
       saveCart();
     }
 
     $("orderModal").style.display = "none";
-    showMessage("Order submitted. Order ID: " + ref.key, "✅");
-    switchTab("ordersView", document.querySelectorAll(".nav-item")[2]);
+    showMessage(
+      "Order request submitted. Order ID: " + ref.key +
+      ". Payment and order are pending merchant confirmation.",
+      "✅"
+    );
+    openTabById("ordersView");
   } catch (e) {
     showMessage("Unable to submit order: " + (e.message || e), "❌");
   } finally {
     btn.disabled = false;
-    btn.textContent = "Submit Order";
+    btn.textContent = "Submit Order for Confirmation";
   }
 }
 
@@ -957,16 +1084,27 @@ function loadUserOrders(uid) {
     items.forEach(o => {
       const card = document.createElement("div");
       card.className = "order-card";
+
+      let itemSummary = "";
+      if (Array.isArray(o.items)) {
+        itemSummary = o.items.map(i =>
+          escapeHtml(i.name) + " × " + Number(i.qty || 1)
+        ).join("<br>");
+      }
+
       card.innerHTML = `
         <h3 style="color:#1a237e;margin-bottom:9px">${escapeHtml(o.product || "Product")}</h3>
+        ${itemSummary ? `<div style="margin:6px 0">${itemSummary}</div>` : ""}
         <div><b>Order ID:</b> ${escapeHtml(o.orderId || o._id)}</div>
         <div style="margin-top:6px"><b>Price:</b> ₹${money(o.price)}</div>
         <div style="margin-top:6px"><b>Name:</b> ${escapeHtml(o.customerName || "")}</div>
         <div style="margin-top:6px"><b>Mobile:</b> ${escapeHtml(o.customerPhone || "")}</div>
         <div style="margin-top:6px"><b>Address:</b> ${escapeHtml(o.address || "")}</div>
-        <div style="margin-top:6px"><b>Payment:</b> ${escapeHtml(o.paymentStatus || "pending")}</div>
-        <div style="margin-top:6px"><b>Status:</b> ${escapeHtml(o.status || "processing")}</div>
-        <div style="margin-top:6px"><b>Date:</b> ${escapeHtml(o.date || "")}</div>`;
+        <div style="margin-top:6px"><b>Payment:</b> ${escapeHtml(o.paymentStatus || "not_confirmed")}</div>
+        <div style="margin-top:6px"><b>Order Status:</b> ${escapeHtml(o.status || "pending_confirmation")}</div>
+        <div style="margin-top:6px"><b>Date:</b> ${escapeHtml(o.date || "")}</div>
+        <p class="help">Payment is not confirmed automatically by entering a UTR.</p>`;
+
       root.appendChild(card);
     });
   }, error => {
@@ -1022,7 +1160,8 @@ function openPolicy(type) {
       "1. Provide accurate contact and delivery details.\n" +
       "2. Home delivery is available only in Gopalganj district, Bihar.\n" +
       "3. Orders require confirmation.\n" +
-      "4. Contact topperstitching@gmail.com for assistance.";
+      "4. UPI payments are confirmed by the merchant, not by a customer-entered UTR.\n" +
+      "5. Contact topperstitching@gmail.com for assistance.";
   } else {
     $("policyTitle").textContent = "Refund Policy";
     $("policyText").textContent =
@@ -1045,9 +1184,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("pageshow", () => {
-  if (auth.currentUser) fillSavedPhone();
+  if (auth.currentUser) fillSavedProfile();
 });
 </script>
-
 </body>
 </html>
