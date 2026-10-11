@@ -449,18 +449,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="ai-head">
     <div>
       <div class="ai-head-title">🤖 Topper AI Assistant</div>
-      <div class="ai-head-sub">Chat ya Live Voice se baat karein</div>
+      <div class="ai-head-sub">Chat or talk with live voice</div>
     </div>
-    <button class="ai-close" onclick="closeAI()" aria-label="Close">✕</button>
+    <div style="display:flex;gap:8px;align-items:center"><button class="ai-close" id="aiClearBtn" onclick="clearAIChat()" aria-label="Clear chat" style="width:auto;padding:0 12px">🗑</button><button class="ai-close" onclick="closeAI()" aria-label="Close">✕</button></div>
   </div>
   <div class="ai-live-bar" id="aiLiveBar">
-    <span id="aiLiveText"><span class="ai-pulse"></span>Live voice chal rahi hai...</span>
+    <span id="aiLiveText"><span class="ai-pulse"></span>Live voice is on...</span>
     <button onclick="stopLive()">End</button>
   </div>
   <div class="ai-messages" id="aiMessages"></div>
   <div class="ai-input-row">
     <button class="ai-btn ai-mic" id="aiMicBtn" onclick="toggleLive()" aria-label="Live voice">🎙️</button>
-    <input type="text" id="aiInput" placeholder="Apna sawal likhein..." maxlength="1000" autocomplete="off">
+    <input type="text" id="aiInput" placeholder="Type your question..." maxlength="1000" autocomplete="off">
     <button class="ai-btn ai-send" id="aiSendBtn" onclick="sendAIText()" aria-label="Send">➤</button>
   </div>
 </div>
@@ -1185,46 +1185,17 @@ document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); });
 <script>
 "use strict";
 /* ============ AI CONFIG ============ */
-const GEMINI_API_KEY = "AQ.Ab8RN6LP_hM1hDF2NPZ-65Ng7YhMXALq_Zl5EMd4Itk8TLnIJg";
-const GEMINI_CHAT_MODEL = "gemini-2.5-flash";
-const GEMINI_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
-const GEMINI_VOICE_NAME = "Aoede";
-const GEMINI_LIVE_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=";
+// Your Cloudflare Worker address (see worker.js). The Gemini key lives ONLY inside the Worker.
+const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
+const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";
 
-const STORE_PROMPT = [
-  "You are the official AI assistant of 'Topper Stitching', a sewing machine and parts store.",
-  "Reply in the same language the customer uses (Hindi, Hinglish or English). Keep answers short, friendly and clear. In voice, speak in 1-3 short sentences.",
-  "",
-  "STORE DETAILS:",
-  "- Address: Main Road, Sasamusa, Gopalganj, Bihar.",
-  "- Phone: +14844817124. Email: topperstitching@gmail.com.",
-  "- Registered: GSTIN and UDYAM.",
-  "- Home delivery is available ONLY in Gopalganj district, Bihar.",
-  "",
-  "PRODUCTS AND PRICES (INR):",
-  "- Topper SV Tailor: Rs 4,500. Sewing machine head only. 5 years warranty, no guarantee. Accessories box included.",
-  "- Topper SV Tailor Deluxe: Rs 4,500. Sewing machine head only. 5 years warranty, no guarantee. Accessories box included.",
-  "- Bag Closer Single Needle: Rs 5,800. Heavy-duty bag closer machine. Warranty: 2 service visits, no guarantee. Accessories box included.",
-  "- Topper TA1 Model (TA1 Umbrella): Rs 6,000. Sewing machine head only. 5 years warranty, no guarantee. Accessories box included.",
-  "- Sewing Machine Top Table: Rs 550. Fits SV / TA1 models. Top table only. Colors: Light Wooden, Grey Wooden, Light Dark Wooden, Dark Wooden. No warranty or guarantee.",
-  "- Topper Karhai (130K): Rs 7,200. Sewing machine head only. 5 years warranty, no guarantee. Accessories box included.",
-  "- Jupiter Scissors (Size 10): Rs 300. Currently OUT OF STOCK.",
-  "",
-  "HOW TO ORDER: Sign in with Google, then tap 'Pay Online' on a product or add items to the cart and tap 'Pay for All Items'. Enter name, mobile number and full address, accept the terms, pay by UPI, then enter the 12-22 character UTR / transaction reference number and tap Submit Order. Orders can be tracked in the Orders tab.",
-  "ORDER STATUS STEPS: Order placed, Payment successful, Preparing for delivery, Order delivered. Payment is confirmed by the store after checking the UTR; it is not verified instantly.",
-  "REFUND POLICY: Refund requests are accepted only until delivery is completed. After delivery, refunds are not accepted except where required by law.",
-  "",
-  "RULES:",
-  "- Use ONLY the information above. If you do not know something (stock of other items, discounts, delivery date, order status of a specific order), say so and suggest Human Call Support or email.",
-  "- Never invent prices, offers, warranty terms or delivery promises. You cannot place orders, take payments or check a specific order. Guide the customer to the app buttons instead.",
-  "- If the customer is outside Gopalganj district, tell them home delivery is not available there.",
-  "- Never ask for or repeat passwords, OTPs, UPI PINs or card numbers."
-].join("\n");
-
-/* ============ UI STATE ============ */
+/* ============ STATE + SAVED CHAT (per user) ============ */
 const aiHistory = [];
-let aiGreeted = false;
+const GUEST_KEY = "topper_ai_chat_guest";
+let aiLoadedFor = null;
 let aiBusy = false;
+let aiWarned = false;
+let aiClearArmed = null;
 
 function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
 function addAIMsg(role,text){
@@ -1239,12 +1210,76 @@ function addAIMsg(role,text){
   aiScroll();
   return d;
 }
-function openAI(mode){
-  $("aiPanel").style.display="flex";
-  if(!aiGreeted){
-    aiGreeted=true;
-    addAIMsg("bot","Namaste! Main Topper Stitching ka AI Assistant hoon. Machines, price, warranty, delivery ya order ke baare mein puchiye. Likh kar ya 🎙️ dabakar bol kar baat kar sakte hain.");
+function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
+function aiWarnOnce(){
+  if(aiWarned) return; aiWarned=true;
+  addAIMsg("sys","Chat history could not be saved to your account. Please check your connection.");
+}
+function persistMsg(role,text){
+  const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
+  if(currentUser){
+    try{ db.ref("chats/"+currentUser.uid).push(rec).catch(aiWarnOnce); }catch(e){ aiWarnOnce(); }
+  }else{
+    try{
+      const a=JSON.parse(localStorage.getItem(GUEST_KEY)||"[]");
+      a.push(rec);
+      localStorage.setItem(GUEST_KEY,JSON.stringify(a.slice(-50)));
+    }catch(e){}
   }
+}
+async function loadAIChat(){
+  const owner=aiOwner();
+  if(aiLoadedFor===owner) return;
+  aiLoadedFor=owner;
+  $("aiMessages").innerHTML="";
+  aiHistory.length=0;
+  let items=[];
+  try{
+    if(currentUser){
+      const snap=await db.ref("chats/"+currentUser.uid).orderByChild("t").limitToLast(50).once("value");
+      snap.forEach(c=>{ const v=c.val(); if(v&&v.text) items.push(v); });
+      items.sort((a,b)=>Number(a.t)-Number(b.t));
+    }else{
+      items=JSON.parse(localStorage.getItem(GUEST_KEY)||"[]");
+    }
+  }catch(e){ items=[]; }
+  if(!items.length){ addAIMsg("bot",AI_GREETING); return; }
+  items.forEach(m=>{
+    const r=m.role==="user"?"user":"bot";
+    addAIMsg(r,m.text);
+    aiHistory.push({role:r==="user"?"user":"model",parts:[{text:m.text}]});
+  });
+}
+function clearAIChat(){
+  const btn=$("aiClearBtn");
+  if(aiClearArmed===null){
+    btn.textContent="Delete?";
+    aiClearArmed=setTimeout(()=>{ aiClearArmed=null; btn.textContent="🗑"; },3000);
+    return;
+  }
+  clearTimeout(aiClearArmed); aiClearArmed=null; btn.textContent="🗑";
+  try{
+    if(currentUser) db.ref("chats/"+currentUser.uid).remove().catch(()=>{});
+    else localStorage.removeItem(GUEST_KEY);
+  }catch(e){}
+  aiLoadedFor=null;
+  loadAIChat();
+}
+auth.onAuthStateChanged(()=>{
+  aiLoadedFor=null;
+  if($("aiPanel").style.display==="flex"&&!live.active) loadAIChat();
+});
+
+async function openAI(mode){
+  $("aiPanel").style.display="flex";
+  if(mode==="voice"&&!live.outCtx){
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      live.outCtx=new AC();
+      live.outCtx.resume().catch(()=>{});
+    }catch(e){}
+  }
+  await loadAIChat();
   if(mode==="voice") startLive();
   else setTimeout(()=>{ try{$("aiInput").focus();}catch(e){} },200);
 }
@@ -1261,12 +1296,13 @@ async function sendAIText(){
   if(!text||aiBusy) return;
   input.value="";
   addAIMsg("user",text);
+  persistMsg("user",text);
 
   if(live.active){
     if(live.ws&&live.ws.readyState===1&&live.ready){
       live.ws.send(JSON.stringify({realtimeInput:{text:text}}));
     }else{
-      addAIMsg("sys","Voice connect ho rahi hai, thodi der baad try karein.");
+      addAIMsg("sys","Voice is still connecting. Please try again in a moment.");
     }
     return;
   }
@@ -1276,31 +1312,29 @@ async function sendAIText(){
   const typing=addAIMsg("bot typing","Typing...");
   aiHistory.push({role:"user",parts:[{text:text}]});
   try{
-    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GEMINI_CHAT_MODEL+":generateContent",{
+    const contents=aiHistory.slice(-20);
+    while(contents.length&&contents[0].role!=="user") contents.shift();
+    if(!currentUser) throw new Error("Please sign in with Google to use the AI assistant.");
+    const idToken=await currentUser.getIdToken();
+    const res=await fetch(AI_API_BASE+"/chat",{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-goog-api-key":GEMINI_API_KEY},
-      body:JSON.stringify({
-        systemInstruction:{parts:[{text:STORE_PROMPT}]},
-        contents:aiHistory.slice(-20),
-        generationConfig:{temperature:0.4,maxOutputTokens:600}
-      })
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},
+      body:JSON.stringify({contents:contents})
     });
     const data=await res.json();
-    if(!res.ok){
-      throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-    }
+    if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
     const parts=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts)||[];
-    const reply=parts.map(p=>p.text||"").join("").trim();
+    const reply=parts.filter(p=>!p.thought).map(p=>p.text||"").join("").trim();
     if(!reply) throw new Error("Empty reply");
     aiHistory.push({role:"model",parts:[{text:reply}]});
     typing.remove();
     addAIMsg("bot",reply);
+    persistMsg("bot",reply);
   }catch(err){
     aiHistory.pop();
     typing.remove();
     const em=String(err.message||err);
-    const keyBad=/credential|API key|API_KEY|OAuth|PERMISSION_DENIED|not valid/i.test(em);
-    addAIMsg("sys",keyBad?"AI ki API key valid nahi hai. Google AI Studio ki key ko Copy key se copy karke GEMINI_API_KEY mein dobara paste karein (bina extra space ke).":"AI abhi jawab nahi de pa raha: "+em+"\nKripya dobara try karein ya Human Call Support use karein.");
+    addAIMsg("sys",/sign in/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Human Call Support.");
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
@@ -1317,64 +1351,73 @@ function setLiveUI(on,text){
 }
 function toggleLive(){ if(live.active) stopLive(); else startLive(); }
 
+function flushLive(which){
+  const b=live[which+"Bubble"];
+  live[which+"Bubble"]=null;
+  if(!b) return;
+  const t=b.textContent.trim();
+  if(!t) return;
+  const r=which==="user"?"user":"bot";
+  persistMsg(r,t);
+  aiHistory.push({role:r==="user"?"user":"model",parts:[{text:t}]});
+}
+
 async function startLive(){
   if(live.active) return;
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    addAIMsg("sys","Is device/page par microphone support nahi hai. Page https:// par khulna chahiye.");
+    addAIMsg("sys","Microphone is not supported here. The page must be opened over https://.");
     return;
   }
+  if(!currentUser){ addAIMsg("sys","Please sign in with Google to use live voice."); return; }
   live.active=true; live.ready=false;
-  setLiveUI(true,"Microphone permission le rahe hain...");
+  setLiveUI(true,"Requesting microphone permission...");
   try{
     live.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
   }catch(err){
     live.active=false; setLiveUI(false);
     const denied=err&&(err.name==="NotAllowedError"||err.name==="SecurityError");
-    addAIMsg("sys",denied?"Microphone permission nahi mili. Browser/App settings mein Microphone allow karke dobara try karein.":"Microphone shuru nahi ho paya: "+(err.message||err));
+    addAIMsg("sys",denied?"Microphone permission was not granted. Allow Microphone in the app/browser settings and try again.":"Could not start the microphone: "+(err.message||err));
     return;
   }
-  const AC=window.AudioContext||window.webkitAudioContext;
-  live.outCtx=new AC();
+  if(!live.outCtx){
+    const AC=window.AudioContext||window.webkitAudioContext;
+    live.outCtx=new AC();
+  }
   try{ await live.outCtx.resume(); }catch(e){}
   live.nextTime=0;
-  setLiveUI(true,"Connect ho raha hai...");
+  setLiveUI(true,"Connecting...");
+  connectLive();
+}
 
+async function connectLive(){
   let ws;
-  try{ ws=new WebSocket(GEMINI_LIVE_URL+encodeURIComponent(GEMINI_API_KEY)); }
-  catch(e){ stopLive(true); addAIMsg("sys","Voice connection shuru nahi ho paya."); return; }
+  try{
+    if(!currentUser) throw new Error("login");
+    const token=await currentUser.getIdToken();
+    ws=new WebSocket(AI_API_BASE.replace(/^http/,"ws")+"/live?token="+encodeURIComponent(token));
+  }catch(e){ stopLive(true); addAIMsg("sys","Could not start the voice connection."); return; }
   live.ws=ws;
-
-  ws.onopen=()=>{
-    ws.send(JSON.stringify({setup:{
-      model:"models/"+GEMINI_LIVE_MODEL,
-      generationConfig:{
-        responseModalities:["AUDIO"],
-        speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:GEMINI_VOICE_NAME}}}
-      },
-      systemInstruction:{parts:[{text:STORE_PROMPT}]},
-      inputAudioTranscription:{},
-      outputAudioTranscription:{}
-    }}));
-  };
   ws.onmessage=async ev=>{
     let raw=ev.data;
     if(raw instanceof Blob) raw=await raw.text();
+    if(ws!==live.ws) return;
     let msg; try{ msg=JSON.parse(raw); }catch(e){ return; }
     handleLiveMessage(msg);
   };
-  ws.onerror=()=>{ if(live.active&&!live.ready) addAIMsg("sys","Voice server se connect nahi ho paya. Internet aur API key check karein."); };
+  ws.onerror=()=>{};
   ws.onclose=ev=>{
-    if(!live.active) return;
+    if(!live.active||ws!==live.ws) return;
     const why=ev&&ev.reason?(" ("+ev.reason+")"):"";
+    const wasReady=live.ready;
     stopLive(true);
-    addAIMsg("sys","Live voice band ho gayi"+why+".");
+    addAIMsg("sys",wasReady?"Live voice ended"+why+".":"Could not connect to live voice"+why+". Check your internet connection.");
   };
 }
 
 function handleLiveMessage(msg){
   if(msg.setupComplete){
     live.ready=true;
-    setLiveUI(true,"Live voice chalu hai — boliye...");
+    setLiveUI(true,"Live voice is on — go ahead and speak...");
     startMicStream();
     return;
   }
@@ -1382,13 +1425,13 @@ function handleLiveMessage(msg){
   if(!sc) return;
   if(sc.interrupted){ stopPlayback(); }
   if(sc.inputTranscription&&sc.inputTranscription.text){
-    live.botBubble=null;
+    flushLive("bot");
     if(!live.userBubble) live.userBubble=addAIMsg("user","");
     live.userBubble.textContent+=sc.inputTranscription.text;
     aiScroll();
   }
   if(sc.outputTranscription&&sc.outputTranscription.text){
-    live.userBubble=null;
+    flushLive("user");
     if(!live.botBubble) live.botBubble=addAIMsg("bot","");
     live.botBubble.textContent+=sc.outputTranscription.text;
     aiScroll();
@@ -1398,7 +1441,7 @@ function handleLiveMessage(msg){
       if(p.inlineData&&p.inlineData.data) playPcm(p.inlineData.data);
     });
   }
-  if(sc.turnComplete){ live.userBubble=null; live.botBubble=null; }
+  if(sc.turnComplete){ flushLive("user"); flushLive("bot"); }
 }
 
 function startMicStream(){
@@ -1460,6 +1503,7 @@ function stopPlayback(){
 function stopLive(silent){
   if(!live.active&&!live.ws&&!live.stream) return;
   const wasActive=live.active;
+  flushLive("user"); flushLive("bot");
   live.active=false; live.ready=false;
   try{ if(live.ws){ live.ws.onclose=null; live.ws.close(); } }catch(e){}
   live.ws=null;
@@ -1470,9 +1514,8 @@ function stopLive(silent){
   try{ if(live.inCtx) live.inCtx.close(); }catch(e){}
   try{ if(live.outCtx) live.outCtx.close(); }catch(e){}
   live.proc=live.src=live.stream=live.inCtx=live.outCtx=null;
-  live.userBubble=live.botBubble=null;
   setLiveUI(false);
-  if(wasActive&&!silent) addAIMsg("sys","Live voice band kar di gayi.");
+  if(wasActive&&!silent) addAIMsg("sys","Live voice ended.");
 }
 window.addEventListener("pagehide",()=>stopLive(true));
 </script>
