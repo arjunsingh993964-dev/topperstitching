@@ -671,30 +671,44 @@ function triggerSupport(type){
 } 
 
 /* ================= WEBTRC LIVE SUPPORT CALL SYSTEM ================= */
-const OWNER_PEER_ID = "topper_stitching_owner_main_id_999";
-let peer = new Peer();
+// ओनर की फिक्स आईडी जो owner.html पर सेट है
+const OWNER_PEER_ID = "topper-stitching-owner";
+let customerPeer = null;
 let activeCall = null;
 
 function startWebRtcCall(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    showAppMessage("Microphone is not supported on this browser.","⚠️");
+    showAppMessage("आपके ब्राउज़र में माइक्रोफ़ोन समर्थित नहीं है।","⚠️");
     return;
   }
-  showAppMessage("Connecting to Topper Support... Please allow microphone permission.","📞");
+  showAppMessage("टूप्पर सपोर्ट से कनेक्ट हो रहा है... कृपया माइक्रोफ़ोन अनुमति दें।","📞");
+  
   navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(stream => {
-    const call = peer.call(OWNER_PEER_ID, stream);
-    activeCall = call;
-    call.on('stream', remoteStream => {
-      const audio = new Audio();
-      audio.srcObject = remoteStream;
-      audio.play();
-      showAppMessage("Connected! You are talking with Topper Support.","✅");
+    customerPeer = new Peer();
+    
+    customerPeer.on('open', () => {
+      const call = customerPeer.call(OWNER_PEER_ID, stream);
+      activeCall = call;
+
+      call.on('stream', remoteStream => {
+        const audio = document.createElement('audio');
+        audio.srcObject = remoteStream;
+        audio.autoplay = true;
+        document.body.appendChild(audio);
+        showAppMessage("कॉल कनेक्ट हो गई है! अब आप बात कर सकते हैं।","✅");
+      });
+
+      call.on('close', () => {
+        showAppMessage("कॉल समाप्त हो गई है।","ℹ️");
+      });
     });
-    call.on('close', () => {
-      showAppMessage("Call ended.","ℹ️");
+
+    customerPeer.on('error', (err) => {
+      showAppMessage("कनेक्शन त्रुटि: ओनर डैशबोर्ड ऑनलाइन नहीं है।","❌");
     });
+
   }).catch(err => {
-    showAppMessage("Microphone permission denied or unavailable.","❌");
+    showAppMessage("माइक्रोफ़ोन की अनुमति अस्वीकार कर दी गई या उपलब्ध नहीं है।","❌");
   });
 }
 
