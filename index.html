@@ -296,7 +296,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="footer-address">
     <strong>📍 Store Address</strong>
     Main Road, Sasamusa, Gopalganj, Bihar<br><br>
-    Phone: +14844817124<br>
     Email: topperstitching@gmail.com
     <button class="btn-submit location-btn" onclick="requestUserLocation()">📍 Update My Live Location</button>
     <div class="location-status" id="locationStatus"></div>
@@ -338,7 +337,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <h4>Support</h4>
       <ul>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant (Chat + Voice)</li>
-        <li><a href="tel:+14844817124" onclick="return openNativeCall('+14844817124')">📞 Call Support</a></li>
+        <li onclick="startWebRtcCall()" style="color:#2e7d32; font-weight:bold;">📞 Call Support (Live Web Call)</li>
         <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>
       </ul>
     </div>
@@ -463,10 +462,11 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- FIREBASE SDKS -->
+<!-- FIREBASE & PEERJS SDKS -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <script>
 "use strict"; 
@@ -650,20 +650,6 @@ auth.onAuthStateChanged(user=>{
   hideLoading(); 
 }); 
 
-function openNativeCall(number){ 
-  const phoneNumber=String(number||"+14844817124"); 
-  try{ 
-    if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){ 
-      window.AndroidApp.callPhone(phoneNumber); 
-      return false; 
-    } 
-    window.location.href="tel:"+phoneNumber; 
-  }catch(e){ 
-    showAppMessage("Unable to open the phone dialer.","⚠️"); 
-  } 
-  return false; 
-} 
-
 function openNativeEmail(email,subject){ 
   const targetEmail=String(email||"topperstitching@gmail.com").trim(); 
   const targetSubject=String(subject||"Support Request"); 
@@ -683,6 +669,34 @@ function openNativeEmail(email,subject){
 function triggerSupport(type){ 
   if(type==="ai_assistant") openAI("chat"); 
 } 
+
+/* ================= WEBTRC LIVE SUPPORT CALL SYSTEM ================= */
+const OWNER_PEER_ID = "topper_stitching_owner_main_id_999";
+let peer = new Peer();
+let activeCall = null;
+
+function startWebRtcCall(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showAppMessage("Microphone is not supported on this browser.","⚠️");
+    return;
+  }
+  showAppMessage("Connecting to Topper Support... Please allow microphone permission.","📞");
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(stream => {
+    const call = peer.call(OWNER_PEER_ID, stream);
+    activeCall = call;
+    call.on('stream', remoteStream => {
+      const audio = new Audio();
+      audio.srcObject = remoteStream;
+      audio.play();
+      showAppMessage("Connected! You are talking with Topper Support.","✅");
+    });
+    call.on('close', () => {
+      showAppMessage("Call ended.","ℹ️");
+    });
+  }).catch(err => {
+    showAppMessage("Microphone permission denied or unavailable.","❌");
+  });
+}
 
 function setProfileAvatar(src){ 
   const img=$("profilePageImg"); 
@@ -1178,7 +1192,7 @@ loadCart();
 document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); }); 
 </script>
 
-<!-- AI ASSISTANT (Super Fast Optimized Chat + Live Voice) -->
+<!-- AI ASSISTANT -->
 <script>
 "use strict";
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
@@ -1284,7 +1298,6 @@ function closeAI(){
 }
 $("aiInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendAIText(); } });
 
-/* ============ FAST TEXT CHAT (Optimized Streaming) ============ */
 async function sendAIText(){
   const input=$("aiInput");
   const text=input.value.trim();
@@ -1371,7 +1384,6 @@ async function sendAIText(){
   }
 }
 
-/* ============ SUPER FAST LIVE VOICE ============ */
 const live={ws:null,stream:null,inCtx:null,outCtx:null,proc:null,src:null,nextTime:0,sources:[],active:false,ready:false,userBubble:null,botBubble:null};
 
 function setLiveUI(on,text){
