@@ -338,9 +338,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="profile-section-box">
       <h4>Support</h4>
       <ul>
-        <li onclick="triggerSupport('ai_call')">🤖 AI Call Support (Live Voice)</li>
         <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant (Chat + Voice)</li>
-        <li><a href="tel:+14844817124" onclick="return openNativeCall('+14844817124')">📞 Human Call Support</a></li>
+        <li><a href="tel:+14844817124" onclick="return openNativeCall('+14844817124')">📞 Call Support</a></li>
         <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>
       </ul>
     </div>
@@ -683,8 +682,7 @@ function openNativeEmail(email,subject){
 } 
 
 function triggerSupport(type){ 
-  if(type==="ai_call") openAI("voice"); 
-  else if(type==="ai_assistant") openAI("chat"); 
+  if(type==="ai_assistant") openAI("chat"); 
 } 
 
 function setProfileAvatar(src){ 
@@ -1213,18 +1211,16 @@ function addAIMsg(role,text){
 function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
 function aiWarnOnce(){
   if(aiWarned) return; aiWarned=true;
-  addAIMsg("sys","Chat history could not be saved to your account. Please check your connection.");
+  addAIMsg("sys","Cloud backup of this chat is unavailable right now. Your chat is still saved on this phone.");
 }
+function localKey(){ return "topper_ai_chat_"+aiOwner(); }
+function localRead(){ try{ const a=JSON.parse(localStorage.getItem(localKey())||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function localWrite(arr){ try{ localStorage.setItem(localKey(),JSON.stringify(arr.slice(-50))); }catch(e){} }
 function persistMsg(role,text){
   const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
+  const cache=localRead(); cache.push(rec); localWrite(cache);
   if(currentUser){
     try{ db.ref("chats/"+currentUser.uid).push(rec).catch(aiWarnOnce); }catch(e){ aiWarnOnce(); }
-  }else{
-    try{
-      const a=JSON.parse(localStorage.getItem(GUEST_KEY)||"[]");
-      a.push(rec);
-      localStorage.setItem(GUEST_KEY,JSON.stringify(a.slice(-50)));
-    }catch(e){}
   }
 }
 async function loadAIChat(){
@@ -1233,16 +1229,22 @@ async function loadAIChat(){
   aiLoadedFor=owner;
   $("aiMessages").innerHTML="";
   aiHistory.length=0;
-  let items=[];
-  try{
-    if(currentUser){
+  let items=localRead();
+  if(currentUser){
+    try{
       const snap=await db.ref("chats/"+currentUser.uid).orderByChild("t").limitToLast(50).once("value");
-      snap.forEach(c=>{ const v=c.val(); if(v&&v.text) items.push(v); });
-      items.sort((a,b)=>Number(a.t)-Number(b.t));
-    }else{
-      items=JSON.parse(localStorage.getItem(GUEST_KEY)||"[]");
-    }
-  }catch(e){ items=[]; }
+      const remote=[];
+      snap.forEach(c=>{ const v=c.val(); if(v&&v.text) remote.push(v); });
+      const seen=new Set(); const merged=[];
+      remote.concat(items).forEach(m=>{
+        const k=m.t+"|"+m.role+"|"+m.text;
+        if(!seen.has(k)){ seen.add(k); merged.push(m); }
+      });
+      merged.sort((a,b)=>Number(a.t)-Number(b.t));
+      items=merged.slice(-50);
+      localWrite(items);
+    }catch(e){}
+  }
   if(!items.length){ addAIMsg("bot",AI_GREETING); return; }
   items.forEach(m=>{
     const r=m.role==="user"?"user":"bot";
@@ -1258,10 +1260,8 @@ function clearAIChat(){
     return;
   }
   clearTimeout(aiClearArmed); aiClearArmed=null; btn.textContent="🗑";
-  try{
-    if(currentUser) db.ref("chats/"+currentUser.uid).remove().catch(()=>{});
-    else localStorage.removeItem(GUEST_KEY);
-  }catch(e){}
+  try{ if(currentUser) db.ref("chats/"+currentUser.uid).remove().catch(()=>{}); }catch(e){}
+  try{ localStorage.removeItem(localKey()); }catch(e){}
   aiLoadedFor=null;
   loadAIChat();
 }
@@ -1311,6 +1311,7 @@ async function sendAIText(){
   $("aiSendBtn").disabled=true;
   const typing=addAIMsg("bot typing","Typing...");
   aiHistory.push({role:"user",parts:[{text:text}]});
+  let bubble=null, reply="";
   try{
     const contents=aiHistory.slice(-20);
     while(contents.length&&contents[0].role!=="user") contents.shift();
@@ -1321,20 +1322,54 @@ async function sendAIText(){
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},
       body:JSON.stringify({contents:contents})
     });
-    const data=await res.json();
-    if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-    const parts=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts)||[];
-    const reply=parts.filter(p=>!p.thought).map(p=>p.text||"").join("").trim();
+    if(!res.ok){
+      let data={}; try{ data=await res.json(); }catch(e){}
+      const er=Array.isArray(data)?data[0]:data;
+      throw new Error((er&&er.error&&er.error.message)||("HTTP "+res.status));
+    }
+    const reader=res.body.getReader();
+    const dec=new TextDecoder();
+    let buf="";
+    const handleEvent=ev=>{
+      ev.split("\n").forEach(line=>{
+        if(line.indexOf("data:")!==0) return;
+        let obj; try{ obj=JSON.parse(line.slice(5).trim()); }catch(e){ return; }
+        const parts=(obj.candidates&&obj.candidates[0]&&obj.candidates[0].content&&obj.candidates[0].content.parts)||[];
+        const chunk=parts.filter(p=>!p.thought).map(p=>p.text||"").join("");
+        if(!chunk) return;
+        reply+=chunk;
+        if(!bubble){ typing.remove(); bubble=addAIMsg("bot",""); }
+        bubble.textContent=reply;
+        aiScroll();
+      });
+    };
+    while(true){
+      const r=await reader.read();
+      if(r.done) break;
+      buf+=dec.decode(r.value,{stream:true}).replace(/\r\n/g,"\n");
+      let idx;
+      while((idx=buf.indexOf("\n\n"))>=0){
+        handleEvent(buf.slice(0,idx));
+        buf=buf.slice(idx+2);
+      }
+    }
+    if(buf.trim()) handleEvent(buf);
+    reply=reply.trim();
     if(!reply) throw new Error("Empty reply");
+    bubble.textContent=reply;
     aiHistory.push({role:"model",parts:[{text:reply}]});
-    typing.remove();
-    addAIMsg("bot",reply);
     persistMsg("bot",reply);
   }catch(err){
-    aiHistory.pop();
     typing.remove();
-    const em=String(err.message||err);
-    addAIMsg("sys",/sign in/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Human Call Support.");
+    if(reply.trim()){
+      aiHistory.push({role:"model",parts:[{text:reply.trim()}]});
+      persistMsg("bot",reply.trim());
+    }else{
+      aiHistory.pop();
+      if(bubble) bubble.remove();
+      const em=String(err.message||err);
+      addAIMsg("sys",/sign in/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Call Support.");
+    }
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
@@ -1518,6 +1553,21 @@ function stopLive(silent){
   if(wasActive&&!silent) addAIMsg("sys","Live voice ended.");
 }
 window.addEventListener("pagehide",()=>stopLive(true));
+/* ============ ANDROID BACK BUTTON ============ */
+function handleAppBack(){
+  const box=$("appMessageBox");
+  if(box){ box.remove(); return true; }
+  if($("aiPanel").style.display==="flex"){ closeAI(); return true; }
+  if($("orderModal").style.display==="block"){ $("orderModal").style.display="none"; saveOrderDraft(); return true; }
+  if($("policyModal").style.display==="block"){ closePolicyModal(); return true; }
+  if($("avatarModal").style.display==="block"){ closeAvatarPicker(); return true; }
+  if(!$("homeView").classList.contains("active-view")){
+    switchTab("homeView",document.querySelectorAll(".nav-item")[0]);
+    return true;
+  }
+  return false;
+}
+window.handleAppBack=handleAppBack;
 </script>
 </body>
 </html>
