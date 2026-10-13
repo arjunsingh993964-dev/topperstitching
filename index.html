@@ -512,7 +512,9 @@ function showLoading(message){
   $("authLoadingText").textContent=message||"Checking your account..."; 
   $("authLoading").style.display="flex"; 
 } 
-function hideLoading(){ $("authLoading").style.display="none"; } 
+function hideLoading(){ 
+  $("authLoading").style.display="none"; 
+} 
 
 function escapeHtml(value){ 
   return String(value??"") 
@@ -645,15 +647,25 @@ function updateAuthUI(){
   authBusy=false; 
 } 
 
+// Firebase Authentication State Listener (Guaranteed Loop Fix)
 auth.onAuthStateChanged(user=>{ 
   currentUser=user||null; 
   authStateResolved=true; 
   authBusy=false;
-  hideLoading();
+  hideLoading(); // लोडिंग स्क्रीन तुरंत हटेगी
   updateAuthUI(); 
   if(user) loadUserOrders(user.uid); 
   else clearOrdersListener(); 
 }); 
+
+// 3.5 सेकंड का सेफ्टी टाइमर (अगर फायरबेस से रिस्पॉन्स न मिले तो लूप को अपने आप तोड़ देगा)
+setTimeout(()=>{
+  if(!authStateResolved){
+    authStateResolved=true;
+    authBusy=false;
+    hideLoading();
+  }
+}, 3500);
 
 function getDefaultDeliveryDate() {
   const d = new Date();
@@ -1057,8 +1069,10 @@ function restoreOrderDraft(){
     const saved=localStorage.getItem(ORDER_DRAFT_KEY); if(!saved) return; 
     const draft=JSON.parse(saved); if(!draft||!draft.isOpen) return; 
     selectedProduct=String(draft.selectedProduct||""); selectedPrice=String(draft.selectedPrice||""); 
-    $("custName").value=draft.customerName\vert{}\vert{}""; $("custPhone").value=draft.customerPhone||""; 
-    $("custAddress").value=draft.customerAddress\vert{}\vert{}""; $("termsCheck").checked=Boolean(draft.termsChecked); 
+    $("custName").value=draft.customerName||""; 
+    $("custPhone").value=draft.customerPhone||""; 
+    $("custAddress").value=draft.customerAddress||""; 
+    $("termsCheck").checked=Boolean(draft.termsChecked); 
     userLocationLink=draft.locationLink||""; locationReady=Boolean(userLocationLink); 
     $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN"); 
     $("upiPayAmount").textContent=Number(selectedPrice||0).toLocaleString("en-IN"); 
