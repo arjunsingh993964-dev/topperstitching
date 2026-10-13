@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Topper Stitching | Sewing Machine Store</title>
+<!-- CASHFREE DROP CHECKOUT SDK -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <style>
 * {box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif;margin:0;padding:0} 
 body{background:#f0f2f5;padding-bottom:90px;color:#222} 
@@ -61,7 +64,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .cart-btn-remove{background:#ffebee;color:#c62828;border:0;padding:4px 10px;font-size:12px;font-weight:bold;border-radius:4px;cursor:pointer;margin-top:5px} 
 .order-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px #0001;font-size:13px} 
 .order-header{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px} 
-/* Custom Tracker Timeline Styles */
 .tracker-timeline{margin:12px 0 6px 0;padding-left:10px;border-left:2px dashed #1565c0;display:flex;flex-direction:column;gap:8px}
 .tracker-step{display:flex;align-items:center;gap:10px;font-size:13px;color:#555}
 .tracker-step.completed{color:#2e7d32;font-weight:bold}
@@ -89,7 +91,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @keyframes authSpin{to{transform:rotate(360deg)}} 
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}} 
 
-/* ===== WHATSAPP STYLE CALL SCREEN (CUSTOMER) ===== */
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
 @keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
@@ -104,7 +105,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .btn-speaker.active{background:#fff;color:#333;}
 .btn-end-call{background:#dc3545;color:#fff;width:70px;height:70px;font-size:28px;}
 
-/* ===== AI ASSISTANT PANEL ===== */
 #aiPanel{display:none;position:fixed;inset:0;z-index:1500;background:#f0f2f5;flex-direction:column}
 .ai-head{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:max(12px,env(safe-area-inset-top))}
 .ai-head-title{font-size:16px;font-weight:800;color:#ffab00}
@@ -132,11 +132,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
 </head>
 <body>
 
-<!-- WHATSAPP STYLE CALL SCREEN MODAL -->
 <div id="callScreenModal">
-  <div>
-    <div style="font-size:14px; letter-spacing:1px; opacity:0.8; margin-top:20px;">TOPPER STITCHING CALL</div>
-  </div>
+  <div><div style="font-size:14px; letter-spacing:1px; opacity:0.8; margin-top:20px;">TOPPER STITCHING CALL</div></div>
   <div class="call-avatar">📞</div>
   <div class="call-info">
     <h2>Topper Support</h2>
@@ -171,7 +168,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
 <div id="authError" class="auth-error"></div>
 
-<!-- HOME VIEW -->
 <div id="homeView" class="view-section active-view">
   <div class="products">
     <div class="card"> 
@@ -337,7 +333,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- CART VIEW -->
 <div id="cartView" class="view-section">
   <div class="cart-container">
     <h3>🛒 Your Shopping Cart</h3>
@@ -349,7 +344,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- ORDERS VIEW -->
 <div id="ordersView" class="view-section">
   <div class="orders-container">
     <h3>📦 My Orders</h3>
@@ -357,7 +351,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- PROFILE VIEW -->
 <div id="profileView" class="view-section">
   <div class="profile-container">
     <div style="text-align:center;margin-bottom:15px">
@@ -395,23 +388,13 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav">
-  <button class="nav-item active" onclick="switchTab('homeView',this)">
-    <span class="icon">🏠</span>Home
-  </button>
-  <button class="nav-item" onclick="switchTab('cartView',this)">
-    <span class="icon">🛒</span>Cart<span id="cartCountBadge" class="cart-badge" style="display:none">0</span>
-  </button>
-  <button class="nav-item" onclick="switchTab('ordersView',this)">
-    <span class="icon">📦</span>Orders
-  </button>
-  <button class="nav-item" onclick="switchTab('profileView',this)">
-    <span class="icon">👤</span>Profile
-  </button>
+  <button class="nav-item active" onclick="switchTab('homeView',this)"><span class="icon">🏠</span>Home</button>
+  <button class="nav-item" onclick="switchTab('cartView',this)"><span class="icon">🛒</span>Cart<span id="cartCountBadge" class="cart-badge" style="display:none">0</span></button>
+  <button class="nav-item" onclick="switchTab('ordersView',this)"><span class="icon">📦</span>Orders</button>
+  <button class="nav-item" onclick="switchTab('profileView',this)"><span class="icon">👤</span>Profile</button>
 </div>
 
-<!-- ORDER MODAL -->
 <div id="orderModal" class="modal">
   <div class="modal-content">
     <h3>💳 Order and Payment</h3>
@@ -436,16 +419,15 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <input type="checkbox" id="termsCheck">
       <label for="termsCheck" style="font-size:13px">I agree to the Terms and Conditions and Refund Policy.</label>
     </div>
-    <div class="qr-box">
-      <p style="font-size:15px;font-weight:700">🔒 Secure online payment via Cashfree</p>
-      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below to generate a secure payment link and proceed with online payment.</p>
+    <div class="qr-box" style="background:#e8f5e9; border-color:#2e7d32;">
+      <p style="font-size:15px;font-weight:700; color:#2e7d32;">💳 Direct UPI Payment Apps / Cards</p>
+      <p style="font-size:12px;color:#555;margin-top:8px">Clicking this will open Google Pay, PhonePe or Paytm directly on your phone.</p>
     </div>
     <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px;background:#2e7d32" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>
     <button class="btn-close" onclick="cancelOrderForm()" style="margin-top:6px">Cancel</button>
   </div>
 </div>
 
-<!-- POLICY MODAL -->
 <div id="policyModal" class="modal">
   <div class="modal-content">
     <h3 id="policyModalTitle">Policy</h3>
@@ -454,7 +436,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- AVATAR MODAL -->
 <div id="avatarModal" class="modal">
   <div class="modal-content" style="max-width:320px;text-align:center">
     <h3>Choose Profile Photo</h3>
@@ -470,7 +451,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- AI ASSISTANT PANEL -->
 <div id="aiPanel">
   <div class="ai-head">
     <div>
@@ -491,7 +471,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- FIREBASE SDKS -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -533,16 +512,14 @@ function showLoading(message){
   $("authLoadingText").textContent=message||"Checking your account..."; 
   $("authLoading").style.display="flex"; 
 } 
-function hideLoading(){ 
-  $("authLoading").style.display="none"; 
-} 
+function hideLoading(){ $("authLoading").style.display="none"; } 
+
 function escapeHtml(value){ 
   return String(value??"") 
-    .replace(/&/g,"&amp;") 
-    .replace(/</g,"&lt;").replace(/>/g,"&gt;") 
-    .replace(/"/g,"&quot;") 
-    .replace(/'/g,"&#39;"); 
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") 
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;"); 
 } 
+
 function showAppMessage(message,icon="⚠️"){ 
   const old=$("appMessageBox"); 
   if(old) old.remove(); 
@@ -567,9 +544,9 @@ function showAppMessage(message,icon="⚠️"){
   box.appendChild(overlay); 
   document.body.appendChild(box); 
 } 
-function showOutOfStock(){ 
-  showAppMessage("This product is currently out of stock.","📦"); 
-} 
+
+function showOutOfStock(){ showAppMessage("This product is currently out of stock.","📦"); } 
+
 function showAuthError(message){ 
   const el=$("authError"); 
   el.textContent=message; 
@@ -617,9 +594,6 @@ function nativeGoogleLoginError(message){
 
 window.nativeGoogleLogin=nativeGoogleLogin; 
 window.nativeGoogleLoginError=nativeGoogleLoginError; 
-window.nativeLocationSuccess=nativeLocationSuccess; 
-window.nativeLocationReceived=nativeLocationReceived; 
-window.nativeLocationError=nativeLocationError; 
 
 function handleAuthAction(){ 
   if(currentUser) googleSignOut(); 
@@ -679,416 +653,6 @@ auth.onAuthStateChanged(user=>{
   hideLoading(); 
 }); 
 
-function openNativeEmail(email,subject){ 
-  const targetEmail=String(email||"topperstitching@gmail.com").trim(); 
-  const targetSubject=String(subject||"Support Request"); 
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)){ 
-    showAppMessage("The support email address is invalid.","⚠️"); 
-    return false; 
-  } 
-  const mailtoUrl="mailto:"+targetEmail+"?subject="+encodeURIComponent(targetSubject); 
-  try{ 
-    window.location.href=mailtoUrl; 
-  }catch(error){ 
-    showAppMessage("Unable to open an email app.","⚠️"); 
-  } 
-  return false; 
-} 
-
-function triggerSupport(type){ 
-  if(type==="ai_assistant") openAI("chat"); 
-} 
-
-/* ================= WHATSAPP STYLE LIVE CALL SYSTEM ================= */
-const OWNER_PEER_ID = "topper-stitching-owner";
-let customerPeer = null;
-let activeCall = null;
-let localAudioStream = null;
-let isMuted = false;
-let isSpeakerOn = true;
-
-const dialTone = $("dialToneAudio");
-
-function startWebRtcCall(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    showAppMessage("माइक्रोफ़ोन समर्थित नहीं है।","⚠️");
-    return;
-  }
-  
-  $("callScreenModal").style.display = "flex";
-  $("callStatusText").textContent = "रिंगिंग हो रही है... (Calling owner)";
-  
-  if(dialTone) { dialTone.currentTime = 0; dialTone.play().catch(e=>console.log(e)); }
-
-  navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(stream => {
-    localAudioStream = stream;
-    customerPeer = new Peer();
-    
-    let isConnected = false;
-
-    customerPeer.on('open', () => {
-      const call = customerPeer.call(OWNER_PEER_ID, stream);
-      activeCall = call;
-
-      const timeoutCheck = setTimeout(()=>{
-        if(!isConnected){
-          $("callStatusText").textContent = "ओनर व्यस्त हैं या कॉल अस्वीकृत कर दी (Owner is Busy / Rejected)";
-          if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-          setTimeout(endWebRtcCall, 3000);
-        }
-      }, 15000);
-
-      call.on('stream', remoteStream => {
-        isConnected = true;
-        clearTimeout(timeoutCheck);
-        if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-        const audio = $("customerAudio");
-        audio.srcObject = remoteStream;
-        audio.play().catch(e => console.log(e));
-        $("callStatusText").textContent = "कॉल कनेक्ट हो गई है 🟢";
-      });
-
-      call.on('close', () => {
-        if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-        $("callStatusText").textContent = "कॉल काट दी गई है / अस्वीकृत (Call Rejected)";
-        setTimeout(endWebRtcCall, 2500);
-      });
-    });
-
-    customerPeer.on('error', (err) => {
-      if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-      $("callStatusText").textContent = "ओनर अभी ऑनलाइन नहीं हैं (Owner Offline)";
-      setTimeout(endWebRtcCall, 3000);
-    });
-
-  }).catch(err => {
-    if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-    $("callStatusText").textContent = "माइक्रोफ़ोन की अनुमति अस्वीकृत।";
-    setTimeout(endWebRtcCall, 3000);
-  });
-}
-
-function endWebRtcCall(){
-  if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }
-  if(activeCall) { try{ activeCall.close(); }catch(e){} }
-  if(customerPeer) { try{ customerPeer.destroy(); }catch(e){} }
-  if(localAudioStream) {
-    localAudioStream.getTracks().forEach(track => track.stop());
-  }
-  activeCall = null;
-  customerPeer = null;
-  localAudioStream = null;
-  isMuted = false;
-  isSpeakerOn = true;
-  $("muteBtn").classList.remove("active");
-  $("speakerBtn").classList.remove("active");
-  $("callScreenModal").style.display = "none";
-}
-
-function toggleMute(){
-  if(!localAudioStream) return;
-  isMuted = !isMuted;
-  localAudioStream.getAudioTracks().forEach(track => {
-    track.enabled = !isMuted;
-  });
-  $("muteBtn").classList.toggle("active", isMuted);
-}
-
-function toggleSpeaker(){
-  isSpeakerOn = !isSpeakerOn;
-  const audio = $("customerAudio");
-  audio.volume = isSpeakerOn ? 1.0 : 0.05;
-  $("speakerBtn").classList.toggle("active", !isSpeakerOn);
-}
-
-function setProfileAvatar(src){ 
-  const img=$("profilePageImg"); 
-  if(img) img.src=src; 
-  const topPic=document.querySelector("#authBtn .user-pic"); 
-  if(topPic) topPic.src=src; 
-} 
-function openAvatarPicker(){ $("avatarModal").style.display="block"; } 
-function closeAvatarPicker(){ $("avatarModal").style.display="none"; } 
-function selectAvatar(fileName){ 
-  try{localStorage.setItem("topperProfileAvatar",fileName);}catch(e){} 
-  setProfileAvatar(fileName); 
-  closeAvatarPicker(); 
-} 
-
-function openPolicyModal(type){ 
-  if(type==="terms"){ 
-    $("policyModalTitle").textContent="Terms and Conditions"; 
-    $("policyModalText").textContent= "1. Product descriptions and prices are displayed on the website.\n"+ "2. Please provide accurate contact details and a complete delivery address.\n"+ "3. Home delivery is available only in Gopalganj district, Bihar.\n"+ "4. Keep your Google account and personal information secure.\n"+ "5. Orders are subject to confirmation and applicable laws.\n"+ "6. Contact topperstitching@gmail.com for assistance."; 
-  }else{ 
-    $("policyModalTitle").textContent="Refund Policy"; 
-    $("policyModalText").textContent= "Refund requests are accepted only until delivery is completed. Once an order has been delivered, refund requests will not be accepted, except where required by applicable law. For assistance, contact topperstitching@gmail.com."; 
-  } 
-  $("policyModal").style.display="block"; 
-} 
-function closePolicyModal(){ $("policyModal").style.display="none"; } 
-
-function switchTab(viewId,btnEl){ 
-  document.querySelectorAll(".view-section").forEach(v=>v.classList.remove("active-view")); 
-  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active")); 
-  const view=$(viewId); 
-  if(view) view.classList.add("active-view"); 
-  if(btnEl) btnEl.classList.add("active"); 
-} 
-
-function setUserLocation(lat,lon){ 
-  const latitude=Number(lat); 
-  const longitude=Number(lon); 
-  if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return; 
-  userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude; 
-  locationReady=true; 
-  locationRequestBusy=false; 
-  $("locationStatus").textContent="Live location is available."; 
-  saveOrderDraft(); 
-} 
-function nativeLocationSuccess(lat,lon){ setUserLocation(lat,lon); } 
-function nativeLocationReceived(locationUrl){ 
-  if(typeof locationUrl==="string"&&locationUrl.trim()){ 
-    userLocationLink=locationUrl; 
-    locationReady=true; 
-    locationRequestBusy=false; 
-    $("locationStatus").textContent="Live location is available."; 
-    saveOrderDraft(); 
-  } 
-} 
-function nativeLocationError(message){ 
-  locationRequestBusy=false; 
-  $("locationStatus").textContent=String(message||"Unable to get your location."); 
-} 
-function requestUserLocation(){ 
-  if(locationReady||locationRequestBusy) return; 
-  locationRequestBusy=true; 
-  $("locationStatus").textContent="Getting your live location..."; 
-  if(window.AndroidApp&&typeof window.AndroidApp.getLocation==="function"){ 
-    try{ window.AndroidApp.getLocation(); return; }catch(e){ locationRequestBusy=false; return; } 
-  } 
-  if(!navigator.geolocation){ 
-    locationRequestBusy=false; 
-    $("locationStatus").textContent="Location is not available on this device."; 
-    return; 
-  } 
-  navigator.geolocation.getCurrentPosition( 
-    pos=>setUserLocation(pos.coords.latitude,pos.coords.longitude), 
-    ()=>{ locationRequestBusy=false; $("locationStatus").textContent="Allow location permission and try again."; }, 
-    {enableHighAccuracy:true,timeout:20000,maximumAge:0} 
-  ); 
-} 
-
-const tableColors=["Light Wooden","Grey Wooden","Light Dark Wooden","Dark Wooden"]; 
-const tableSliderTrack=$("tableSlider"); 
-if(tableSliderTrack){ 
-  tableSliderTrack.addEventListener("scroll",()=>{ 
-    const width=tableSliderTrack.clientWidth||1; 
-    const index=Math.round(tableSliderTrack.scrollLeft/width); 
-    if(tableColors[index]){ $("selectedTableColorText").textContent=tableColors[index]; } 
-  }); 
-} 
-function slideImages(id,direction){ 
-  const track=$(id); 
-  if(track) track.scrollBy({left:direction*track.clientWidth,behavior:"smooth"}); 
-} 
-function getSelectedTableColor(){ 
-  const track=$("tableSlider"); 
-  if(!track) return tableColors[0]; 
-  const index=Math.round(track.scrollLeft/(track.clientWidth||1)); 
-  return tableColors[index]||tableColors[0]; 
-} 
-
-function requireLogin(){ 
-  if(currentUser) return true; 
-  showAppMessage("Please sign in with Google before placing an order.","🔐"); 
-  switchTab("profileView",document.querySelectorAll(".nav-item")[3]); 
-  return false; 
-} 
-
-function loadCart(){ 
-  try{ 
-    const saved=localStorage.getItem("topper_cart"); 
-    if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed)) cart=parsed; } 
-  }catch(e){ cart=[]; } 
-  cart.forEach(i=>{ const p=PRODUCT_PRICES[baseProductName(i.name)]; if(p) i.price=p; });
-  updateCartUI(); 
-} 
-function saveCart(){ 
-  try{ localStorage.setItem("topper_cart",JSON.stringify(cart)); }catch(e){} 
-  updateCartUI(); 
-} 
-function toggleCart(name,price,btnEl){ 
-  const index=cart.findIndex(item=>item.name===name); 
-  if(index>-1){ 
-    cart.splice(index,1); 
-    saveCart(); 
-    showAppMessage("Item removed from your cart.","ℹ️"); 
-  }else{ 
-    cart.push({name:name,price:Number(price),qty:1}); 
-    saveCart(); 
-    showAppMessage("Item added to your cart.","✅"); 
-  } 
-} 
-function addTableToCart(btnEl){ 
-  toggleCart("Sewing Machine Top Table ["+getSelectedTableColor()+"]",4500,btnEl); 
-} 
-function updateAllHomepageButtons(){ 
-  document.querySelectorAll(".btn-cart").forEach(btn=>{ 
-    const text=btn.getAttribute("onclick")||""; 
-    const match=text.match(/toggleCart\('([^']+)'/); 
-    const pName=match?match[1]:null; 
-    if(!pName) return; 
-    const found=cart.some(i=>i.name===pName); 
-    btn.textContent=found?"❌ Remove from Cart":"🛒 Add to Cart"; 
-    btn.classList.toggle("in-cart",found); 
-  }); 
-} 
-function updateCartUI(){ 
-  const list=$("cartItemsList"); 
-  const badge=$("cartCountBadge"); 
-  const summary=$("cartSummary"); 
-  let totalQty=0; 
-  let totalPrice=0; 
-  if(!cart.length){ 
-    list.innerHTML='<p class="empty-orders">🛒 Your cart is empty.</p>'; 
-    summary.style.display="none"; 
-    badge.style.display="none"; 
-    updateAllHomepageButtons(); 
-    return; 
-  } 
-  list.innerHTML=""; 
-  cart.forEach((item,index)=>{ 
-    const qty=Math.max(1,Number(item.qty)||1); 
-    const price=Math.max(0,Number(item.price)||0); 
-    totalQty+=qty; 
-    totalPrice+=price*qty; 
-    const div=document.createElement("div"); 
-    div.className="cart-item"; 
-    div.innerHTML= '<div><b>'+escapeHtml(item.name)+'</b>'+ '<div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+price.toLocaleString("en-IN")+'</div>'+ '<div class="cart-controls"><button class="cart-btn-qty" onclick="updateQty('+index+',-1)">-</button>'+ '<span>'+qty+'</span><button class="cart-btn-qty" onclick="updateQty('+index+',1)">+</button></div></div>'+ '<div style="text-align:right"><b>₹'+(price*qty).toLocaleString("en-IN")+'</b>'+ '<br><button class="cart-btn-remove" onclick="removeFromCart('+index+')">Remove</button></div>'; 
-    list.appendChild(div); 
-  }); 
-  badge.textContent=totalQty; 
-  badge.style.display="inline-block"; 
-  $("cartTotalPrice").textContent=totalPrice.toLocaleString("en-IN"); 
-  summary.style.display="block"; 
-  updateAllHomepageButtons(); 
-} 
-function updateQty(index,delta){ 
-  if(!cart[index]) return; 
-  cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta); 
-  saveCart(); 
-} 
-function removeFromCart(index){ 
-  if(!cart[index]) return; 
-  cart.splice(index,1); 
-  saveCart(); 
-  showAppMessage("Item removed from your cart.","ℹ️"); 
-} 
-function checkoutCart(){ 
-  if(!requireLogin()||!cart.length) return; 
-  const names=cart.map(i=>i.name+" (x"+i.qty+")").join(", "); 
-  const total=cart.reduce((sum,i)=>sum+(Number(i.price)*Number(i.qty)),0); 
-  prepareNewPayment("Cart Items: "+names,total); 
-} 
-
-function saveOrderDraft(){ 
-  try{ 
-    const draft={ 
-      isOpen:$("orderModal").style.display==="block", 
-      selectedProduct:selectedProduct, 
-      selectedPrice:selectedPrice, 
-      customerName:$("custName").value, 
-      customerPhone:$("custPhone").value, 
-      customerAddress:$("custAddress").value, 
-      termsChecked:$("termsCheck").checked, 
-      locationLink:userLocationLink, 
-      savedAt:Date.now() 
-    }; 
-    localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(draft)); 
-  }catch(e){} 
-} 
-function clearOrderDraft(){ try{ localStorage.removeItem(ORDER_DRAFT_KEY); }catch(e){} } 
-function restoreOrderDraft(){ 
-  try{ 
-    const saved=localStorage.getItem(ORDER_DRAFT_KEY); 
-    if(!saved) return; 
-    const draft=JSON.parse(saved); 
-    if(!draft||!draft.isOpen) return; 
-    selectedProduct=String(draft.selectedProduct||""); 
-    selectedPrice=String(draft.selectedPrice||""); 
-    $("custName").value=draft.customerName||""; 
-    $("custPhone").value=draft.customerPhone||""; 
-    $("custAddress").value=draft.customerAddress||""; 
-    $("termsCheck").checked=Boolean(draft.termsChecked); 
-    userLocationLink=draft.locationLink||""; 
-    locationReady=Boolean(userLocationLink); 
-    $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN"); 
-    $("upiPayAmount").textContent=Number(selectedPrice||0).toLocaleString("en-IN"); 
-    $("orderModal").style.display="block"; 
-    validatePhone(false); 
-  }catch(e){} 
-} 
-
-function prepareNewPayment(productName,price){ 
-  selectedProduct=String(productName); 
-  selectedPrice=String(price); 
-  $("custName").value=currentUser?.displayName||""; 
-  $("custPhone").value=""; 
-  $("custAddress").value=""; 
-  $("termsCheck").checked=false; 
-  $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN"); 
-  $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN"); 
-  $("orderModal").style.display="block"; 
-  saveOrderDraft(); 
-  requestUserLocation(); 
-} 
-function openOrderForm(productName,price){ 
-  if(requireLogin()) prepareNewPayment(productName,price); 
-} 
-function openTableOrderForm(){ 
-  if(requireLogin()){ 
-    prepareNewPayment("Sewing Machine Top Table ["+getSelectedTableColor()+"]",4500); 
-  } 
-} 
-function cancelOrderForm(){ 
-  $("orderModal").style.display="none"; 
-  clearOrderDraft(); 
-} 
-
-["custName","custPhone","custAddress","termsCheck"].forEach(id=>{ 
-  const el=$(id); 
-  if(!el) return; 
-  el.addEventListener("input",()=>{ 
-    if(id==="custPhone") validatePhone(false); 
-    saveOrderDraft(); 
-  }); 
-  el.addEventListener("change",saveOrderDraft); 
-}); 
-
-function normalizeIndianPhone(value){ 
-  let digits=String(value||"").replace(/\D/g,""); 
-  if(digits.length===12&&digits.startsWith("91")){ digits=digits.slice(2); } 
-  else if(digits.length===11&&digits.startsWith("0")){ digits=digits.slice(1); } 
-  return digits; 
-} 
-function validatePhone(showMessage=true){ 
-  const input=$("custPhone"); 
-  const status=$("phoneStatus"); 
-  const normalized=normalizeIndianPhone(input.value); 
-  const valid=/^[6-9]\d{9}$/.test(normalized); 
-  if(!input.value.trim()){ 
-    status.textContent="Enter a valid mobile number."; 
-    status.style.color="#666"; 
-  }else if(valid){ 
-    status.textContent="✓ Mobile number format is valid."; 
-    status.style.color="#2e7d32"; 
-  }else{ 
-    status.textContent="Enter a valid mobile number."; 
-    status.style.color="#d32f2f"; 
-  } 
-  return valid; 
-} 
-
 function getDefaultDeliveryDate() {
   const d = new Date();
   d.setDate(d.getDate() + 10);
@@ -1098,7 +662,7 @@ function getDefaultDeliveryDate() {
   return `${day}/${month}/${year}`;
 }
 
-/* ================= PAYMENT (Cashfree, confirmed by the server) ================= */
+/* ================= CASHFREE DROP CHECKOUT INTEGRATION ================= */
 const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";
 const PRODUCT_PRICES={
   "Topper SV Tailor":4500,
@@ -1108,16 +672,8 @@ const PRODUCT_PRICES={
   "Sewing Machine Top Table":4500,
   "Topper Karhai (130K)":7500
 };
-const PRODUCT_LINKS={
-  "Topper Karhai (130K)":"https://payments.cashfree.com/links?code=Tb5bcm8bhsqg_AAAAAAAWYg8",
-  "Sewing Machine Top Table":"https://payments.cashfree.com/links?code=yb5bcjjtjsqg_AAAAAAAWYg8",
-  "Topper TA1 Model":"https://payments.cashfree.com/links?code=Yb5bcf6rv5k0_AAAAAAAWYg8",
-  "Bag Closer Single Needle":"https://payments.cashfree.com/links?code=kb5bc7rhj5k0_AAAAAAAWYg8",
-  "Topper SV Tailor Deluxe":"https://payments.cashfree.com/links?code=Fb5bc52bjsqg_AAAAAAAWYg8",
-  "Topper SV Tailor":"https://payments.cashfree.com/links?code=Qb5bbh7adsqg_AAAAAAAWYg8"
-};
-let latestOrders=[];
-let lastVerifyAt=0;
+
+const cashfree = Cashfree({ mode: "production" });
 
 function baseProductName(n){ return String(n||"").replace(/\s*\[.*\]\s*$/,"").trim(); }
 function buildOrderItems(){
@@ -1207,7 +763,7 @@ async function submitOnlineOrder(){
 
 async function startPayment(orderId,items){
   if(!currentUser){ requireLogin(); return; }
-  showLoading("Opening secure payment...");
+  showLoading("Opening Direct Payment Apps...");
   try{
     const idToken=await currentUser.getIdToken();
     const res=await fetch(PAY_API_BASE+"/pay/create",{
@@ -1216,35 +772,28 @@ async function startPayment(orderId,items){
       body:JSON.stringify({orderId:orderId})
     });
     let data={}; try{ data=await res.json(); }catch(e){}
-    if(res.ok&&data.paid){ hideLoading(); showAppMessage("This order is already paid.","✅"); return; }
-    if(res.ok&&data.url){ window.location.href=data.url; return; }
-    if(res.status===503){ fallbackStaticPayment(items); return; }
-    throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
+    hideLoading();
+
+    if(res.ok && data.payment_session_id){
+      let checkoutOptions = {
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self"
+      };
+      cashfree.checkout(checkoutOptions);
+    } else {
+      throw new Error((data && data.error && data.error.message) || ("HTTP " + res.status));
+    }
   }catch(e){
     hideLoading();
-    showAppMessage("Could not open the payment page.\n"+(e.message||e)+"\n\nYour order is saved. Open My Orders and tap Pay now to try again.","❌");
-  }finally{
-    hideLoading();
+    showAppMessage("Could not open payment: "+(e.message||e), "❌");
   }
-}
-
-function fallbackStaticPayment(items){
-  hideLoading();
-  if(items&&items.length===1&&Number(items[0].qty)===1){
-    const link=PRODUCT_LINKS[baseProductName(items[0].name)];
-    if(link){
-      showAppMessage("Automatic payment check is not active yet. Pay on the next page; the store will confirm your payment manually.","ℹ️");
-      setTimeout(()=>{ window.location.href=link; },2200);
-      return;
-    }
-  }
-  showAppMessage("Online payment is being set up. Your order is saved. Please try again later from My Orders.","⚠️");
 }
 
 function payNowForOrder(orderId){
   const o=latestOrders.find(x=>x._id===orderId);
   startPayment(orderId,o&&o.items);
 }
+
 async function verifyOrder(orderId,manual){
   if(!currentUser) return;
   try{
@@ -1261,7 +810,12 @@ async function verifyOrder(orderId,manual){
     }
   }catch(e){ if(manual) showAppMessage("Could not check the payment right now.","⚠️"); }
 }
+
 function checkPaymentNow(orderId){ verifyOrder(orderId,true); }
+
+let latestOrders=[];
+let lastVerifyAt=0;
+
 function verifyPendingOrders(){
   if(!currentUser||Date.now()-lastVerifyAt<8000) return;
   const pending=latestOrders.filter(o=>o.paymentStatus==="pending"&&o.cfLinkId);
@@ -1314,33 +868,14 @@ function loadUserOrders(userId){
 
       let timelineHtml = "";
       if (isFailed) {
-        timelineHtml = `
-          <div class="tracker-timeline">
-            <div class="tracker-step failed">
-              <div class="tracker-dot"></div>
-              <span>❌ Order Failed</span>
-            </div>
-          </div>
-        `;
+        timelineHtml = `<div class="tracker-timeline"><div class="tracker-step failed"><div class="tracker-dot"></div><span>❌ Order Failed</span></div></div>`;
       } else {
         timelineHtml = `
           <div class="tracker-timeline">
-            <div class="tracker-step ${isStep1 ? 'completed' : ''}">
-              <div class="tracker-dot"></div>
-              <span> Order placed</span>
-            </div>
-            <div class="tracker-step ${isStep2 ? 'completed' : ''}">
-              <div class="tracker-dot"></div>
-              <span> Payment successful</span>
-            </div>
-            <div class="tracker-step ${isStep3 ? 'completed' : ''}">
-              <div class="tracker-dot"></div>
-              <span> Preparing for delivery</span>
-            </div>
-            <div class="tracker-step ${isStep4 ? 'completed' : ''}">
-              <div class="tracker-dot"></div>
-              <span> Order delivered (Delivered on: ${delDateStr})</span>
-            </div>
+            <div class="tracker-step ${isStep1 ? 'completed' : ''}"><div class="tracker-dot"></div><span> Order placed</span></div>
+            <div class="tracker-step ${isStep2 ? 'completed' : ''}"><div class="tracker-dot"></div><span> Payment successful</span></div>
+            <div class="tracker-step ${isStep3 ? 'completed' : ''}"><div class="tracker-dot"></div><span> Preparing for delivery</span></div>
+            <div class="tracker-step ${isStep4 ? 'completed' : ''}"><div class="tracker-dot"></div><span> Order delivered (Delivered on: ${delDateStr})</span></div>
           </div>
         `;
       }
@@ -1377,136 +912,192 @@ function loadUserOrders(userId){
   },error=>{ 
     $("ordersList").textContent="Unable to load orders: "+(error.message||error); 
   }); 
+}
+
+/* ================= OTHER UTILS & AI ================= */
+function setProfileAvatar(src){ 
+  const img=$("profilePageImg"); if(img) img.src=src; 
+  const topPic=document.querySelector("#authBtn .user-pic"); if(topPic) topPic.src=src; 
+} 
+function openAvatarPicker(){ $("avatarModal").style.display="block"; } 
+function closeAvatarPicker(){ $("avatarModal").style.display="none"; } 
+function selectAvatar(fileName){ 
+  try{localStorage.setItem("topperProfileAvatar",fileName);}catch(e){} 
+  setProfileAvatar(fileName); closeAvatarPicker(); 
 } 
 
-setProfileAvatar(getSavedAvatar()); 
-loadCart(); 
+function openPolicyModal(type){ 
+  if(type==="terms"){ 
+    $("policyModalTitle").textContent="Terms and Conditions"; 
+    $("policyModalText").textContent= "1. Product descriptions and prices are displayed on the website.\n2. Please provide accurate contact details and a complete delivery address.\n3. Home delivery is available only in Gopalganj district, Bihar.\n4. Keep your Google account and personal information secure."; 
+  }else{ 
+    $("policyModalTitle").textContent="Refund Policy"; 
+    $("policyModalText").textContent= "Refund requests are accepted only until delivery is completed. For assistance, contact topperstitching@gmail.com."; 
+  } 
+  $("policyModal").style.display="block"; 
+} 
+function closePolicyModal(){ $("policyModal").style.display="none"; } 
+
+function switchTab(viewId,btnEl){ 
+  document.querySelectorAll(".view-section").forEach(v=>v.classList.remove("active-view")); 
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active")); 
+  const view=$(viewId); if(view) view.classList.add("active-view"); 
+  if(btnEl) btnEl.classList.add("active"); 
+} 
+
+function setUserLocation(lat,lon){ 
+  const latitude=Number(lat); const longitude=Number(lon); 
+  if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return; 
+  userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude; 
+  locationReady=true; locationRequestBusy=false; 
+  $("locationStatus").textContent="Live location is available."; saveOrderDraft(); 
+} 
+function requestUserLocation(){ 
+  if(locationReady||locationRequestBusy) return; 
+  locationRequestBusy=true; 
+  $("locationStatus").textContent="Getting your live location..."; 
+  if(!navigator.geolocation){ 
+    locationRequestBusy=false; $("locationStatus").textContent="Location not supported."; return; 
+  } 
+  navigator.geolocation.getCurrentPosition( 
+    pos=>setUserLocation(pos.coords.latitude,pos.coords.longitude), 
+    ()=>{ locationRequestBusy=false; $("locationStatus").textContent="Permission denied."; }, 
+    {enableHighAccuracy:true,timeout:20000,maximumAge:0} 
+  ); 
+} 
+
+const tableColors=["Light Wooden","Grey Wooden","Light Dark Wooden","Dark Wooden"]; 
+const tableSliderTrack=$("tableSlider"); 
+if(tableSliderTrack){ 
+  tableSliderTrack.addEventListener("scroll",()=>{ 
+    const width=tableSliderTrack.clientWidth||1; 
+    const index=Math.round(tableSliderTrack.scrollLeft/width); 
+    if(tableColors[index]){ $("selectedTableColorText").textContent=tableColors[index]; } 
+  }); 
+} 
+function slideImages(id,direction){ 
+  const track=$(id); if(track) track.scrollBy({left:direction*track.clientWidth,behavior:"smooth"}); 
+} 
+function getSelectedTableColor(){ 
+  const track=$("tableSlider"); if(!track) return tableColors[0]; 
+  const index=Math.round(track.scrollLeft/(track.clientWidth||1)); 
+  return tableColors[index]||tableColors[0]; 
+} 
+
+function requireLogin(){ 
+  if(currentUser) return true; 
+  showAppMessage("Please sign in with Google before placing an order.","🔐"); 
+  switchTab("profileView",document.querySelectorAll(".nav-item")[3]); 
+  return false; 
+} 
+
+function loadCart(){ 
+  try{ const saved=localStorage.getItem("topper_cart"); if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed)) cart=parsed; } }catch(e){ cart=[]; } 
+  updateCartUI(); 
+} 
+function saveCart(){ try{ localStorage.setItem("topper_cart",JSON.stringify(cart)); }catch(e){} updateCartUI(); } 
+function toggleCart(name,price,btnEl){ 
+  const index=cart.findIndex(item=>item.name===name); 
+  if(index>-1){ cart.splice(index,1); saveCart(); showAppMessage("Item removed from your cart.","ℹ️"); } 
+  else{ cart.push({name:name,price:Number(price),qty:1}); saveCart(); showAppMessage("Item added to your cart.","✅"); } 
+} 
+function addTableToCart(btnEl){ toggleCart("Sewing Machine Top Table ["+getSelectedTableColor()+"]",4500,btnEl); } 
+function updateAllHomepageButtons(){ 
+  document.querySelectorAll(".btn-cart").forEach(btn=>{ 
+    const text=btn.getAttribute("onclick")||""; 
+    const match=text.match(/toggleCart\('([^']+)'/); 
+    const pName=match?match[1]:null; if(!pName) return; 
+    const found=cart.some(i=>i.name===pName); 
+    btn.textContent=found?"❌ Remove from Cart":"🛒 Add to Cart"; 
+    btn.classList.toggle("in-cart",found); 
+  }); 
+} 
+function updateCartUI(){ 
+  const list=$("cartItemsList"); const badge=$("cartCountBadge"); const summary=$("cartSummary"); 
+  let totalQty=0; let totalPrice=0; 
+  if(!cart.length){ 
+    list.innerHTML='<p class="empty-orders">🛒 Your cart is empty.</p>'; summary.style.display="none"; badge.style.display="none"; updateAllHomepageButtons(); return; 
+  } 
+  list.innerHTML=""; 
+  cart.forEach((item,index)=>{ 
+    const qty=Math.max(1,Number(item.qty)||1); const price=Math.max(0,Number(item.price)||0); 
+    totalQty+=qty; totalPrice+=price*qty; 
+    const div=document.createElement("div"); div.className="cart-item"; 
+    div.innerHTML= '<div><b>'+escapeHtml(item.name)+'</b><div style="color:#2e7d32;font-weight:bold;margin-top:2px">₹'+price.toLocaleString("en-IN")+'</div><div class="cart-controls"><button class="cart-btn-qty" onclick="updateQty('+index+',-1)">-</button><span>'+qty+'</span><button class="cart-btn-qty" onclick="updateQty('+index+',1)">+</button></div></div><div style="text-align:right"><b>₹'+(price*qty).toLocaleString("en-IN")+'</b><br><button class="cart-btn-remove" onclick="removeFromCart('+index+')">Remove</button></div>'; 
+    list.appendChild(div); 
+  }); 
+  badge.textContent=totalQty; badge.style.display="inline-block"; 
+  $("cartTotalPrice").textContent=totalPrice.toLocaleString("en-IN"); summary.style.display="block"; updateAllHomepageButtons(); 
+} 
+function updateQty(index,delta){ if(!cart[index]) return; cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta); saveCart(); } 
+function removeFromCart(index){ if(!cart[index]) return; cart.splice(index,1); saveCart(); showAppMessage("Item removed from your cart.","ℹ️"); } 
+function checkoutCart(){ 
+  if(!requireLogin()||!cart.length) return; 
+  const total=cart.reduce((sum,i)=>sum+(Number(i.price)*Number(i.qty)),0); 
+  prepareNewPayment("Cart Items ("+cart.length+" items)",total,cart); 
+} 
+
+function saveOrderDraft(){ 
+  try{ 
+    const draft={ 
+      isOpen:$("orderModal").style.display==="block", 
+      selectedProduct:selectedProduct, selectedPrice:selectedPrice, 
+      customerName:$("custName").value, customerPhone:$("custPhone").value, 
+      customerAddress:$("custAddress").value, termsChecked:$("termsCheck").checked, 
+      locationLink:userLocationLink, savedAt:Date.now() 
+    }; 
+    localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(draft)); 
+  }catch(e){} 
+} 
+function clearOrderDraft(){ try{ localStorage.removeItem(ORDER_DRAFT_KEY); }catch(e){} } 
+function restoreOrderDraft(){ 
+  try{ 
+    const saved=localStorage.getItem(ORDER_DRAFT_KEY); if(!saved) return; 
+    const draft=JSON.parse(saved); if(!draft||!draft.isOpen) return; 
+    selectedProduct=String(draft.selectedProduct||""); selectedPrice=String(draft.selectedPrice||""); 
+    $("custName").value=draft.customerName\vert{}\vert{}""; $("custPhone").value=draft.customerPhone||""; 
+    $("custAddress").value=draft.customerAddress\vert{}\vert{}""; $("termsCheck").checked=Boolean(draft.termsChecked); 
+    userLocationLink=draft.locationLink||""; locationReady=Boolean(userLocationLink); 
+    $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN"); 
+    $("upiPayAmount").textContent=Number(selectedPrice||0).toLocaleString("en-IN"); 
+    $("orderModal").style.display="block"; validatePhone(false); 
+  }catch(e){} 
+} 
+
+function prepareNewPayment(productName,price,itemsArr){ 
+  selectedProduct=String(productName); selectedPrice=Number(price); 
+  window.currentOrderItems=itemsArr||[{name:productName, price:selectedPrice, qty:1}]; 
+  $("custName").value=currentUser?.displayName||""; $("custPhone").value=""; $("custAddress").value=""; 
+  $("termsCheck").checked=false; 
+  $("modalProductInfo").textContent=selectedProduct+" - ₹"+selectedPrice.toLocaleString("en-IN"); 
+  $("upiPayAmount").textContent=selectedPrice.toLocaleString("en-IN"); 
+  $("orderModal").style.display="block"; requestUserLocation(); 
+} 
+function openOrderForm(productName,price){ if(requireLogin()) prepareNewPayment(productName,price,[{name:productName, price:price, qty:1}]); } 
+function openTableOrderForm(){ 
+  if(requireLogin()){ const name="Sewing Machine Top Table ["+getSelectedTableColor()+"]"; prepareNewPayment(name,4500,[{name:name, price:4500, qty:1}]); } 
+} 
+function cancelOrderForm(){ $("orderModal").style.display="none"; clearOrderDraft(); } 
+
+function normalizeIndianPhone(value){ 
+  let digits=String(value||"").replace(/\D/g,""); 
+  if(digits.length===12&&digits.startsWith("91")){ digits=digits.slice(2); } 
+  else if(digits.length===11&&digits.startsWith("0")){ digits=digits.slice(1); } 
+  return digits; 
+} 
+
+function validatePhone(showMessage=true){ 
+  const input=$("custPhone"); const status=$("phoneStatus"); 
+  const normalized=normalizeIndianPhone(input.value); 
+  const valid=/^[6-9]\d{9}$/.test(normalized); 
+  if(!input.value.trim()){ status.textContent="Enter a valid mobile number."; status.style.color="#666"; } 
+  else if(valid){ status.textContent="✓ Mobile number format is valid."; status.style.color="#2e7d32"; } 
+  else{ status.textContent="Enter a valid mobile number."; status.style.color="#d32f2f"; } 
+  return valid; 
+} 
+
+setProfileAvatar(getSavedAvatar()); loadCart(); 
 document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); }); 
-</script>
-
-<!-- AI ASSISTANT -->
-<script>
-"use strict";
-const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
-const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";
-
-const aiHistory = [];
-let aiLoadedFor = null;
-let aiBusy = false;
-let aiWarned = false;
-let aiClearArmed = null;
-
-function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
-function addAIMsg(role,text){
-  const d=document.createElement("div");
-  d.className="ai-msg "+role;
-  d.textContent=text;
-  $("aiMessages").appendChild(d);
-  aiScroll();
-  return d;
-}
-function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
-function localKey(){ return "topper_ai_chat_"+aiOwner(); }
-function localRead(){ try{ return JSON.parse(localStorage.getItem(localKey())||"[]"); }catch(e){ return []; } }
-function localWrite(arr){ try{ localStorage.setItem(localKey(),JSON.stringify(arr.slice(-50))); }catch(e){} }
-function persistMsg(role,text){
-  const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
-  const cache=localRead(); cache.push(rec); localWrite(cache);
-}
-
-async function loadAIChat(){
-  const owner=aiOwner();
-  if(aiLoadedFor===owner) return;
-  aiLoadedFor=owner;
-  $("aiMessages").innerHTML="";
-  aiHistory.length=0;
-  const items=localRead();
-  if(!items.length){ addAIMsg("bot",AI_GREETING); return; }
-  items.forEach(m=>{
-    const r=m.role==="user"?"user":"bot";
-    addAIMsg(r,m.text);
-    aiHistory.push({role:r==="user"?"user":"model",parts:[{text:m.text}]});
-  });
-}
-
-function clearAIChat(){
-  const btn=$("aiClearBtn");
-  if(aiClearArmed===null){
-    btn.textContent="Delete?";
-    aiClearArmed=setTimeout(()=>{ aiClearArmed=null; btn.textContent="🗑"; },3000);
-    return;
-  }
-  clearTimeout(aiClearArmed); aiClearArmed=null; btn.textContent="🗑";
-  try{ localStorage.removeItem(localKey()); }catch(e){}
-  aiLoadedFor=null;
-  loadAIChat();
-}
-
-async function openAI(mode){
-  $("aiPanel").style.display="flex";
-  await loadAIChat();
-  if(mode==="chat") setTimeout(()=>{ try{$("aiInput").focus();}catch(e){} },200);
-}
-function closeAI(){ $("aiPanel").style.display="none"; }
-$("aiInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendAIText(); } });
-
-async function sendAIText(){
-  const input=$("aiInput");
-  const text=input.value.trim();
-  if(!text||aiBusy) return;
-  input.value="";
-  addAIMsg("user",text);
-  persistMsg("user",text);
-
-  aiBusy=true;
-  $("aiSendBtn").disabled=true;
-  const typing=addAIMsg("bot typing","Typing...");
-  aiHistory.push({role:"user",parts:[{text:text}]});
-  let bubble=null, reply="";
-  try{
-    if(!currentUser) throw new Error("Please sign in with Google to use AI.");
-    const idToken=await currentUser.getIdToken();
-    const res=await fetch(AI_API_BASE+"/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},
-      body:JSON.stringify({contents:aiHistory.slice(-20)})
-    });
-    if(!res.ok) throw new Error("AI service error.");
-    const reader=res.body.getReader();
-    const dec=new TextDecoder();
-    let buf="";
-    while(true){
-      const r=await reader.read();
-      if(r.done) break;
-      buf+=dec.decode(r.value,{stream:true});
-      let idx;
-      while((idx=buf.indexOf("\n\n"))>=0){
-        const ev=buf.slice(0,idx);
-        buf=buf.slice(idx+2);
-        if(ev.indexOf("data:")!==0) continue;
-        let obj; try{ obj=JSON.parse(ev.slice(5).trim()); }catch(e){ continue; }
-        const parts=(obj.candidates&&obj.candidates[0]&&obj.candidates[0].content&&obj.candidates[0].content.parts)||[];
-        const chunk=parts.filter(p=>!p.thought).map(p=>p.text||"").join("");
-        if(!chunk) continue;
-        reply+=chunk;
-        if(!bubble){ typing.remove(); bubble=addAIMsg("bot",""); }
-        bubble.textContent=reply;
-        aiScroll();
-      }
-    }
-    reply=reply.trim();
-    if(bubble) bubble.textContent=reply;
-    aiHistory.push({role:"model",parts:[{text:reply}]});
-    persistMsg("bot",reply);
-  }catch(err){
-    typing.remove();
-    if(bubble) bubble.remove();
-    addAIMsg("sys","AI could not reply right now.");
-  }finally{
-    aiBusy=false;
-    $("aiSendBtn").disabled=false;
-  }
-}
 </script>
 </body>
 </html>
