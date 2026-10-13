@@ -362,7 +362,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div id="profileView" class="view-section">
   <div class="profile-container">
     <div style="text-align:center;margin-bottom:15px">
-      <img id="profilePageImg" src="m1.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">
+      <img id="profilePageImg" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">
       <div style="font-size:11px;color:#666;margin-top:4px">Tap photo to change avatar</div>
       <h3 id="profileName" style="color:#1a237e;margin-top:8px">Guest User</h3>
       <p id="profileEmail" style="font-size:13px;color:#666">Google Account Not Connected</p>
@@ -1123,7 +1123,6 @@ const PRODUCT_PRICES={
   "Sewing Machine Top Table":4500,
   "Topper Karhai (130K)":7500
 };
-// Fixed payment links. Used ONLY if the verified payment service is not active; then the store checks the payment by hand.
 const PRODUCT_LINKS={
   "Topper Karhai (130K)":"https://payments.cashfree.com/links?code=Tb5bcm8bhsqg_AAAAAAAWYg8",
   "Sewing Machine Top Table":"https://payments.cashfree.com/links?code=yb5bcjjtjsqg_AAAAAAAWYg8",
@@ -1237,7 +1236,8 @@ async function startPayment(orderId,items){
       if(typeof Cashfree!=="function") throw new Error("Payment library could not load. Check your internet and try again.");
       hideLoading();
       const cf=Cashfree({mode:data.mode==="sandbox"?"sandbox":"production"});
-      cf.checkout({paymentSessionId:data.payment_session_id,redirectTarget:"_self"});
+      // Yahan redirectTarget ko "_top" kar diya hai taaki UPI Intent options proper trigger ho sakein
+      cf.checkout({paymentSessionId:data.payment_session_id,redirectTarget:"_top"});
       return;
     }
     if(res.ok&&data.url){ window.location.href=data.url; return; }
@@ -1402,7 +1402,11 @@ function loadUserOrders(userId){
   }); 
 } 
 
-setProfileAvatar(getSavedAvatar()); 
+// User profile image fix
+const defaultAvatar = getSavedAvatar();
+const profileImgEl = $("profilePageImg");
+if (profileImgEl) profileImgEl.src = defaultAvatar;
+setProfileAvatar(defaultAvatar); 
 loadCart(); 
 document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); }); 
 </script>
@@ -1410,14 +1414,10 @@ document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); });
 <!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->
 <script>
 "use strict";
-/* ============ AI CONFIG ============ */
-// Your Cloudflare Worker address (see worker.js). The Gemini key lives ONLY inside the Worker.
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
 const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";
 
-/* ============ STATE + SAVED CHAT (per user) ============ */
 const aiHistory = [];
-const GUEST_KEY = "topper_ai_chat_guest";
 let aiLoadedFor = null;
 let aiBusy = false;
 let aiWarned = false;
@@ -1517,7 +1517,6 @@ function closeAI(){
 }
 $("aiInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendAIText(); } });
 
-/* ============ TEXT CHAT ============ */
 async function sendAIText(){
   const input=$("aiInput");
   const text=input.value.trim();
@@ -1604,7 +1603,6 @@ async function sendAIText(){
   }
 }
 
-/* ============ LIVE VOICE ============ */
 const live={ws:null,stream:null,inCtx:null,outCtx:null,proc:null,src:null,nextTime:0,sources:[],active:false,ready:false,userBubble:null,botBubble:null};
 
 function setLiveUI(on,text){
@@ -1781,7 +1779,7 @@ function stopLive(silent){
   if(wasActive&&!silent) addAIMsg("sys","Live voice ended.");
 }
 window.addEventListener("pagehide",()=>stopLive(true));
-/* ============ ANDROID BACK BUTTON ============ */
+
 function handleAppBack(){
   if($("callScreenModal").style.display==="flex") return true;
   const box=$("appMessageBox");
