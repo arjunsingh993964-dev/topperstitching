@@ -499,7 +499,7 @@ function showAppMessage(msg,icon="⚠️"){
   document.body.appendChild(box); 
 } 
 function showOutOfStock(){ showAppMessage("This product is currently out of stock.","📦"); } 
-function showAuthError(msg){ const el=$("authError"); el.textContent=msg; el.style.display="block"; setTimeout(()=>{el.style.display="none";},7000); } 
+function showAuthError(msg){ hideLoading(); const el=$("authError"); el.textContent=msg; el.style.display="block"; setTimeout(()=>{el.style.display="none";},7000); } 
 
 async function googleSignIn(){ 
   if(currentUser||authBusy) return; authBusy=true; showLoading("Loading your account..."); 
@@ -551,8 +551,8 @@ auth.onAuthStateChanged(user=>{
   hideLoading(); 
 }); 
 
-// Fallback safety timeout for loading screen
-setTimeout(()=>{ hideLoading(); }, 3500);
+// Force hide loading screen after 2.5 seconds max so it never loops
+setTimeout(()=>{ hideLoading(); }, 2500);
 
 const OWNER_PEER_ID="topper-stitching-owner"; 
 let customerPeer=null, activeCall=null, localAudioStream=null, isMuted=false, isSpeakerOn=true; 
@@ -734,7 +734,7 @@ async function startPayment(orderId){
   }
 }
 
-function payNowForOrder(orderId){ startPayment(orderId); }
+function payNowForOrder(orderId){ startParameter=orderId; startPayment(orderId); }
 
 function loadUserOrders(userId){
   db.ref("orders").orderByChild("userId").equalTo(userId).on("value",snap=>{
