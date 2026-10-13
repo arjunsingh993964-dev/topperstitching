@@ -437,10 +437,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <label for="termsCheck" style="font-size:13px">I agree to the Terms and Conditions and Refund Policy.</label>
     </div>
     <div class="qr-box">
-      <p style="font-size:15px;font-weight:700">🔒 Secure online payment</p>
-      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below. A secure payment page opens where you can pay by UPI, card or net banking. Your order is confirmed automatically after the payment is received.</p>
+      <p style="font-size:15px;font-weight:700">🔒 Secure online payment via Cashfree</p>
+      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below to generate a secure payment link and proceed with online payment.</p>
     </div>
-    <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>
+    <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px;background:#2e7d32" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>
     <button class="btn-close" onclick="cancelOrderForm()" style="margin-top:6px">Cancel</button>
   </div>
 </div>
@@ -678,20 +678,6 @@ auth.onAuthStateChanged(user=>{
   else clearOrdersListener(); 
   hideLoading(); 
 }); 
-
-function openNativeCall(number){ 
-  const phoneNumber=String(number||"+14844817124"); 
-  try{ 
-    if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){ 
-      window.AndroidApp.callPhone(phoneNumber); 
-      return false; 
-    } 
-    window.location.href="tel:"+phoneNumber; 
-  }catch(e){ 
-    showAppMessage("Unable to open the phone dialer.","⚠️"); 
-  } 
-  return false; 
-} 
 
 function openNativeEmail(email,subject){ 
   const targetEmail=String(email||"topperstitching@gmail.com").trim(); 
@@ -1122,7 +1108,6 @@ const PRODUCT_PRICES={
   "Sewing Machine Top Table":4500,
   "Topper Karhai (130K)":7500
 };
-// Fixed payment links. Used ONLY if the verified payment service is not active; then the store checks the payment by hand.
 const PRODUCT_LINKS={
   "Topper Karhai (130K)":"https://payments.cashfree.com/links?code=Tb5bcm8bhsqg_AAAAAAAWYg8",
   "Sewing Machine Top Table":"https://payments.cashfree.com/links?code=yb5bcjjtjsqg_AAAAAAAWYg8",
@@ -1399,17 +1384,13 @@ loadCart();
 document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); }); 
 </script>
 
-<!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->
+<!-- AI ASSISTANT -->
 <script>
 "use strict";
-/* ============ AI CONFIG ============ */
-// Your Cloudflare Worker address (see worker.js). The Gemini key lives ONLY inside the Worker.
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
 const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";
 
-/* ============ STATE + SAVED CHAT (per user) ============ */
 const aiHistory = [];
-const GUEST_KEY = "topper_ai_chat_guest";
 let aiLoadedFor = null;
 let aiBusy = false;
 let aiWarned = false;
@@ -1417,10 +1398,6 @@ let aiClearArmed = null;
 
 function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
 function addAIMsg(role,text){
-  if(role==="sys"){
-    const last=$("aiMessages").lastElementChild;
-    if(last&&last.classList.contains("sys")&&last.textContent===text){ aiScroll(); return last; }
-  }
   const d=document.createElement("div");
   d.className="ai-msg "+role;
   d.textContent=text;
@@ -1429,42 +1406,21 @@ function addAIMsg(role,text){
   return d;
 }
 function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
-function aiWarnOnce(){
-  if(aiWarned) return; aiWarned=true;
-  addAIMsg("sys","Cloud backup of this chat is unavailable right now. Your chat is still saved on this phone.");
-}
 function localKey(){ return "topper_ai_chat_"+aiOwner(); }
-function localRead(){ try{ const a=JSON.parse(localStorage.getItem(localKey())||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function localRead(){ try{ return JSON.parse(localStorage.getItem(localKey())||"[]"); }catch(e){ return []; } }
 function localWrite(arr){ try{ localStorage.setItem(localKey(),JSON.stringify(arr.slice(-50))); }catch(e){} }
 function persistMsg(role,text){
   const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
   const cache=localRead(); cache.push(rec); localWrite(cache);
-  if(currentUser){
-    try{ db.ref("chats/"+currentUser.uid).push(rec).catch(aiWarnOnce); }catch(e){ aiWarnOnce(); }
-  }
 }
+
 async function loadAIChat(){
   const owner=aiOwner();
   if(aiLoadedFor===owner) return;
   aiLoadedFor=owner;
   $("aiMessages").innerHTML="";
   aiHistory.length=0;
-  let items=localRead();
-  if(currentUser){
-    try{
-      const snap=await db.ref("chats/"+currentUser.uid).orderByChild("t").limitToLast(50).once("value");
-      const remote=[];
-      snap.forEach(c=>{ const v=c.val(); if(v&&v.text) remote.push(v); });
-      const seen=new Set(); const merged=[];
-      remote.concat(items).forEach(m=>{
-        const k=m.t+"|"+m.role+"|"+m.text;
-        if(!seen.has(k)){ seen.add(k); merged.push(m); }
-      });
-      merged.sort((a,b)=>Number(a.t)-Number(b.t));
-      items=merged.slice(-50);
-      localWrite(items);
-    }catch(e){}
-  }
+  const items=localRead();
   if(!items.length){ addAIMsg("bot",AI_GREETING); return; }
   items.forEach(m=>{
     const r=m.role==="user"?"user":"bot";
@@ -1472,6 +1428,7 @@ async function loadAIChat(){
     aiHistory.push({role:r==="user"?"user":"model",parts:[{text:m.text}]});
   });
 }
+
 function clearAIChat(){
   const btn=$("aiClearBtn");
   if(aiClearArmed===null){
@@ -1480,36 +1437,19 @@ function clearAIChat(){
     return;
   }
   clearTimeout(aiClearArmed); aiClearArmed=null; btn.textContent="🗑";
-  try{ if(currentUser) db.ref("chats/"+currentUser.uid).remove().catch(()=>{}); }catch(e){}
   try{ localStorage.removeItem(localKey()); }catch(e){}
   aiLoadedFor=null;
   loadAIChat();
 }
-auth.onAuthStateChanged(()=>{
-  aiLoadedFor=null;
-  if($("aiPanel").style.display==="flex"&&!live.active) loadAIChat();
-});
 
 async function openAI(mode){
   $("aiPanel").style.display="flex";
-  if(mode==="voice"&&!live.outCtx){
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      live.outCtx=new AC();
-      live.outCtx.resume().catch(()=>{});
-    }catch(e){}
-  }
   await loadAIChat();
-  if(mode==="voice") startLive();
-  else setTimeout(()=>{ try{$("aiInput").focus();}catch(e){} },200);
+  if(mode==="chat") setTimeout(()=>{ try{$("aiInput").focus();}catch(e){} },200);
 }
-function closeAI(){
-  stopLive(true);
-  $("aiPanel").style.display="none";
-}
+function closeAI(){ $("aiPanel").style.display="none"; }
 $("aiInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendAIText(); } });
 
-/* ============ TEXT CHAT ============ */
 async function sendAIText(){
   const input=$("aiInput");
   const text=input.value.trim();
@@ -1518,277 +1458,55 @@ async function sendAIText(){
   addAIMsg("user",text);
   persistMsg("user",text);
 
-  if(live.active){
-    if(live.ws&&live.ws.readyState===1&&live.ready){
-      live.ws.send(JSON.stringify({realtimeInput:{text:text}}));
-    }else{
-      addAIMsg("sys","Voice is still connecting. Please try again in a moment.");
-    }
-    return;
-  }
-
   aiBusy=true;
   $("aiSendBtn").disabled=true;
   const typing=addAIMsg("bot typing","Typing...");
   aiHistory.push({role:"user",parts:[{text:text}]});
   let bubble=null, reply="";
   try{
-    const contents=aiHistory.slice(-20);
-    while(contents.length&&contents[0].role!=="user") contents.shift();
-    if(!currentUser) throw new Error("Please sign in with Google to use the AI assistant.");
+    if(!currentUser) throw new Error("Please sign in with Google to use AI.");
     const idToken=await currentUser.getIdToken();
     const res=await fetch(AI_API_BASE+"/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},
-      body:JSON.stringify({contents:contents})
+      body:JSON.stringify({contents:aiHistory.slice(-20)})
     });
-    if(!res.ok){
-      let data={}; try{ data=await res.json(); }catch(e){}
-      const er=Array.isArray(data)?data[0]:data;
-      throw new Error((er&&er.error&&er.error.message)||("HTTP "+res.status));
-    }
+    if(!res.ok) throw new Error("AI service error.");
     const reader=res.body.getReader();
     const dec=new TextDecoder();
     let buf="";
-    const handleEvent=ev=>{
-      ev.split("\n").forEach(line=>{
-        if(line.indexOf("data:")!==0) return;
-        let obj; try{ obj=JSON.parse(line.slice(5).trim()); }catch(e){ return; }
+    while(true){
+      const r=await reader.read();
+      if(r.done) break;
+      buf+=dec.decode(r.value,{stream:true});
+      let idx;
+      while((idx=buf.indexOf("\n\n"))>=0){
+        const ev=buf.slice(0,idx);
+        buf=buf.slice(idx+2);
+        if(ev.indexOf("data:")!==0) continue;
+        let obj; try{ obj=JSON.parse(ev.slice(5).trim()); }catch(e){ continue; }
         const parts=(obj.candidates&&obj.candidates[0]&&obj.candidates[0].content&&obj.candidates[0].content.parts)||[];
         const chunk=parts.filter(p=>!p.thought).map(p=>p.text||"").join("");
-        if(!chunk) return;
+        if(!chunk) continue;
         reply+=chunk;
         if(!bubble){ typing.remove(); bubble=addAIMsg("bot",""); }
         bubble.textContent=reply;
         aiScroll();
-      });
-    };
-    while(true){
-      const r=await reader.read();
-      if(r.done) break;
-      buf+=dec.decode(r.value,{stream:true}).replace(/\r\n/g,"\n");
-      let idx;
-      while((idx=buf.indexOf("\n\n"))>=0){
-        handleEvent(buf.slice(0,idx));
-        buf=buf.slice(idx+2);
       }
     }
-    if(buf.trim()) handleEvent(buf);
     reply=reply.trim();
-    if(!reply) throw new Error("Empty reply");
-    bubble.textContent=reply;
+    if(bubble) bubble.textContent=reply;
     aiHistory.push({role:"model",parts:[{text:reply}]});
     persistMsg("bot",reply);
   }catch(err){
     typing.remove();
-    if(reply.trim()){
-      aiHistory.push({role:"model",parts:[{text:reply.trim()}]});
-      persistMsg("bot",reply.trim());
-    }else{
-      aiHistory.pop();
-      if(bubble) bubble.remove();
-      const em=String(err.message||err);
-      addAIMsg("sys",/sign in/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Call Support.");
-    }
+    if(bubble) bubble.remove();
+    addAIMsg("sys","AI could not reply right now.");
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
   }
 }
-
-/* ============ LIVE VOICE ============ */
-const live={ws:null,stream:null,inCtx:null,outCtx:null,proc:null,src:null,nextTime:0,sources:[],active:false,ready:false,userBubble:null,botBubble:null};
-
-function setLiveUI(on,text){
-  $("aiLiveBar").classList.toggle("on",on);
-  $("aiMicBtn").classList.toggle("on",on);
-  if(text) $("aiLiveText").innerHTML='<span class="ai-pulse"></span>'+escapeHtml(text);
-}
-function toggleLive(){ if(live.active) stopLive(); else startLive(); }
-
-function flushLive(which){
-  const b=live[which+"Bubble"];
-  live[which+"Bubble"]=null;
-  if(!b) return;
-  const t=b.textContent.trim();
-  if(!t) return;
-  const r=which==="user"?"user":"bot";
-  persistMsg(r,t);
-  aiHistory.push({role:r==="user"?"user":"model",parts:[{text:t}]});
-}
-
-async function startLive(){
-  if(live.active) return;
-  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    addAIMsg("sys","Microphone is not supported here. The page must be opened over https://.");
-    return;
-  }
-  if(!currentUser){ addAIMsg("sys","Please sign in with Google to use live voice."); return; }
-  live.active=true; live.ready=false;
-  setLiveUI(true,"Requesting microphone permission...");
-  try{
-    live.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-  }catch(err){
-    live.active=false; setLiveUI(false);
-    const denied=err&&(err.name==="NotAllowedError"||err.name==="SecurityError");
-    addAIMsg("sys",denied?"Microphone permission was not granted. Allow Microphone in the app/browser settings and try again.":"Could not start the microphone: "+(err.message||err));
-    return;
-  }
-  if(!live.outCtx){
-    const AC=window.AudioContext||window.webkitAudioContext;
-    live.outCtx=new AC();
-  }
-  try{ await live.outCtx.resume(); }catch(e){}
-  live.nextTime=0;
-  setLiveUI(true,"Connecting...");
-  connectLive();
-}
-
-async function connectLive(){
-  let ws;
-  try{
-    if(!currentUser) throw new Error("login");
-    const token=await currentUser.getIdToken();
-    ws=new WebSocket(AI_API_BASE.replace(/^http/,"ws")+"/live?token="+encodeURIComponent(token));
-  }catch(e){ stopLive(true); addAIMsg("sys","Could not start the voice connection."); return; }
-  live.ws=ws;
-  ws.onmessage=async ev=>{
-    let raw=ev.data;
-    if(raw instanceof Blob) raw=await raw.text();
-    if(ws!==live.ws) return;
-    let msg; try{ msg=JSON.parse(raw); }catch(e){ return; }
-    handleLiveMessage(msg);
-  };
-  ws.onerror=()=>{};
-  ws.onclose=ev=>{
-    if(!live.active||ws!==live.ws) return;
-    const why=ev&&ev.reason?(" ("+ev.reason+")"):"";
-    const wasReady=live.ready;
-    stopLive(true);
-    addAIMsg("sys",wasReady?"Live voice ended"+why+".":"Could not connect to live voice"+why+". Check your internet connection.");
-  };
-}
-
-function handleLiveMessage(msg){
-  if(msg.setupComplete){
-    live.ready=true;
-    setLiveUI(true,"Live voice is on — go ahead and speak...");
-    startMicStream();
-    return;
-  }
-  const sc=msg.serverContent;
-  if(!sc) return;
-  if(sc.interrupted){ stopPlayback(); }
-  if(sc.inputTranscription&&sc.inputTranscription.text){
-    flushLive("bot");
-    if(!live.userBubble) live.userBubble=addAIMsg("user","");
-    live.userBubble.textContent+=sc.inputTranscription.text;
-    aiScroll();
-  }
-  if(sc.outputTranscription&&sc.outputTranscription.text){
-    flushLive("user");
-    if(!live.botBubble) live.botBubble=addAIMsg("bot","");
-    live.botBubble.textContent+=sc.outputTranscription.text;
-    aiScroll();
-  }
-  if(sc.modelTurn&&sc.modelTurn.parts){
-    sc.modelTurn.parts.forEach(p=>{
-      if(p.inlineData&&p.inlineData.data) playPcm(p.inlineData.data);
-    });
-  }
-  if(sc.turnComplete){ flushLive("user"); flushLive("bot"); }
-}
-
-function startMicStream(){
-  if(!live.stream||live.proc) return;
-  const AC=window.AudioContext||window.webkitAudioContext;
-  live.inCtx=new AC();
-  live.src=live.inCtx.createMediaStreamSource(live.stream);
-  live.proc=live.inCtx.createScriptProcessor(4096,1,1);
-  const inRate=live.inCtx.sampleRate;
-  live.proc.onaudioprocess=e=>{
-    if(!live.ready||!live.ws||live.ws.readyState!==1) return;
-    const input=e.inputBuffer.getChannelData(0);
-    const ratio=inRate/16000;
-    const outLen=Math.floor(input.length/ratio);
-    const pcm=new Int16Array(outLen);
-    for(let i=0;i<outLen;i++){
-      const start=Math.floor(i*ratio), end=Math.min(input.length,Math.floor((i+1)*ratio));
-      let sum=0,n=0;
-      for(let j=start;j<end;j++){ sum+=input[j]; n++; }
-      const s=Math.max(-1,Math.min(1,n?sum/n:0));
-      pcm[i]=s<0?s*32768:s*32767;
-    }
-    live.ws.send(JSON.stringify({realtimeInput:{audio:{data:bytesToB64(new Uint8Array(pcm.buffer)),mimeType:"audio/pcm;rate=16000"}}}));
-  };
-  live.src.connect(live.proc);
-  live.proc.connect(live.inCtx.destination);
-}
-
-function bytesToB64(bytes){
-  let bin=""; const chunk=0x8000;
-  for(let i=0;i<bytes.length;i+=chunk){ bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk)); }
-  return btoa(bin);
-}
-function playPcm(b64){
-  if(!live.outCtx) return;
-  const bin=atob(b64);
-  const bytes=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-  const pcm=new Int16Array(bytes.buffer,0,Math.floor(bytes.length/2));
-  const f32=new Float32Array(pcm.length);
-  for(let i=0;i<pcm.length;i++) f32[i]=pcm[i]/32768;
-  const buf=live.outCtx.createBuffer(1,f32.length,24000);
-  buf.copyToChannel(f32,0);
-  const src=live.outCtx.createBufferSource();
-  src.buffer=buf;
-  src.connect(live.outCtx.destination);
-  const now=live.outCtx.currentTime;
-  if(live.nextTime<now) live.nextTime=now+0.02;
-  src.start(live.nextTime);
-  live.nextTime+=buf.duration;
-  live.sources.push(src);
-  src.onended=()=>{ live.sources=live.sources.filter(s=>s!==src); };
-}
-function stopPlayback(){
-  live.sources.forEach(s=>{ try{s.stop();}catch(e){} });
-  live.sources=[]; live.nextTime=0;
-}
-
-function stopLive(silent){
-  if(!live.active&&!live.ws&&!live.stream) return;
-  const wasActive=live.active;
-  flushLive("user"); flushLive("bot");
-  live.active=false; live.ready=false;
-  try{ if(live.ws){ live.ws.onclose=null; live.ws.close(); } }catch(e){}
-  live.ws=null;
-  stopPlayback();
-  try{ if(live.proc){ live.proc.onaudioprocess=null; live.proc.disconnect(); } }catch(e){}
-  try{ if(live.src) live.src.disconnect(); }catch(e){}
-  try{ if(live.stream) live.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
-  try{ if(live.inCtx) live.inCtx.close(); }catch(e){}
-  try{ if(live.outCtx) live.outCtx.close(); }catch(e){}
-  live.proc=live.src=live.stream=live.inCtx=live.outCtx=null;
-  setLiveUI(false);
-  if(wasActive&&!silent) addAIMsg("sys","Live voice ended.");
-}
-window.addEventListener("pagehide",()=>stopLive(true));
-/* ============ ANDROID BACK BUTTON ============ */
-function handleAppBack(){
-  if($("callScreenModal").style.display==="flex") return true;
-  const box=$("appMessageBox");
-  if(box){ box.remove(); return true; }
-  if($("aiPanel").style.display==="flex"){ closeAI(); return true; }
-  if($("orderModal").style.display==="block"){ $("orderModal").style.display="none"; saveOrderDraft(); return true; }
-  if($("policyModal").style.display==="block"){ closePolicyModal(); return true; }
-  if($("avatarModal").style.display==="block"){ closeAvatarPicker(); return true; }
-  if(!$("homeView").classList.contains("active-view")){
-    switchTab("homeView",document.querySelectorAll(".nav-item")[0]);
-    return true;
-  }
-  return false;
-}
-window.handleAppBack=handleAppBack;
 </script>
 </body>
 </html>
