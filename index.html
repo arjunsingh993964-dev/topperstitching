@@ -561,6 +561,7 @@ async function googleSignIn(){
   try{ 
     if(window.AndroidApp&&typeof window.AndroidApp.signIn==="function"){ 
       window.AndroidApp.signIn(); 
+      setTimeout(() => { if(authBusy) { authBusy = false; hideLoading(); } }, 10000);
       return; 
     } 
     const provider=new firebase.auth.GoogleAuthProvider(); 
@@ -582,7 +583,7 @@ async function nativeGoogleLogin(idToken){
     showAuthError("Firebase sign-in failed: "+(error.message||error)); 
   }finally{ 
     authBusy=false; 
-    if(authStateResolved) hideLoading(); 
+    hideLoading(); 
   } 
 } 
 
@@ -647,10 +648,11 @@ function updateAuthUI(){
 auth.onAuthStateChanged(user=>{ 
   currentUser=user||null; 
   authStateResolved=true; 
+  authBusy=false;
+  hideLoading();
   updateAuthUI(); 
   if(user) loadUserOrders(user.uid); 
   else clearOrdersListener(); 
-  hideLoading(); 
 }); 
 
 function getDefaultDeliveryDate() {
