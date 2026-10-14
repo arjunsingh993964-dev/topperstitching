@@ -1188,46 +1188,55 @@ async function submitOnlineOrder(){
   if(orderId) await startPayment(orderId,items);  
 }   
   
-async function startPayment(orderId,items){  
-  if(!currentUser){ requireLogin(); return; }  
+async function startPayment(orderId, items) {  
+  if (!currentUser) { requireLogin(); return; }  
   showLoading("Opening secure payment...");  
-  try{  
-    const idToken=await currentUser.getIdToken();  
-    const res=await fetch(PAY_API_BASE+"/pay/create",{  
-      method:"POST",  
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},  
-      body:JSON.stringify({orderId:orderId})  
+  try {  
+    const idToken = await currentUser.getIdToken();  
+    const res = await fetch(PAY_API_BASE + "/pay/create", {  
+      method: "POST",  
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + idToken },  
+      body: JSON.stringify({ orderId: orderId })  
     });  
-    let data={}; try{ data=await res.json(); }catch(e){}  
-    if(res.ok&&data.paid){ hideLoading(); showAppMessage("This order is already paid.","✅"); return; }  
-    if(res.ok&&data.payment_session_id){  
-      if(typeof Cashfree!=="function") throw new Error("Payment library could not load. Check your internet and try again.");  
-      hideLoading();  
-      const payMode=data.mode==="sandbox"?"sandbox":"production";  
-      // In the Android app the payment page is opened in the phone's browser,  
-      // where Google Pay / PhonePe / Paytm are shown. Older app builds fall back to the in-app page.  
-      window.__lastPay={session:data.payment_session_id,mode:payMode,orderId:data.order_id||""};  
-      // Newest app build: payment screen inside the app (Google Pay / PhonePe / Paytm list)  
-      if(data.order_id&&window.AndroidApp&&typeof window.AndroidApp.startCashfreePayment==="function"){  
-        window.AndroidApp.startCashfreePayment(String(data.order_id),String(data.payment_session_id),payMode);  
-        return;  
-      }  
-      if(window.AndroidApp&&typeof window.AndroidApp.openExternal==="function"){  
-        window.AndroidApp.openExternal(SITE_BASE_URL+"?cfpay="+encodeURIComponent(data.payment_session_id)+"&mode="+payMode);  
-        showAppMessage("Payment is opening in your browser.\n\nAfter you pay, come back to this app. Your order will update automatically.","ℹ️");  
-        return;  
-      }  
-      const cf=Cashfree({mode:payMode});  
-      cf.checkout({paymentSessionId:data.payment_session_id,redirectTarget:"_self"});  
-      return;  
+    
+    let data = {}; 
+    try { data = await res.json(); } catch(e) {}  
+    
+    if (res.ok && data.paid) { 
+      hideLoading(); 
+      showAppMessage("This order is already paid.", "✅"); 
+      return; 
     }  
-    if(res.ok&&data.url){ window.location.href=data.url; return; }  
-    if(res.status===503){ fallbackStaticPayment(items); return; }  
-    throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));  
-  }catch(e){  
+
+    if (res.ok && data.payment_session_id) {  
+      hideLoading();  
+      const payMode = data.mode === "sandbox" ? "sandbox" : "production";  
+      const cfOrderId = data.order_id || ("TS_" + orderId);
+
+      window.__lastPay = { session: data.payment_session_id, mode: payMode, orderId: cfOrderId };  
+
+      // 1. Android App ka Native Cashfree Payment trigger karega (browser nahi kholega)
+      if (window.AndroidApp && typeof window.AndroidApp.startCashfreePayment === "function") {  
+        window.AndroidApp.startCashfreePayment(String(cfOrderId), String(data.payment_session_id), payMode);  
+        return;  
+      }  
+
+      // 2. Browser ke liye Cashfree Web SDK checkout
+      if (typeof Cashfree === "function") {
+        const cf = Cashfree({ mode: payMode });  
+        cf.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_self" });  
+        return;
+      }
+    }  
+
+    if (res.ok && data.url) { window.location.href = data.url; return; }  
+    if (res.status === 503) { fallbackStaticPayment(items); return; }  
+    
+    throw new Error((data && data.error && data.error.message) || ("HTTP " + res.status));  
+  } catch(e) {  
     hideLoading();  
-    showAppMessage("Could not open the payment page.\n"+(e.message||e)+"\n\nYour order is saved. Open My Orders and tap Pay now to try again.","❌");  
-  }finally{  
+    showAppMessage("Could not open the payment page.\n" + (e.message || e) + "\n\nYour order is saved. Open My Orders and tap Pay now to try again.", "❌");  
+  } finally {  
     hideLoading();  
   }  
 }  
@@ -1274,13 +1283,6 @@ window.nativePaymentVerify=function(cfOrderId){
 };  
 window.nativePaymentFailure=function(message){  
   const msg=String(message||"Payment failed");  
-  const last=window.__lastPay;  
-  // Sideloaded test builds are blocked by Cashfree in live mode: continue in the browser instead.  
-  if(/trusted source|integrity|not whitelisted/i.test(msg)&&last&&window.AndroidApp&&typeof window.AndroidApp.openExternal==="function"){  
-    window.AndroidApp.openExternal(SITE_BASE_URL+"?cfpay="+encodeURIComponent(last.session)+"&mode="+last.mode);  
-    showAppMessage("Payment is opening in your browser.\n\nAfter you pay, come back to this app.","ℹ️");  
-    return;  
-  }  
   showAppMessage("Payment was not completed.\n"+msg+"\n\nIf money was taken, open My Orders and tap Check payment.","⚠️");  
 };  
 function verifyPendingOrders(){  
@@ -1403,7 +1405,6 @@ function loadUserOrders(userId){
 setProfileAvatar(getSavedAvatar());   
 loadCart();   
 document.addEventListener("DOMContentLoaded",()=>{   
-  // Opened in the phone's browser by the app: start the Cashfree payment page straight away.  
   try{  
     const q=new URLSearchParams(window.location.search);  
     const sess=q.get("cfpay");  
@@ -1419,7 +1420,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>  <!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->  <script>  
 "use strict";  
 /* ============ AI CONFIG ============ */  
-// Your Cloudflare Worker address (see worker.js). The Gemini key lives ONLY inside the Worker.  
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";  
 const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";  
   
