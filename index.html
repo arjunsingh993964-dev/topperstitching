@@ -327,6 +327,23 @@ button:disabled{opacity:.7;cursor:not-allowed}
         <button class="btn-cart" onclick="toggleCart('Topper Karhai (130K)',7500,this)">🛒 Add to Cart</button> 
       </div> 
     </div> 
+
+    <div class="card"> 
+      <div> 
+        <div class="img-container" style="font-size:70px">🧪</div> 
+        <div class="card-details"> 
+          <h3>Product Testing</h3><div class="price">₹10</div> 
+          <div class="specs"> 
+            <div><span>Type:</span> Test product for checking online payment</div> 
+            <div><span>Note:</span> Not a real item. Only for testing payment.</div> 
+          </div> 
+        </div> 
+      </div> 
+      <div> 
+        <button class="btn-online" onclick="openOrderForm('Product Testing',10)">💳 Pay Online</button> 
+        <button class="btn-cart" onclick="toggleCart('Product Testing',10,this)">🛒 Add to Cart</button> 
+      </div> 
+    </div> 
   </div>
 
   <div class="footer-address">
@@ -1122,7 +1139,8 @@ const PRODUCT_PRICES={
   "Bag Closer Single Needle":6200,
   "Topper TA1 Model":6500,
   "Sewing Machine Top Table":4500,
-  "Topper Karhai (130K)":7500
+  "Topper Karhai (130K)":7500,
+  "Product Testing":10
 };
 // Fixed payment links. Used ONLY if the verified payment service is not active; then the store checks the payment by hand.
 const PRODUCT_LINKS={
