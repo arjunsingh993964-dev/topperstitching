@@ -1115,6 +1115,7 @@ function getDefaultDeliveryDate() {
 
 /* ================= PAYMENT (Cashfree, confirmed by the server) ================= */
 const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";
+const SITE_BASE_URL="https://arjunsingh993964-dev.github.io/topperstitching/";
 const PRODUCT_PRICES={
   "Topper SV Tailor":4500,
   "Topper SV Tailor Deluxe":4500,
@@ -1236,7 +1237,21 @@ async function startPayment(orderId,items){
     if(res.ok&&data.payment_session_id){
       if(typeof Cashfree!=="function") throw new Error("Payment library could not load. Check your internet and try again.");
       hideLoading();
-      const cf=Cashfree({mode:data.mode==="sandbox"?"sandbox":"production"});
+      const payMode=data.mode==="sandbox"?"sandbox":"production";
+      // In the Android app the payment page is opened in the phone's browser,
+      // where Google Pay / PhonePe / Paytm are shown. Older app builds fall back to the in-app page.
+      window.__lastPay={session:data.payment_session_id,mode:payMode,orderId:data.order_id||""};
+      // Newest app build: payment screen inside the app (Google Pay / PhonePe / Paytm list)
+      if(data.order_id&&window.AndroidApp&&typeof window.AndroidApp.startCashfreePayment==="function"){
+        window.AndroidApp.startCashfreePayment(String(data.order_id),String(data.payment_session_id),payMode);
+        return;
+      }
+      if(window.AndroidApp&&typeof window.AndroidApp.openExternal==="function"){
+        window.AndroidApp.openExternal(SITE_BASE_URL+"?cfpay="+encodeURIComponent(data.payment_session_id)+"&mode="+payMode);
+        showAppMessage("Payment is opening in your browser.\n\nAfter you pay, come back to this app. Your order will update automatically.","ℹ️");
+        return;
+      }
+      const cf=Cashfree({mode:payMode});
       cf.checkout({paymentSessionId:data.payment_session_id,redirectTarget:"_self"});
       return;
     }
@@ -1285,6 +1300,23 @@ async function verifyOrder(orderId,manual){
   }catch(e){ if(manual) showAppMessage("Could not check the payment right now.","⚠️"); }
 }
 function checkPaymentNow(orderId){ verifyOrder(orderId,true); }
+
+// Called by the Android app when the Cashfree screen closes. Cashfree is then asked on the server.
+window.nativePaymentVerify=function(cfOrderId){
+  const m=/^TS_([A-Za-z0-9_-]{20})/.exec(String(cfOrderId||""));
+  if(m) verifyOrder(m[1],true);
+};
+window.nativePaymentFailure=function(message){
+  const msg=String(message||"Payment failed");
+  const last=window.__lastPay;
+  // Sideloaded test builds are blocked by Cashfree in live mode: continue in the browser instead.
+  if(/trusted source|integrity|not whitelisted/i.test(msg)&&last&&window.AndroidApp&&typeof window.AndroidApp.openExternal==="function"){
+    window.AndroidApp.openExternal(SITE_BASE_URL+"?cfpay="+encodeURIComponent(last.session)+"&mode="+last.mode);
+    showAppMessage("Payment is opening in your browser.\n\nAfter you pay, come back to this app.","ℹ️");
+    return;
+  }
+  showAppMessage("Payment was not completed.\n"+msg+"\n\nIf money was taken, open My Orders and tap Check payment.","⚠️");
+};
 function verifyPendingOrders(){
   if(!currentUser||Date.now()-lastVerifyAt<8000) return;
   const pending=latestOrders.filter(o=>o.paymentStatus==="pending"&&(o.cfOrderId||o.cfLinkId));
@@ -1404,7 +1436,20 @@ function loadUserOrders(userId){
 
 setProfileAvatar(getSavedAvatar()); 
 loadCart(); 
-document.addEventListener("DOMContentLoaded",()=>{ restoreOrderDraft(); }); 
+document.addEventListener("DOMContentLoaded",()=>{ 
+  // Opened in the phone's browser by the app: start the Cashfree payment page straight away.
+  try{
+    const q=new URLSearchParams(window.location.search);
+    const sess=q.get("cfpay");
+    if(sess&&!window.AndroidApp&&/^[A-Za-z0-9_\-=.]{10,600}$/.test(sess)&&typeof Cashfree==="function"){
+      showLoading("Opening secure payment...");
+      const cf=Cashfree({mode:q.get("mode")==="sandbox"?"sandbox":"production"});
+      cf.checkout({paymentSessionId:sess,redirectTarget:"_self"});
+      return;
+    }
+  }catch(e){}
+  restoreOrderDraft(); 
+}); 
 </script>
 
 <!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->
