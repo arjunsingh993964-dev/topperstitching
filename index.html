@@ -115,7 +115,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-msg.user{background:#1565c0;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .ai-msg.sys{background:#fff8e1;color:#6d4c00;align-self:center;font-size:12px;text-align:center;border:1px dashed #ffcc80}
 .ai-msg.typing{color:#888;font-style:italic}
-.ai-input-row{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#fff;border-top:1px solid #ddd;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.ai-input-row{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#fff;border-top:1px solid #ddd;padding-bottom:max(10px,env(safe-area-inset-top))}
 .ai-input-row input{flex:1;min-width:0;padding:11px 14px;border:1px solid #ccc;border-radius:22px;font-size:16px;outline:none}
 .ai-input-row input:focus{border-color:#1565c0}
 .ai-btn{border:0;width:44px;height:44px;border-radius:50%;font-size:19px;cursor:pointer;flex-shrink:0;color:#fff}
@@ -700,6 +700,17 @@ async function isEmailRegisteredInDatabase(email) {
   }
 }
 
+/* --- CHECK IF PHONE IS REGISTERED FUNCTION --- */
+async function isPhoneRegisteredInDatabase(phone) {
+  if (!phone) return false;
+  try {
+    const snap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
+    return snap.exists();
+  } catch (e) {
+    return false;
+  }
+}
+
 /* --- CREATE ACCOUNT LOGIC --- */
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
@@ -713,10 +724,32 @@ async function triggerCreateAccountVerification(){
     return;
   }
 
-  statusEl.textContent = "Sending Verification OTP...";
+  statusEl.textContent = "Checking account status...";
   statusEl.style.color = "#1565c0";
+  showLoading("Checking account details...");
 
   try {
+    // Check Email Existence
+    const emailExists = await isEmailRegisteredInDatabase(email);
+    if(emailExists){
+      hideLoading();
+      statusEl.textContent = "This email is already registered.";
+      statusEl.style.color = "#d32f2f";
+      showAppMessage("This email is already logged in/registered.", "⚠️");
+      return;
+    }
+
+    // Check Phone Existence
+    const phoneExists = await isPhoneRegisteredInDatabase(phone);
+    if(phoneExists){
+      hideLoading();
+      statusEl.textContent = "This mobile number is already registered.";
+      statusEl.style.color = "#d32f2f";
+      showAppMessage("This mobile number is already logged in/registered.", "⚠️");
+      return;
+    }
+
+    $("authLoadingText").textContent = "Sending OTP...";
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -725,9 +758,10 @@ async function triggerCreateAccountVerification(){
     
     let data = {};
     try { data = await res.json(); } catch(e){}
+    hideLoading();
 
     if(res.ok) {
-      statusEl.textContent = "OTP Sent!";
+      statusEl.textContent = "OTP Sent Successfully!";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
 
@@ -744,6 +778,7 @@ async function triggerCreateAccountVerification(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
+    hideLoading();
     statusEl.textContent = "Network Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -763,6 +798,7 @@ async function confirmOtpVerification(){
   }
 
   statusEl.textContent = "Verifying OTP & Registering account...";
+  showLoading("Verifying OTP...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -772,6 +808,7 @@ async function confirmOtpVerification(){
     
     let data = {};
     try { data = await res.json(); } catch(e){}
+    hideLoading();
 
     if(res.ok && data.success) {
       const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
@@ -800,6 +837,7 @@ async function confirmOtpVerification(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
+    hideLoading();
     statusEl.textContent = "Registration error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -818,6 +856,7 @@ async function triggerMobileLoginOtp(){
 
   statusEl.textContent = "Sending Login OTP...";
   statusEl.style.color = "#1565c0";
+  showLoading("Sending Login OTP...");
 
   try {
     const res = await fetch(PAY_API_BASE + "/send-sms", {
@@ -828,6 +867,7 @@ async function triggerMobileLoginOtp(){
 
     let data = {};
     try { data = await res.json(); } catch(e){}
+    hideLoading();
 
     if(res.ok){
       statusEl.textContent = "Login OTP sent!";
@@ -847,6 +887,7 @@ async function triggerMobileLoginOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
+    hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -864,6 +905,7 @@ async function confirmMobileLoginOtp(){
   }
 
   statusEl.textContent = "Verifying OTP...";
+  showLoading("Verifying Login OTP...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -873,6 +915,7 @@ async function confirmMobileLoginOtp(){
 
     let data = {};
     try { data = await res.json(); } catch(e){}
+    hideLoading();
 
     if(res.ok && data.success){
       statusEl.textContent = "Login Verified!";
@@ -899,6 +942,7 @@ async function confirmMobileLoginOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
+    hideLoading();
     statusEl.textContent = "Login failed: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -917,9 +961,11 @@ async function loginWithEmailPassword(){
 
   statusEl.textContent = "Checking account and credentials...";
   statusEl.style.color = "#1565c0";
+  showLoading("Signing in with Email & Password...");
 
   const isReg = await isEmailRegisteredInDatabase(email);
   if(!isReg) {
+    hideLoading();
     statusEl.textContent = "No account found with this email. Please click 'Create Account' first.";
     statusEl.style.color = "#d32f2f";
     return;
@@ -927,11 +973,13 @@ async function loginWithEmailPassword(){
 
   try {
     await auth.signInWithEmailAndPassword(email, password);
+    hideLoading();
     statusEl.textContent = "Login Successful!";
     statusEl.style.color = "#2e7d32";
     showAppMessage("Logged in successfully!", "✅");
     switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
   } catch(e) {
+    hideLoading();
     statusEl.textContent = "Invalid Email or Password.";
     statusEl.style.color = "#d32f2f";
   }
@@ -955,6 +1003,7 @@ async function sendCurrMobOtp(){
   const statusEl = $("changeMobStatus");
   statusEl.textContent = "Sending OTP to current mobile number...";
   statusEl.style.color = "#1565c0";
+  showLoading("Sending OTP...");
 
   try {
     const res = await fetch(PAY_API_BASE + "/send-sms", {
@@ -963,6 +1012,7 @@ async function sendCurrMobOtp(){
       body: JSON.stringify({ phone: phone, action: "change_curr", limit: 5 })
     });
     let data = {}; try{ data=await res.json(); }catch(e){}
+    hideLoading();
     if(res.ok){
       statusEl.textContent = "OTP sent to current number!";
       statusEl.style.color = "#2e7d32";
@@ -980,6 +1030,7 @@ async function sendCurrMobOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
+    hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -997,6 +1048,7 @@ async function verifyCurrMobOtp(){
   }
 
   statusEl.textContent = "Verifying current number...";
+  showLoading("Verifying OTP...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -1004,6 +1056,7 @@ async function verifyCurrMobOtp(){
       body: JSON.stringify({ phone: phone, otp: otp, action: "change_curr" })
     });
     let data = {}; try{ data=await res.json(); }catch(e){}
+    hideLoading();
 
     if(res.ok && data.success){
       statusEl.textContent = "Current number verified! Enter new number below.";
@@ -1021,6 +1074,7 @@ async function verifyCurrMobOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
+    hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -1038,6 +1092,7 @@ async function sendNewMobOtp(){
 
   statusEl.textContent = "Sending OTP to new number...";
   statusEl.style.color = "#1565c0";
+  showLoading("Sending OTP...");
 
   try {
     const res = await fetch(PAY_API_BASE + "/send-sms", {
@@ -1046,6 +1101,7 @@ async function sendNewMobOtp(){
       body: JSON.stringify({ phone: newPhone, action: "change_new", limit: 5 })
     });
     let data = {}; try{ data=await res.json(); }catch(e){}
+    hideLoading();
     if(res.ok){
       statusEl.textContent = "OTP sent to new number!";
       statusEl.style.color = "#2e7d32";
@@ -1063,6 +1119,7 @@ async function sendNewMobOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
+    hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
@@ -1080,6 +1137,7 @@ async function verifyNewMobOtp(){
   }
 
   statusEl.textContent = "Updating Mobile Number...";
+  showLoading("Updating Mobile Number...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -1087,6 +1145,7 @@ async function verifyNewMobOtp(){
       body: JSON.stringify({ phone: newPhone, otp: otp, action: "change_new", oldPhone: userPhone, email: currentUser?.email })
     });
     let data = {}; try{ data=await res.json(); }catch(e){}
+    hideLoading();
 
     if(res.ok && data.success){
       userPhone = newPhone;
@@ -1106,6 +1165,7 @@ async function verifyNewMobOtp(){
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
+    hideLoading();
     statusEl.textContent = "Update failed: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
