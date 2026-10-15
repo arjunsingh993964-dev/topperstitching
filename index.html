@@ -91,7 +91,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   /* ===== WHATSAPP STYLE CALL SCREEN (CUSTOMER) ===== */
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
-@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}}
+@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
 .call-info h2{font-size:24px;margin-top:15px;font-weight:600;}
 .call-info p{font-size:15px;opacity:0.8;margin-top:5px;}
 .call-controls-row{display:flex;gap:20px;margin-bottom:40px;align-items:center;}
@@ -358,8 +358,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <p id="profileEmail" style="font-size:13px;color:#666">Google Account Not Connected</p>  
     </div>  
     <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Sign In with Google</button>  
-    
-    <!-- CREATE ACCOUNT SECTION (WITH MOBILE & EMAIL VERIFICATION + 3 LIMIT) -->
+
+    <!-- CREATE ACCOUNT SECTION (WITH MOBILE & EMAIL VERIFICATION + 3 LIMIT LOCK) -->
     <div style="margin-top: 15px; background: #fff8e1; border: 1px dashed #ffa000; padding: 12px; border-radius: 8px; text-align: left;">
       <h4 style="color: #d84315; font-size: 14px; margin-bottom: 6px;">📝 Create Account & Verify</h4>
       <p style="font-size: 11px; color: #555; margin-bottom: 8px;">Register with Email & Mobile (Max 3 SMS Verification Limits per user)</p>
@@ -376,10 +376,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
       
       <button class="btn-submit" style="background: #2e7d32; font-size: 13px; padding: 8px;" onclick="triggerCreateAccountVerification()">Send Verification OTP (Limit 3)</button>
       <div id="verifBox" style="display:none; margin-top: 10px;">
-        <input type="text" id="otpInput" placeholder="Enter OTP code" style="font-size: 13px; padding: 8px; margin-bottom: 6px;">
+        <input type="text" id="otpInput" placeholder="Enter OTP code" style="font-size: 13px; padding: 8px; margin-bottom: 6px; width: 100%;">
         <button class="btn-submit" style="font-size: 13px; padding: 8px;" onclick="confirmOtpVerification()">Verify & Register</button>
       </div>
-      <small id="regStatusMsg" style="display:block; margin-top: 5px; font-size: 11px; color: #666;"></small>
+      <small id="regStatusMsg" style="display:block; margin-top: 5px; font-size: 11px; color: #666; font-weight: bold;"></small>
     </div>
 
     <div class="profile-section-box">  
@@ -524,7 +524,7 @@ const ORDER_DRAFT_KEY="topper_order_draft_v1";
 /* --- CREATE ACCOUNT & SMS VERIFICATION LOGIC (LIMIT 3 PER USER) --- */
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
-  const email = $("regEmail").value.trim();
+  const email = $("regEmail").value.trim().toLowerCase();
   const phone = normalizeIndianPhone($("regPhone").value);
   const statusEl = $("regStatusMsg");
 
@@ -552,11 +552,12 @@ async function triggerCreateAccountVerification(){
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
     } else {
-      statusEl.textContent = data.error || "SMS Limit (3 max) poori ho chuki hai.";
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit (3 max) poori ho chuki hai.");
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
-    statusEl.textContent = "Network error. Traccar SMS Gateway connection check karein.";
+    statusEl.textContent = "Network error. Traccar SMS Gateway connection check karein: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -564,6 +565,8 @@ async function triggerCreateAccountVerification(){
 async function confirmOtpVerification(){
   const otp = $("otpInput").value.trim();
   const phone = normalizeIndianPhone($("regPhone").value);
+  const email = $("regEmail").value.trim().toLowerCase();
+  const name = $("regName").value.trim();
   const statusEl = $("regStatusMsg");
 
   if(!otp){
@@ -577,23 +580,32 @@ async function confirmOtpVerification(){
     const res = await fetch("https://topper-ai.ankiteeepad009.workers.dev/verify-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, otp: otp })
+      body: JSON.stringify({ phone: phone, otp: otp, email: email })
     });
     
     let data = {};
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success) {
-      statusEl.textContent = "Verification Safal! Account ban gaya hai.";
+      const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
+      await db.ref("verified_users/" + cleanEmailKey).set({
+        verified: true,
+        phone: phone,
+        name: name,
+        verifiedAt: Date.now()
+      });
+
+      statusEl.textContent = "Verification Safal! Ab aap Sign In kar sakte hain.";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
-      showAppMessage("Aapka account safalpurvak register ho gaya hai!", "✅");
+      showAppMessage("Account verify ho gaya hai! Ab Sign In with Google button daba kar login karein.", "✅");
     } else {
-      statusEl.textContent = data.error || "Galat OTP code.";
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Galat OTP code.");
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
-    statusEl.textContent = "Verification mein samasya aayi.";
+    statusEl.textContent = "Verification mein samasya aayi: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -739,12 +751,33 @@ function updateAuthUI(){
   authBusy=false;   
 }   
   
-auth.onAuthStateChanged(user=>{   
-  currentUser=user||null;   
-  authStateResolved=true;   
-  updateAuthUI();   
-  if(user) loadUserOrders(user.uid);   
-  else clearOrdersListener();   
+auth.onAuthStateChanged(async user=>{   
+  if(user){
+    const userEmail = (user.email || "").toLowerCase();
+    const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
+
+    showLoading("Verification check ho raha hai...");
+    const snapshot = await db.ref("verified_users/" + cleanEmailKey).once("value");
+    
+    if(!snapshot.exists() || !snapshot.val().verified){
+      hideLoading();
+      await auth.signOut();
+      currentUser = null;
+      updateAuthUI();
+      showAppMessage("Aapka account verified nahi hai!\nPehle niche 'Create Account & Verify' section se OTP verification poora karein.", "⚠️");
+      return;
+    }
+
+    currentUser = user;   
+    authStateResolved = true;   
+    updateAuthUI();   
+    loadUserOrders(user.uid);   
+  }else{   
+    currentUser=null;   
+    authStateResolved=true;   
+    updateAuthUI();   
+    clearOrdersListener();   
+  }   
   hideLoading();   
 });   
   
@@ -1193,7 +1226,6 @@ const PRODUCT_PRICES={
   "Topper Karhai (130K)":7500,  
   "Product Testing":10  
 };  
-// Fixed payment links. Used ONLY if the verified payment service is not active; then the store checks the payment by hand.  
 const PRODUCT_LINKS={  
   "Topper Karhai (130K)":"https://payments.cashfree.com/links?code=Tb5bcm8bhsqg_AAAAAAAWYg8",  
   "Sewing Machine Top Table":"https://payments.cashfree.com/links?code=yb5bcjjtjsqg_AAAAAAAWYg8",  
@@ -1318,13 +1350,11 @@ async function startPayment(orderId, items) {
 
       window.__lastPay = { session: data.payment_session_id, mode: payMode, orderId: cfOrderId };  
 
-      // 1. Android App ka Native Cashfree Payment trigger karega (browser nahi kholega)
       if (window.AndroidApp && typeof window.AndroidApp.startCashfreePayment === "function") {  
         window.AndroidApp.startCashfreePayment(String(cfOrderId), String(data.payment_session_id), payMode);  
         return;  
       }  
 
-      // 2. Browser ke liye Cashfree Web SDK checkout
       if (typeof Cashfree === "function") {
         const cf = Cashfree({ mode: payMode });  
         cf.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_self" });  
@@ -1379,7 +1409,6 @@ async function verifyOrder(orderId,manual){
 }  
 function checkPaymentNow(orderId){ verifyOrder(orderId,true); }  
   
-// Called by the Android app when the Cashfree screen closes. Cashfree is then asked on the server.  
 window.nativePaymentVerify=function(cfOrderId){  
   const m=/^TS_([A-Za-z0-9_-]{20})/.exec(String(cfOrderId||""));  
   if(m) verifyOrder(m[1],true);  
@@ -1522,11 +1551,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 });   
 </script>  <!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->  <script>  
 "use strict";  
-/* ============ AI CONFIG ============ */  
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";  
 const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";  
   
-/* ============ STATE + SAVED CHAT (per user) ============ */  
 const aiHistory = [];  
 const GUEST_KEY = "topper_ai_chat_guest";  
 let aiLoadedFor = null;  
@@ -1628,7 +1655,6 @@ function closeAI(){
 }  
 $("aiInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendAIText(); } });  
   
-/* ============ TEXT CHAT ============ */  
 async function sendAIText(){  
   const input=$("aiInput");  
   const text=input.value.trim();  
@@ -1715,7 +1741,6 @@ async function sendAIText(){
   }  
 }  
   
-/* ============ LIVE VOICE ============ */  
 const live={ws:null,stream:null,inCtx:null,outCtx:null,proc:null,src:null,nextTime:0,sources:[],active:false,ready:false,userBubble:null,botBubble:null};  
   
 function setLiveUI(on,text){  
@@ -1892,7 +1917,7 @@ function stopLive(silent){
   if(wasActive&&!silent) addAIMsg("sys","Live voice ended.");  
 }  
 window.addEventListener("pagehide",()=>stopLive(true));  
-/* ============ ANDROID BACK BUTTON ============ */  
+  
 function handleAppBack(){  
   if($("callScreenModal").style.display==="flex") return true;  
   const box=$("appMessageBox");  
