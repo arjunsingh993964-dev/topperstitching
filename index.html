@@ -729,7 +729,6 @@ async function triggerCreateAccountVerification(){
   showLoading("Checking account details...");
 
   try {
-    // Check Email Existence
     const emailExists = await isEmailRegisteredInDatabase(email);
     if(emailExists){
       hideLoading();
@@ -739,7 +738,6 @@ async function triggerCreateAccountVerification(){
       return;
     }
 
-    // Check Phone Existence
     const phoneExists = await isPhoneRegisteredInDatabase(phone);
     if(phoneExists){
       hideLoading();
@@ -849,7 +847,7 @@ async function triggerMobileLoginOtp(){
   const statusEl = $("mobLoginStatus");
 
   if(!/^[6-9]\d{9}$/.test(phone)){
-    statusEl.textContent = "Enter valid 10-digit mobile number.";
+    statusEl.textContent = "Please enter a valid 10-digit Indian Mobile Number.";
     statusEl.style.color = "#d32f2f";
     return;
   }
