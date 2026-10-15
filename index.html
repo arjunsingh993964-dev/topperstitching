@@ -902,7 +902,7 @@ async function confirmMobileLoginOtp(){
     return;
   }
 
-  statusEl.textContent = "Verifying OTP...";
+  statusEl.textContent = "Verifying OTP & Fetching Account...";
   showLoading("Verifying Login OTP...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
@@ -913,23 +913,46 @@ async function confirmMobileLoginOtp(){
 
     let data = {};
     try { data = await res.json(); } catch(e){}
-    hideLoading();
 
     if(res.ok && data.success){
+      // Firebase database se is phone number ka record dhoondhein
+      const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
+      let matchedName = data.name || "User";
+      let matchedEmail = "";
+
+      if(userSnap.exists()){
+        userSnap.forEach(child => {
+          const val = child.val();
+          if(val) {
+            if(val.name) matchedName = val.name;
+            if(val.email) matchedEmail = val.email;
+          }
+        });
+      }
+
+      hideLoading();
       statusEl.textContent = "Login Verified!";
       statusEl.style.color = "#2e7d32";
       
-      if(!auth.currentUser){
-        await firebase.auth().signInAnonymously();
-      }
-      if(auth.currentUser){
-        await auth.currentUser.updateProfile({ displayName: data.name || "Mobile User" });
-      }
+      // Custom object banakar session set kar dein taaki Google account details automatically show ho jayein
+      currentUser = {
+        uid: "mob_" + phone,
+        displayName: matchedName,
+        email: matchedEmail || (phone + "@topperstitching.com"),
+        photoURL: getSavedAvatar(),
+        getIdToken: async () => "mock_token"
+      };
 
       userPhone = phone;
-      showAppMessage("Logged in successfully with Mobile Number!", "✅");
+      if($("custPhone")) $("custPhone").value = userPhone;
+      
+      updateAuthUI();
+      loadUserOrders(currentUser.uid);
+
+      showAppMessage("Logged in successfully!", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
+      hideLoading();
       let errMsg = "Invalid OTP code.";
       if(data && data.error) {
         if(typeof data.error === 'string') errMsg = data.error;
@@ -1342,11 +1365,13 @@ auth.onAuthStateChanged(async user=>{
       switchTab("profileView", null);
     }
   }else{   
-    currentUser=null;   
-    userPhone="";
-    authStateResolved=true;   
-    updateAuthUI();   
-    clearOrdersListener();   
+    if(!currentUser || !currentUser.uid.startsWith("mob_")) {
+      currentUser=null;   
+      userPhone="";
+      authStateResolved=true;   
+      updateAuthUI();   
+      clearOrdersListener();   
+    }
   }   
   hideLoading();   
 });   
