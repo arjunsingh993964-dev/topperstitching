@@ -734,7 +734,12 @@ async function triggerCreateAccountVerification(){
       $("sendOtpBtnWrapper").className = "btn-otp-container";
       $("sendOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerCreateAccountVerification()">Resend OTP</button>`;
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS limit exceeded or already registered.");
+      let errMsg = "SMS limit exceeded or already registered.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
@@ -785,7 +790,12 @@ async function confirmOtpVerification(){
       showAppMessage("Account Created Successfully! You can now Login.", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Invalid OTP code.");
+      let errMsg = "Invalid OTP code.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
@@ -827,7 +837,13 @@ async function triggerMobileLoginOtp(){
       $("mobOtpBtnWrapper").className = "btn-otp-container";
       $("mobOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerMobileLoginOtp()">Resend OTP</button>`;
     } else {
-      statusEl.textContent = (data.error || "Mobile number not registered.");
+      let errMsg = "Mobile number not registered.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
@@ -873,7 +889,13 @@ async function confirmMobileLoginOtp(){
       showAppMessage("Logged in successfully with Mobile Number!", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
-      statusEl.textContent = "Invalid OTP code.";
+      let errMsg = "Invalid OTP code.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
@@ -896,7 +918,6 @@ async function loginWithEmailPassword(){
   statusEl.textContent = "Checking account and credentials...";
   statusEl.style.color = "#1565c0";
 
-  // Check Database Registration First
   const isReg = await isEmailRegisteredInDatabase(email);
   if(!isReg) {
     statusEl.textContent = "No account found with this email. Please click 'Create Account' first.";
@@ -941,6 +962,7 @@ async function sendCurrMobOtp(){
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: phone, action: "change_curr", limit: 5 })
     });
+    let data = {}; try{ data=await res.json(); }catch(e){}
     if(res.ok){
       statusEl.textContent = "OTP sent to current number!";
       statusEl.style.color = "#2e7d32";
@@ -948,7 +970,13 @@ async function sendCurrMobOtp(){
       $("currOtpBtnWrapper").className = "btn-otp-container";
       $("currOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="sendCurrMobOtp()">Resend OTP</button>`;
     } else {
-      statusEl.textContent = "Could not send OTP.";
+      let errMsg = "Could not send OTP.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
@@ -983,7 +1011,13 @@ async function verifyCurrMobOtp(){
       $("changeMobStep1").style.display = "none";
       $("changeMobStep2").style.display = "block";
     } else {
-      statusEl.textContent = "Invalid OTP code.";
+      let errMsg = "Invalid OTP code.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
@@ -1011,6 +1045,7 @@ async function sendNewMobOtp(){
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: newPhone, action: "change_new", limit: 5 })
     });
+    let data = {}; try{ data=await res.json(); }catch(e){}
     if(res.ok){
       statusEl.textContent = "OTP sent to new number!";
       statusEl.style.color = "#2e7d32";
@@ -1018,7 +1053,13 @@ async function sendNewMobOtp(){
       $("newOtpBtnWrapper").className = "btn-otp-container";
       $("newOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="sendNewMobOtp()">Resend OTP</button>`;
     } else {
-      statusEl.textContent = "Could not send OTP to new number.";
+      let errMsg = "Could not send OTP to new number.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
@@ -1055,7 +1096,13 @@ async function verifyNewMobOtp(){
       showAppMessage("Mobile Number updated successfully!", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
-      statusEl.textContent = "Invalid OTP code.";
+      let errMsg = "Invalid OTP code.";
+      if(data && data.error) {
+        if(typeof data.error === 'string') errMsg = data.error;
+        else if(data.error.message) errMsg = data.error.message;
+        else errMsg = JSON.stringify(data.error);
+      }
+      statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e){
@@ -1126,7 +1173,6 @@ async function googleSignIn(){
   }   
 }   
 
-/* === NATIVE ANDROID SYSTEM INTERACTION FUNCTIONS === */
 async function nativeGoogleLogin(idToken){   
   try{   
     if(!idToken) throw new Error("Google ID token was not received.");   
@@ -1200,7 +1246,6 @@ auth.onAuthStateChanged(async user=>{
   if(user){
     const userEmail = (user.email || "").toLowerCase();
     
-    // Validate if user email is created/registered in Realtime Database
     if(userEmail) {
       showLoading("Checking account registration status...");
       const isRegistered = await isEmailRegisteredInDatabase(userEmail);
@@ -1282,7 +1327,6 @@ function triggerSupport(type){
   if(type==="ai_assistant") openAI("chat");   
 }   
   
-/* ================= WHATSAPP STYLE LIVE CALL SYSTEM ================= */  
 const OWNER_PEER_ID = "topper-stitching-owner";  
 let customerPeer = null;  
 let activeCall = null;  
