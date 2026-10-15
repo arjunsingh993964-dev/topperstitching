@@ -49,7 +49,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}   
 .location-btn{background:#2e7d32!important;margin-top:12px!important}   
 .location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}   
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}   
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}.nav-item.active{color:#0d47a1}   
 .cart-badge{position:absolute;top:2px;right:25%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px}   
@@ -88,7 +88,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
-@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}}
+@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
 .call-info h2{font-size:24px;margin-top:15px;font-weight:600;}
 .call-info p{font-size:15px;opacity:0.8;margin-top:5px;}
 .call-controls-row{display:flex;gap:20px;margin-bottom:40px;align-items:center;}
@@ -814,11 +814,9 @@ async function confirmOtpVerification(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success) {
-      // Firebase Authentication mein bhi user create karein taaki Email & Password login kaam kare
       try {
         await auth.createUserWithEmailAndPassword(email, password);
       } catch(authErr) {
-        // Agar user pehle se auth mein hai toh ignore karein
         console.log("Auth create note:", authErr);
       }
 
@@ -867,11 +865,22 @@ async function triggerMobileLoginOtp(){
     return;
   }
 
-  statusEl.textContent = "Sending Login OTP...";
+  statusEl.textContent = "Checking mobile registration...";
   statusEl.style.color = "#1565c0";
-  showLoading("Sending Login OTP...");
+  showLoading("Checking registered mobile...");
 
   try {
+    // Check if phone exists in Database
+    const phoneExists = await isPhoneRegisteredInDatabase(phone);
+    if (!phoneExists) {
+      hideLoading();
+      statusEl.textContent = "Mobile number not registered. Please create an account first.";
+      statusEl.style.color = "#d32f2f";
+      showAppMessage("Mobile number is not registered.\nPlease click 'Create Account' to register first.", "⚠️");
+      return;
+    }
+
+    $("authLoadingText").textContent = "Sending Login OTP...";
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -890,7 +899,7 @@ async function triggerMobileLoginOtp(){
       $("mobOtpBtnWrapper").className = "btn-otp-container";
       $("mobOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerMobileLoginOtp()">Resend OTP</button>`;
     } else {
-      let errMsg = "Mobile number not registered.";
+      let errMsg = "Could not send OTP.";
       if(data && data.error) {
         if(typeof data.error === 'string') errMsg = data.error;
         else if(data.error.message) errMsg = data.error.message;
@@ -930,8 +939,9 @@ async function confirmMobileLoginOtp(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success){
+      // Fetch details from verified_users table using phone number
       const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
-      let matchedName = data.name || "User";
+      let matchedName = "";
       let matchedEmail = "";
 
       if(userSnap.exists()){
@@ -944,6 +954,13 @@ async function confirmMobileLoginOtp(){
         });
       }
 
+      if(!matchedEmail || !matchedName) {
+        hideLoading();
+        statusEl.textContent = "Account details not found. Please create an account.";
+        statusEl.style.color = "#d32f2f";
+        return;
+      }
+
       hideLoading();
       statusEl.textContent = "Login Verified!";
       statusEl.style.color = "#2e7d32";
@@ -951,7 +968,7 @@ async function confirmMobileLoginOtp(){
       currentUser = {
         uid: "mob_" + phone,
         displayName: matchedName,
-        email: matchedEmail || (phone + "@topperstitching.com"),
+        email: matchedEmail,
         photoURL: getSavedAvatar(),
         getIdToken: async () => "mock_token"
       };
