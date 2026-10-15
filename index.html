@@ -62,6 +62,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .cart-btn-remove{background:#ffebee;color:#c62828;border:0;padding:4px 10px;font-size:12px;font-weight:bold;border-radius:4px;cursor:pointer;margin-top:5px}   
 .order-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px #0001;font-size:13px}   
 .order-header{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}   
+/* Custom Tracker Timeline Styles */  
 .tracker-timeline{margin:12px 0 6px 0;padding-left:10px;border-left:2px dashed #1565c0;display:flex;flex-direction:column;gap:8px}  
 .tracker-step{display:flex;align-items:center;gap:10px;font-size:13px;color:#555}  
 .tracker-step.completed{color:#2e7d32;font-weight:bold}  
@@ -87,7 +88,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .auth-loading-title{font-size:17px;font-weight:700;color:#1a237e;margin-top:16px}   
 .auth-loading-subtitle{font-size:13px;color:#666;margin-top:6px}   
 @keyframes authSpin{to{transform:rotate(360deg)}}   
-@media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   
+@media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   /* ===== WHATSAPP STYLE CALL SCREEN (CUSTOMER) ===== */
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
 @keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
@@ -101,6 +102,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .btn-speaker{background:rgba(255,255,255,0.2);color:#fff;}
 .btn-speaker.active{background:#fff;color:#333;}
 .btn-end-call{background:#dc3545;color:#fff;width:70px;height:70px;font-size:28px;}
+
+/* ===== AI ASSISTANT PANEL ===== */
 #aiPanel{display:none;position:fixed;inset:0;z-index:1500;background:#f0f2f5;flex-direction:column}
 .ai-head{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:max(12px,env(safe-area-inset-top))}
 .ai-head-title{font-size:16px;font-weight:800;color:#ffab00}
@@ -125,10 +128,9 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-mic{background:#2e7d32}
 .ai-mic.on{background:#d32f2f}
 </style>
-</head>  
-<body>  
 
-<div id="callScreenModal">  
+</head>  
+<body>  <!-- WHATSAPP STYLE CALL SCREEN MODAL -->  <div id="callScreenModal">  
   <div>  
     <div style="font-size:14px; letter-spacing:1px; opacity:0.8; margin-top:20px;">TOPPER STITCHING CALL</div>  
   </div>  
@@ -144,30 +146,19 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>  
 </div>  
 <audio id="customerAudio" autoplay></audio>  
-<audio id="dialToneAudio" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>  
-
-<div id="authLoading">  
+<audio id="dialToneAudio" src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" loop></audio>  <div id="authLoading">  
   <div class="auth-loader"></div>  
   <div class="auth-loading-title" id="authLoadingText">Checking your account...</div>  
-</div>  
-
-<header>  
+</div>  <header>  
   <div>  
     <div class="brand-title">TOPPER STITCHING</div>  
     <div class="brand-subtitle">Trusted Sewing Machines and Quality Service</div>  
   </div>  
   <button class="auth-header-btn" id="authBtn" onclick="handleAuthAction()">Sign In</button>  
-</header>  
-
-<div class="banner">  
+</header>  <div class="banner">  
   <h2>Your Trusted Sewing Machine and Parts Store</h2>  
   <p>Best Quality, Fair Prices and Excellent Service</p>  
-</div>  
-
-<div id="authError" class="auth-error"></div>  
-
-<!-- HOME VIEW -->  
-<div id="homeView" class="view-section active-view">  
+</div>  <div id="authError" class="auth-error"></div>  <!-- HOME VIEW -->  <div id="homeView" class="view-section active-view">  
   <div class="products">  
     <div class="card">   
       <div>   
@@ -188,169 +179,163 @@ button:disabled{opacity:.7;cursor:not-allowed}
         <button class="btn-online" onclick="openOrderForm('Topper SV Tailor',4500)">💳 Pay Online</button>   
         <button class="btn-cart" onclick="toggleCart('Topper SV Tailor',4500,this)">🛒 Add to Cart</button>   
       </div>   
-    </div>   
-
-    <div class="card">   
-      <div>   
-        <div class="img-container"><img src="IMG_20260829_175005.png" alt="Topper SV Tailor Deluxe"></div>   
-        <div class="card-details">   
-          <h3>Topper SV Tailor Deluxe</h3><div class="price">₹4,500</div>   
-          <div class="specs">   
-            <div><span>Brand:</span> Topper Stitching</div>   
-            <div><span>Model:</span> SV Tailor Deluxe</div>   
-            <div><span>Type:</span> Sewing Machine Head Only</div>   
-            <div><span>Warranty:</span> 5 Years</div>   
-            <div><span>Guarantee:</span> None</div>   
-            <div><span>Accessories:</span> Accessories Box Included</div>   
-          </div>   
-        </div>   
-      </div>   
-      <div>   
-        <button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe',4500)">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="toggleCart('Topper SV Tailor Deluxe',4500,this)">🛒 Add to Cart</button>   
+    </div>   <div class="card">   
+  <div>   
+    <div class="img-container"><img src="IMG_20260829_175005.png" alt="Topper SV Tailor Deluxe"></div>   
+    <div class="card-details">   
+      <h3>Topper SV Tailor Deluxe</h3><div class="price">₹4,500</div>   
+      <div class="specs">   
+        <div><span>Brand:</span> Topper Stitching</div>   
+        <div><span>Model:</span> SV Tailor Deluxe</div>   
+        <div><span>Type:</span> Sewing Machine Head Only</div>   
+        <div><span>Warranty:</span> 5 Years</div>   
+        <div><span>Guarantee:</span> None</div>   
+        <div><span>Accessories:</span> Accessories Box Included</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openOrderForm('Topper SV Tailor Deluxe',4500)">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="toggleCart('Topper SV Tailor Deluxe',4500,this)">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="img-container"><img src="IMG_20260829_174949.png" alt="Bag Closer Single Needle"></div>   
-        <div class="card-details">   
-          <h3>Bag Closer Single Needle</h3><div class="price">₹6,200</div>   
-          <div class="specs">   
-            <div><span>Brand:</span> Topper Stitching</div>   
-            <div><span>Model:</span> Single Needle</div>   
-            <div><span>Type:</span> Heavy-Duty Bag Closer Machine</div>   
-            <div><span>Warranty:</span> 2 Service Visits</div>   
-            <div><span>Guarantee:</span> None</div>   
-            <div><span>Accessories:</span> Accessories Box Included</div>   
-          </div>   
-        </div>   
-      </div>   
-      <div>   
-        <button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle',6200)">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="toggleCart('Bag Closer Single Needle',6200,this)">🛒 Add to Cart</button>   
+<div class="card">   
+  <div>   
+    <div class="img-container"><img src="IMG_20260829_174949.png" alt="Bag Closer Single Needle"></div>   
+    <div class="card-details">   
+      <h3>Bag Closer Single Needle</h3><div class="price">₹6,200</div>   
+      <div class="specs">   
+        <div><span>Brand:</span> Topper Stitching</div>   
+        <div><span>Model:</span> Single Needle</div>   
+        <div><span>Type:</span> Heavy-Duty Bag Closer Machine</div>   
+        <div><span>Warranty:</span> 2 Service Visits</div>   
+        <div><span>Guarantee:</span> None</div>   
+        <div><span>Accessories:</span> Accessories Box Included</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openOrderForm('Bag Closer Single Needle',6200)">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="toggleCart('Bag Closer Single Needle',6200,this)">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="img-container"><img src="file_00000000a1f88211baaa2ea57e9f39f9.png" alt="Topper TA1 Model"></div>   
-        <div class="card-details">   
-          <h3>Topper TA1 Model</h3><div class="price">₹6,500</div>   
-          <div class="specs">   
-            <div><span>Brand:</span> Topper Stitching</div>   
-            <div><span>Model:</span> TA1 Umbrella</div>   
-            <div><span>Type:</span> Sewing Machine Head Only</div>   
-            <div><span>Warranty:</span> 5 Years</div>   
-            <div><span>Guarantee:</span> None</div>   
-            <div><span>Accessories:</span> Accessories Box Included</div>   
-          </div>   
-        </div>   
-      </div>   
-      <div>   
-        <button class="btn-online" onclick="openOrderForm('Topper TA1 Model',6500)">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="toggleCart('Topper TA1 Model',6500,this)">🛒 Add to Cart</button>   
+<div class="card">   
+  <div>   
+    <div class="img-container"><img src="file_00000000a1f88211baaa2ea57e9f39f9.png" alt="Topper TA1 Model"></div>   
+    <div class="card-details">   
+      <h3>Topper TA1 Model</h3><div class="price">₹6,500</div>   
+      <div class="specs">   
+        <div><span>Brand:</span> Topper Stitching</div>   
+        <div><span>Model:</span> TA1 Umbrella</div>   
+        <div><span>Type:</span> Sewing Machine Head Only</div>   
+        <div><span>Warranty:</span> 5 Years</div>   
+        <div><span>Guarantee:</span> None</div>   
+        <div><span>Accessories:</span> Accessories Box Included</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openOrderForm('Topper TA1 Model',6500)">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="toggleCart('Topper TA1 Model',6500,this)">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="slider-container">   
-          <button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>   
-          <div class="slider-track" id="tableSlider">   
-            <div class="slide"><img src="wood-1.png" alt="Light Wooden"><div class="slide-name">Light Wooden</div></div>   
-            <div class="slide"><img src="wood-2.png" alt="Grey Wooden"><div class="slide-name">Grey Wooden</div></div>   
-            <div class="slide"><img src="wood-3.png" alt="Light Dark Wooden"><div class="slide-name">Light Dark Wooden</div></div>   
-            <div class="slide"><img src="wood-4.png" alt="Dark Wooden"><div class="slide-name">Dark Wooden</div></div>   
-          </div>   
-          <button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>   
-        </div>   
-        <div class="card-details">   
-          <h3>Sewing Machine Top Table</h3><div class="price">₹600</div>   
-          <div class="specs">   
-            <div><span>Model:</span> SV / TA1</div>   
-            <div><span>Color:</span> <span id="selectedTableColorText">Light Wooden</span></div>   
-            <div><span>Type:</span> Top Table Only</div>   
-            <div><span>Warranty / Guarantee:</span> None</div>   
-          </div>   
-        </div>   
+<div class="card">   
+  <div>   
+    <div class="slider-container">   
+      <button class="slider-btn slider-prev" onclick="slideImages('tableSlider',-1)">❮</button>   
+      <div class="slider-track" id="tableSlider">   
+        <div class="slide"><img src="wood-1.png" alt="Light Wooden"><div class="slide-name">Light Wooden</div></div>   
+        <div class="slide"><img src="wood-2.png" alt="Grey Wooden"><div class="slide-name">Grey Wooden</div></div>   
+        <div class="slide"><img src="wood-3.png" alt="Light Dark Wooden"><div class="slide-name">Light Dark Wooden</div></div>   
+        <div class="slide"><img src="wood-4.png" alt="Dark Wooden"><div class="slide-name">Dark Wooden</div></div>   
       </div>   
-      <div>   
-        <button class="btn-online" onclick="openTableOrderForm()">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="addTableToCart(this)">🛒 Add to Cart</button>   
+      <button class="slider-btn slider-next" onclick="slideImages('tableSlider',1)">❯</button>   
+    </div>   
+    <div class="card-details">   
+      <h3>Sewing Machine Top Table</h3><div class="price">₹600</div>   
+      <div class="specs">   
+        <div><span>Model:</span> SV / TA1</div>   
+        <div><span>Color:</span> <span id="selectedTableColorText">Light Wooden</span></div>   
+        <div><span>Type:</span> Top Table Only</div>   
+        <div><span>Warranty / Guarantee:</span> None</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openTableOrderForm()">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="addTableToCart(this)">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="img-container"><img src="IMG_20260829_174934.png" alt="Jupiter Scissors"></div>   
-        <div class="card-details">   
-          <h3>Jupiter Scissors</h3><div class="price">₹300</div>   
-          <div class="specs">   
-            <div><span>Brand:</span> Jupiter Scissors</div>   
-            <div><span>Size:</span> Size 10</div>   
-            <div><span>Type:</span> Scissors Only</div>   
-            <div><span>Warranty / Guarantee:</span> None</div>   
-            <div class="out-of-stock">Out of Stock</div>   
-          </div>   
-        </div>   
-      </div>   
-      <div>   
-        <button class="btn-online" onclick="showOutOfStock()">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="showOutOfStock()">🛒 Add to Cart</button>   
+<div class="card">   
+  <div>   
+    <div class="img-container"><img src="IMG_20260829_174934.png" alt="Jupiter Scissors"></div>   
+    <div class="card-details">   
+      <h3>Jupiter Scissors</h3><div class="price">₹300</div>   
+      <div class="specs">   
+        <div><span>Brand:</span> Jupiter Scissors</div>   
+        <div><span>Size:</span> Size 10</div>   
+        <div><span>Type:</span> Scissors Only</div>   
+        <div><span>Warranty / Guarantee:</span> None</div>   
+        <div class="out-of-stock">Out of Stock</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="showOutOfStock()">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="showOutOfStock()">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="img-container"><img src="IMG_20260829_174935.png" alt="Topper Karhai 130K"></div>   
-        <div class="card-details">   
-          <h3>Topper Karhai (130K)</h3><div class="price">₹7,500</div>   
-          <div class="specs">   
-            <div><span>Brand:</span> Topper Stitching</div>   
-            <div><span>Model:</span> 130K Karhai</div>   
-            <div><span>Type:</span> Sewing Machine Head Only</div>   
-            <div><span>Warranty:</span> 5 Years</div>   
-            <div><span>Guarantee:</span> None</div>   
-            <div><span>Accessories:</span> Accessories Box Included</div>   
-          </div>   
-        </div>   
-      </div>   
-      <div>   
-        <button class="btn-online" onclick="openOrderForm('Topper Karhai (130K)',7500)">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="toggleCart('Topper Karhai (130K)',7500,this)">🛒 Add to Cart</button>   
+<div class="card">   
+  <div>   
+    <div class="img-container"><img src="IMG_20260829_174935.png" alt="Topper Karhai 130K"></div>   
+    <div class="card-details">   
+      <h3>Topper Karhai (130K)</h3><div class="price">₹7,500</div>   
+      <div class="specs">   
+        <div><span>Brand:</span> Topper Stitching</div>   
+        <div><span>Model:</span> 130K Karhai</div>   
+        <div><span>Type:</span> Sewing Machine Head Only</div>   
+        <div><span>Warranty:</span> 5 Years</div>   
+        <div><span>Guarantee:</span> None</div>   
+        <div><span>Accessories:</span> Accessories Box Included</div>   
       </div>   
     </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openOrderForm('Topper Karhai (130K)',7500)">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="toggleCart('Topper Karhai (130K)',7500,this)">🛒 Add to Cart</button>   
+  </div>   
+</div>   
 
-    <div class="card">   
-      <div>   
-        <div class="img-container" style="font-size:70px">🧪</div>   
-        <div class="card-details">   
-          <h3>Product Testing</h3><div class="price">₹10</div>   
-          <div class="specs">   
-            <div><span>Type:</span> Test product for checking online payment</div>   
-            <div><span>Note:</span> Not a real item. Only for testing payment.</div>   
-          </div>   
-        </div>   
+<div class="card">   
+  <div>   
+    <div class="img-container" style="font-size:70px">🧪</div>   
+    <div class="card-details">   
+      <h3>Product Testing</h3><div class="price">₹10</div>   
+      <div class="specs">   
+        <div><span>Type:</span> Test product for checking online payment</div>   
+        <div><span>Note:</span> Not a real item. Only for testing payment.</div>   
       </div>   
-      <div>   
-        <button class="btn-online" onclick="openOrderForm('Product Testing',10)">💳 Pay Online</button>   
-        <button class="btn-cart" onclick="toggleCart('Product Testing',10,this)">🛒 Add to Cart</button>   
-      </div>   
-    </div>
-  </div>    
+    </div>   
+  </div>   
+  <div>   
+    <button class="btn-online" onclick="openOrderForm('Product Testing',10)">💳 Pay Online</button>   
+    <button class="btn-cart" onclick="toggleCart('Product Testing',10,this)">🛒 Add to Cart</button>   
+  </div>   
+</div>
 
-  <div class="footer-address">  
+  </div>    <div class="footer-address">  
     <strong>📍 Store Address</strong>  
     Main Road, Sasamusa, Gopalganj, Bihar<br><br>  
     Email: topperstitching@gmail.com  
     <button class="btn-submit location-btn" onclick="requestUserLocation()">📍 Update My Live Location</button>  
     <div class="location-status" id="locationStatus"></div>  
   </div>  
-</div>  
-
-<!-- CART VIEW -->  
-<div id="cartView" class="view-section">  
+</div>  <!-- CART VIEW -->  <div id="cartView" class="view-section">  
   <div class="cart-container">  
     <h3>🛒 Your Shopping Cart</h3>  
     <div id="cartItemsList"></div>  
@@ -359,18 +344,12 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <button class="btn-submit" onclick="checkoutCart()">💳 Pay for All Items</button>  
     </div>  
   </div>  
-</div>  
-
-<!-- ORDERS VIEW -->  
-<div id="ordersView" class="view-section">  
+</div>  <!-- ORDERS VIEW -->  <div id="ordersView" class="view-section">  
   <div class="orders-container">  
     <h3>📦 My Orders</h3>  
     <div id="ordersList"><p class="empty-orders">Loading orders...</p></div>  
   </div>  
-</div>  
-
-<!-- PROFILE VIEW -->  
-<div id="profileView" class="view-section">  
+</div>  <!-- PROFILE VIEW -->  <div id="profileView" class="view-section">  
   <div class="profile-container">  
     <div style="text-align:center;margin-bottom:15px">  
       <img id="profilePageImg" src="m1.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">  
@@ -380,10 +359,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>  
     <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Sign In with Google</button>  
 
-    <!-- CREATE ACCOUNT SECTION (WITH TEXTBEE OTP VERIFICATION) -->
+    <!-- CREATE ACCOUNT SECTION (WITH MOBILE & EMAIL VERIFICATION + 3 LIMIT LOCK) -->
     <div style="margin-top: 15px; background: #fff8e1; border: 1px dashed #ffa000; padding: 12px; border-radius: 8px; text-align: left;">
       <h4 style="color: #d84315; font-size: 14px; margin-bottom: 6px;">📝 Create Account & Verify</h4>
-      <p style="font-size: 11px; color: #555; margin-bottom: 8px;">Register with Email & Mobile (Max 3 SMS Verification Limits)</p>
+      <p style="font-size: 11px; color: #555; margin-bottom: 8px;">Register with Email & Mobile (Max 3 SMS Verification Limits per user)</p>
       
       <div class="form-group" style="margin-bottom: 8px;">
         <input type="text" id="regName" placeholder="Full Name" style="font-size: 13px; padding: 8px;">
@@ -404,34 +383,32 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
 
     <div class="profile-section-box">  
-      <h4>Support</h4>  
-      <ul>  
-        <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant (Chat + Voice)</li>  
-        <li onclick="startWebRtcCall()" style="color:#2e7d32; font-weight:bold;">📞 Call Support (Live Web Call)</li>  
-        <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>  
-      </ul>  
-    </div>  
-
-    <div class="profile-section-box">  
-      <h4>Policies</h4>  
-      <ul>  
-        <li onclick="openPolicyModal('terms')">📄 Terms and Conditions</li>  
-        <li onclick="openPolicyModal('refund')">🔄 Refund Policy</li>  
-      </ul>  
-    </div>  
-
-    <div class="profile-section-box">  
-      <h4>Company Registration</h4>  
-      <ul>  
-        <li>🏢 GSTIN Registered</li>  
-        <li>📜 UDYAM Registered</li>  
-      </ul>  
-    </div>
-  </div>  
+  <h4>Support</h4>  
+  <ul>  
+    <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant (Chat + Voice)</li>  
+    <li onclick="startWebRtcCall()" style="color:#2e7d32; font-weight:bold;">📞 Call Support (Live Web Call)</li>  
+    <li><a href="mailto:topperstitching@gmail.com?subject=Support%20Request" onclick="return openNativeEmail('topperstitching@gmail.com','Support Request')">📧 Email Support</a></li>  
+  </ul>  
 </div>  
 
-<!-- BOTTOM NAVIGATION -->  
-<div class="bottom-nav">  
+<div class="profile-section-box">  
+  <h4>Policies</h4>  
+  <ul>  
+    <li onclick="openPolicyModal('terms')">📄 Terms and Conditions</li>  
+    <li onclick="openPolicyModal('refund')">🔄 Refund Policy</li>  
+  </ul>  
+</div>  
+
+<div class="profile-section-box">  
+  <h4>Company Registration</h4>  
+  <ul>  
+    <li>🏢 GSTIN Registered</li>  
+    <li>📜 UDYAM Registered</li>  
+  </ul>  
+</div>
+
+  </div>  
+</div>  <!-- BOTTOM NAVIGATION -->  <div class="bottom-nav">  
   <button class="nav-item active" onclick="switchTab('homeView',this)">  
     <span class="icon">🏠</span>Home  
   </button>  
@@ -444,10 +421,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <button class="nav-item" onclick="switchTab('profileView',this)">  
     <span class="icon">👤</span>Profile  
   </button>  
-</div>  
-
-<!-- ORDER MODAL -->  
-<div id="orderModal" class="modal">  
+</div>  <!-- ORDER MODAL -->  <div id="orderModal" class="modal">  
   <div class="modal-content">  
     <h3>💳 Order and Payment</h3>  
     <div class="delivery-badge">  
@@ -473,24 +447,18 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>  
     <div class="qr-box">  
       <p style="font-size:15px;font-weight:700">🔒 Secure online payment</p>  
-      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below to pay securely through Cashfree.</p>  
+      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below. Choose Google Pay, PhonePe, Paytm or any UPI app, or pay by card or net banking. Your order is confirmed automatically after the payment is received.</p>  
     </div>  
     <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>  
     <button class="btn-close" onclick="cancelOrderForm()" style="margin-top:6px">Cancel</button>  
   </div>  
-</div>  
-
-<!-- POLICY MODAL -->  
-<div id="policyModal" class="modal">  
+</div>  <!-- POLICY MODAL -->  <div id="policyModal" class="modal">  
   <div class="modal-content">  
     <h3 id="policyModalTitle">Policy</h3>  
     <p id="policyModalText" style="font-size:13px;color:#444;line-height:1.6;white-space:pre-line;text-align:left;margin:15px 0"></p>  
     <button class="btn-close" onclick="closePolicyModal()">Close</button>  
   </div>  
-</div>  
-
-<!-- AVATAR MODAL -->  
-<div id="avatarModal" class="modal">  
+</div>  <!-- AVATAR MODAL -->  <div id="avatarModal" class="modal">  
   <div class="modal-content" style="max-width:320px;text-align:center">  
     <h3>Choose Profile Photo</h3>  
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0">  
@@ -503,10 +471,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>  
     <button class="btn-close" onclick="closeAvatarPicker()">Close</button>  
   </div>  
-</div>  
-
-<!-- AI ASSISTANT PANEL -->  
-<div id="aiPanel">  
+</div>  <!-- AI ASSISTANT PANEL -->  <div id="aiPanel">  
   <div class="ai-head">  
     <div>  
       <div class="ai-head-title">🤖 Topper AI Assistant</div>  
@@ -524,15 +489,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <input type="text" id="aiInput" placeholder="Type your question..." maxlength="1000" autocomplete="off">  
     <button class="ai-btn ai-send" id="aiSendBtn" onclick="sendAIText()" aria-label="Send">➤</button>  
   </div>  
-</div>  
-
-<!-- FIREBASE SDKS -->  
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>  
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>  
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>  
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>  
-
-<script>  
+</div>  <!-- FIREBASE SDKS -->  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>  <script>  
 "use strict";   
 const firebaseConfig={   
   apiKey:"AIzaSyDrsMo4f15JZxUk8LkNYqlYqfzEHOQ8Q4w",   
@@ -563,9 +520,8 @@ let locationRequestBusy=false;
   
 const $=id=>document.getElementById(id);   
 const ORDER_DRAFT_KEY="topper_order_draft_v1";   
-const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev"; // Aapka Cloudflare Worker URL
 
-/* --- CREATE ACCOUNT & SMS VERIFICATION LOGIC (TEXTBEE) --- */
+/* --- CREATE ACCOUNT & SMS VERIFICATION LOGIC (LIMIT 3 PER USER) --- */
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
@@ -582,7 +538,7 @@ async function triggerCreateAccountVerification(){
   statusEl.style.color = "#1565c0";
 
   try {
-    const res = await fetch(PAY_API_BASE + "/send-sms", {
+    const res = await fetch("https://topper-ai.ankiteeepad009.workers.dev/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: phone, email: email, name: name })
@@ -596,12 +552,12 @@ async function triggerCreateAccountVerification(){
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit poori ho chuki hai.");
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit (3 max) poori ho chuki hai.");
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
-    statusEl.textContent = "Network error: " + (e.message || e);
+    statusEl.textContent = "Network error. Traccar SMS Gateway connection check karein: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -621,7 +577,7 @@ async function confirmOtpVerification(){
 
   statusEl.textContent = "OTP verify ho raha hai...";
   try {
-    const res = await fetch(PAY_API_BASE + "/verify-sms", {
+    const res = await fetch("https://topper-ai.ankiteeepad009.workers.dev/verify-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: phone, otp: otp, email: email })
@@ -631,6 +587,14 @@ async function confirmOtpVerification(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success) {
+      const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
+      await db.ref("verified_users/" + cleanEmailKey).set({
+        verified: true,
+        phone: phone,
+        name: name,
+        verifiedAt: Date.now()
+      });
+
       statusEl.textContent = "Verification Safal! Ab aap Sign In kar sakte hain.";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
@@ -654,7 +618,11 @@ function hideLoading(){
   $("authLoading").style.display="none";   
 }   
 function escapeHtml(value){   
-  return String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");   
+  return String(value??"")   
+    .replace(/&/g,"&amp;")   
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;")   
+    .replace(/"/g,"&quot;")   
+    .replace(/'/g,"&#39;");   
 }   
 function showAppMessage(message,icon="⚠️"){   
   const old=$("appMessageBox");   
@@ -695,6 +663,10 @@ async function googleSignIn(){
   authBusy=true;   
   showLoading("Opening Google Sign-In...");   
   try{   
+    if(window.AndroidApp&&typeof window.AndroidApp.signIn==="function"){   
+      window.AndroidApp.signIn();   
+      return;   
+    }   
     const provider=new firebase.auth.GoogleAuthProvider();   
     await auth.signInWithPopup(provider);   
   }catch(error){   
@@ -703,7 +675,33 @@ async function googleSignIn(){
     showAuthError("Google sign-in failed: "+(error.message||error));   
   }   
 }   
-
+  
+async function nativeGoogleLogin(idToken){   
+  try{   
+    if(!idToken) throw new Error("Google ID token was not received.");   
+    showLoading("Signing in to your account...");   
+    const credential=firebase.auth.GoogleAuthProvider.credential(idToken);   
+    await auth.signInWithCredential(credential);   
+  }catch(error){   
+    showAuthError("Firebase sign-in failed: "+(error.message||error));   
+  }finally{   
+    authBusy=false;   
+    if(authStateResolved) hideLoading();   
+  }   
+}   
+  
+function nativeGoogleLoginError(message){   
+  authBusy=false;   
+  hideLoading();   
+  showAuthError("Google sign-in failed: "+String(message||"Unknown error"));   
+}   
+  
+window.nativeGoogleLogin=nativeGoogleLogin;   
+window.nativeGoogleLoginError=nativeGoogleLoginError;   
+window.nativeLocationSuccess=nativeLocationSuccess;   
+window.nativeLocationReceived=nativeLocationReceived;   
+window.nativeLocationError=nativeLocationError;   
+  
 function handleAuthAction(){   
   if(currentUser) googleSignOut();   
   else googleSignIn();   
@@ -755,42 +753,25 @@ function updateAuthUI(){
   
 auth.onAuthStateChanged(async user=>{   
   if(user){
-    showLoading("Checking account registration...");
-    try {
-      const idToken = await user.getIdToken();
-      const res = await fetch(PAY_API_BASE + "/check-user", {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + idToken }
-      });
-      
-      const data = await res.json();
-      
-      if(!res.ok || !data.registered){
-        hideLoading();
-        await auth.signOut();
-        currentUser = null;
-        updateAuthUI();
-        showAppMessage("Google account not exist. Please create an account.", "⚠️");
-        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
-        return;
-      }
+    const userEmail = (user.email || "").toLowerCase();
+    const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
 
-      currentUser = user;   
-      authStateResolved = true;   
-      updateAuthUI();   
-      loadUserOrders(user.uid);   
-
-      if(data.phone && $("custPhone")) {
-        $("custPhone").value = data.phone;
-      }
-    } catch(e) {
+    showLoading("Verification check ho raha hai...");
+    const snapshot = await db.ref("verified_users/" + cleanEmailKey).once("value");
+    
+    if(!snapshot.exists() || !snapshot.val().verified){
       hideLoading();
       await auth.signOut();
       currentUser = null;
       updateAuthUI();
-      showAppMessage("Google account not exist. Please create an account.", "⚠️");
-      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+      showAppMessage("Aapka account verified nahi hai!\nPehle niche 'Create Account & Verify' section se OTP verification poora karein.", "⚠️");
+      return;
     }
+
+    currentUser = user;   
+    authStateResolved = true;   
+    updateAuthUI();   
+    loadUserOrders(user.uid);   
   }else{   
     currentUser=null;   
     authStateResolved=true;   
@@ -1168,6 +1149,7 @@ function prepareNewPayment(productName,price){
   selectedProduct=String(productName);   
   selectedPrice=String(price);   
   $("custName").value=currentUser?.displayName||"";   
+  $("custPhone").value="";   
   $("custAddress").value="";   
   $("termsCheck").checked=false;   
   $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");   
@@ -1232,6 +1214,9 @@ function getDefaultDeliveryDate() {
   return `${day}/${month}/${year}`;  
 }  
   
+/* ================= PAYMENT (Cashfree, confirmed by the server) ================= */  
+const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";  
+const SITE_BASE_URL="https://arjunsingh993964-dev.github.io/topperstitching/";  
 const PRODUCT_PRICES={  
   "Topper SV Tailor":4500,  
   "Topper SV Tailor Deluxe":4500,  
@@ -1283,7 +1268,7 @@ async function submitOnlineOrder(){
   const address=$("custAddress").value.trim();   
   if(!name){ showAppMessage("Please enter your full name.","📝"); return; }   
   if(!validatePhone(true)){ return; }   
-  if(!address||address.length<8){ showAppMessage("Please enter a complete delivery address.","🏠"); return; }  
+  if(!address||address.length<8){ showAppMessage("Please enter a complete delivery address.","🏠"); return; }   
   
   const items=buildOrderItems();  
   const total=itemsTotal(items);  
@@ -1564,15 +1549,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   }catch(e){}  
   restoreOrderDraft();   
 });   
-</script>  
-
-<!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->  
-<script>  
+</script>  <!-- AI ASSISTANT (Gemini chat + Gemini Live voice) -->  <script>  
 "use strict";  
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";  
 const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";  
   
 const aiHistory = [];  
+const GUEST_KEY = "topper_ai_chat_guest";  
 let aiLoadedFor = null;  
 let aiBusy = false;  
 let aiWarned = false;  
@@ -1792,7 +1775,7 @@ async function startLive(){
   }catch(err){  
     live.active=false; setLiveUI(false);  
     const denied=err&&(err.name==="NotAllowedError"||err.name==="SecurityError");  
-    addAIMsg("sys",denied?"Microphone permission was not granted. Allow Microphone in settings and try again.":"Could not start the microphone: "+(err.message||err));  
+    addAIMsg("sys",denied?"Microphone permission was not granted. Allow Microphone in the app/browser settings and try again.":"Could not start the microphone: "+(err.message||err));  
     return;  
   }  
   if(!live.outCtx){  
@@ -1826,7 +1809,7 @@ async function connectLive(){
     const why=ev&&ev.reason?(" ("+ev.reason+")"):"";  
     const wasReady=live.ready;  
     stopLive(true);  
-    addAIMsg("sys",wasReady?"Live voice ended"+why+".":"Could not connect to live voice"+why+".");  
+    addAIMsg("sys",wasReady?"Live voice ended"+why+".":"Could not connect to live voice"+why+". Check your internet connection.");  
   };  
 }  
   
@@ -1950,7 +1933,5 @@ function handleAppBack(){
   return false;  
 }  
 window.handleAppBack=handleAppBack;  
-</script>  
-
-</body>  
+</script>  </body>  
 </html>
