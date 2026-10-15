@@ -51,7 +51,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}   
 .location-btn{background:#2e7d32!important;margin-top:12px!important}   
 .location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}   
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-around:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}   
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}.nav-item.active{color:#0d47a1}   
 .cart-badge{position:absolute;top:2px;right:25%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px}   
@@ -718,6 +718,10 @@ async function googleSignIn(){
   authBusy=true;   
   showLoading("Opening Google Sign-In...");   
   try{   
+    if(window.AndroidApp && typeof window.AndroidApp.signIn === "function"){   
+      window.AndroidApp.signIn();   
+      return;   
+    }   
     const provider=new firebase.auth.GoogleAuthProvider();   
     await auth.signInWithPopup(provider);   
   }catch(error){   
@@ -726,6 +730,33 @@ async function googleSignIn(){
     showAuthError("Google sign-in failed: "+(error.message||error));   
   }   
 }   
+
+/* === NATIVE ANDROID SYSTEM INTERACTION FUNCTIONS === */
+async function nativeGoogleLogin(idToken){   
+  try{   
+    if(!idToken) throw new Error("Google ID token was not received.");   
+    showLoading("Signing in to your account...");   
+    const credential=firebase.auth.GoogleAuthProvider.credential(idToken);   
+    await auth.signInWithCredential(credential);   
+  }catch(error){   
+    showAuthError("Firebase sign-in failed: "+(error.message||error));   
+  }finally{   
+    authBusy=false;   
+    if(authStateResolved) hideLoading();   
+  }   
+}   
+  
+function nativeGoogleLoginError(message){   
+  authBusy=false;   
+  hideLoading();   
+  showAuthError("Google sign-in failed: "+String(message||"Unknown error"));   
+}   
+
+window.nativeGoogleLogin=nativeGoogleLogin;   
+window.nativeGoogleLoginError=nativeGoogleLoginError;   
+window.nativeLocationSuccess=nativeLocationSuccess;   
+window.nativeLocationReceived=nativeLocationReceived;   
+window.nativeLocationError=nativeLocationError;
 
 function handleAuthAction(){   
   if(currentUser) googleSignOut();   
