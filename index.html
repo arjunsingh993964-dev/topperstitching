@@ -11,7 +11,6 @@ body{background:#f0f2f5;padding-bottom:90px;color:#222}
 header{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:15px 12px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 10px #0003;display:flex;justify-content:space-between;align-items:center}   
 .brand-title{font-size:20px;font-weight:900;letter-spacing:1px;color:#ffab00;text-align:left}   
 .brand-subtitle{font-size:11px;color:#e0e0e0;margin-top:2px;text-align:left}   
-.user-pic{width:25px;height:25px;border-radius:50%;object-fit:cover}   
 .banner{background:#283593;color:#fff;padding:12px;text-align:center;border-bottom:3px solid #ffab00}   
 .banner h2{font-size:16px}.banner p{font-size:12px;opacity:.9;margin-top:3px}   
 .view-section{display:none}.active-view{display:block}   
@@ -50,7 +49,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}   
 .location-btn{background:#2e7d32!important;margin-top:12px!important}   
 .location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}   
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-around:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}   
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}.nav-item.active{color:#0d47a1}   
 .cart-badge{position:absolute;top:2px;right:25%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px}   
@@ -409,7 +408,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div id="createAccountView" class="view-section">
   <div class="create-acc-container profile-container">
     <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account</h3>
-    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Register with Email & Mobile (Max 3 SMS Verification Limits)</p>
+    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Register with Email & Mobile (OTP Required)</p>
     
     <div class="form-group" style="margin-bottom: 12px;">
       <label>Full Name:</label>
@@ -425,7 +424,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
     
     <div id="sendOtpBtnWrapper">
-      <button class="btn-submit" style="background: #2e7d32;" id="sendOtpBtn" onclick="triggerCreateAccountVerification()">Send Verification OTP (Limit 3)</button>
+      <button class="btn-submit" style="background: #2e7d32;" id="sendOtpBtn" onclick="triggerCreateAccountVerification()">Send Verification OTP</button>
     </div>
     
     <div id="verifBox" style="display:none; margin-top: 15px;">
@@ -689,6 +688,18 @@ const $=id=>document.getElementById(id);
 const ORDER_DRAFT_KEY="topper_order_draft_v1";   
 const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";
 
+/* --- CHECK IF EMAIL IS REGISTERED FUNCTION --- */
+async function isEmailRegisteredInDatabase(email) {
+  if (!email) return false;
+  const cleanEmailKey = email.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
+  try {
+    const snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
+    return snap.exists();
+  } catch (e) {
+    return false;
+  }
+}
+
 /* --- CREATE ACCOUNT LOGIC --- */
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
@@ -702,28 +713,28 @@ async function triggerCreateAccountVerification(){
     return;
   }
 
-  statusEl.textContent = "Checking account status & sending OTP...";
+  statusEl.textContent = "Sending Verification OTP...";
   statusEl.style.color = "#1565c0";
 
   try {
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, email: email, name: name })
+      body: JSON.stringify({ phone: phone, email: email, name: name, limit: 5 })
     });
     
     let data = {};
     try { data = await res.json(); } catch(e){}
 
     if(res.ok) {
-      statusEl.textContent = "OTP Sent! (Limits left: " + (data.remaining ?? 2) + ")";
+      statusEl.textContent = "OTP Sent!";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
 
       $("sendOtpBtnWrapper").className = "btn-otp-container";
       $("sendOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerCreateAccountVerification()">Resend OTP</button>`;
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit reached or already registered.");
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS limit exceeded or already registered.");
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
@@ -767,11 +778,11 @@ async function confirmOtpVerification(){
         verifiedAt: Date.now()
       });
 
-      statusEl.textContent = "Account Registered! Logging in...";
+      statusEl.textContent = "Account Registered!";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
       
-      showAppMessage("Account Verified! Please Login with Google or Email/Password.", "✅");
+      showAppMessage("Account Created Successfully! You can now Login.", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
       const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Invalid OTP code.");
@@ -802,7 +813,7 @@ async function triggerMobileLoginOtp(){
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, action: "login" })
+      body: JSON.stringify({ phone: phone, action: "login", limit: 5 })
     });
 
     let data = {};
@@ -882,8 +893,16 @@ async function loginWithEmailPassword(){
     return;
   }
 
-  statusEl.textContent = "Logging in...";
+  statusEl.textContent = "Checking account and credentials...";
   statusEl.style.color = "#1565c0";
+
+  // Check Database Registration First
+  const isReg = await isEmailRegisteredInDatabase(email);
+  if(!isReg) {
+    statusEl.textContent = "No account found with this email. Please click 'Create Account' first.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
 
   try {
     await auth.signInWithEmailAndPassword(email, password);
@@ -892,10 +911,7 @@ async function loginWithEmailPassword(){
     showAppMessage("Logged in successfully!", "✅");
     switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
   } catch(e) {
-    let msg = "Invalid Email or Password.";
-    if(e.code === 'auth/user-not-found') msg = "Account not found with this Email.";
-    if(e.code === 'auth/wrong-password') msg = "Incorrect Password.";
-    statusEl.textContent = msg;
+    statusEl.textContent = "Invalid Email or Password.";
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -923,7 +939,7 @@ async function sendCurrMobOtp(){
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, action: "change_curr" })
+      body: JSON.stringify({ phone: phone, action: "change_curr", limit: 5 })
     });
     if(res.ok){
       statusEl.textContent = "OTP sent to current number!";
@@ -993,7 +1009,7 @@ async function sendNewMobOtp(){
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: newPhone, action: "change_new" })
+      body: JSON.stringify({ phone: newPhone, action: "change_new", limit: 5 })
     });
     if(res.ok){
       statusEl.textContent = "OTP sent to new number!";
@@ -1183,8 +1199,23 @@ function updateAuthUI(){
 auth.onAuthStateChanged(async user=>{   
   if(user){
     const userEmail = (user.email || "").toLowerCase();
-    const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
+    
+    // Validate if user email is created/registered in Realtime Database
+    if(userEmail) {
+      showLoading("Checking account registration status...");
+      const isRegistered = await isEmailRegisteredInDatabase(userEmail);
+      if(!isRegistered) {
+        hideLoading();
+        await auth.signOut();
+        currentUser = null;
+        updateAuthUI();
+        showAppMessage("No account found with " + userEmail + ".\nPlease click 'Create Account' first to register.", "⚠️");
+        switchTab("profileView", null);
+        return;
+      }
+    }
 
+    const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
     showLoading("Verifying account status...");
     try {
       let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
