@@ -88,7 +88,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
-@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
+@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}}
 .call-info h2{font-size:24px;margin-top:15px;font-weight:600;}
 .call-info p{font-size:15px;opacity:0.8;margin-top:5px;}
 .call-controls-row{display:flex;gap:20px;margin-bottom:40px;align-items:center;}
@@ -419,6 +419,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <input type="email" id="regEmail" placeholder="Enter your email address">
     </div>
     <div class="form-group" style="margin-bottom: 12px;">
+      <label>Password (for Login):</label>
+      <input type="password" id="regPass" placeholder="Enter secure password">
+    </div>
+    <div class="form-group" style="margin-bottom: 12px;">
       <label>Mobile Number (10 digits):</label>
       <input type="tel" id="regPhone" placeholder="Enter mobile number" maxlength="10">
     </div>
@@ -715,11 +719,12 @@ async function isPhoneRegisteredInDatabase(phone) {
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
+  const password = $("regPass").value.trim();
   const phone = normalizeIndianPhone($("regPhone").value);
   const statusEl = $("regStatusMsg");
 
-  if(!name || !email || !/^[6-9]\d{9}$/.test(phone)){
-    statusEl.textContent = "Please enter valid Name, Email and 10-digit Mobile Number.";
+  if(!name || !email || !password || password.length < 6 || !/^[6-9]\d{9}$/.test(phone)){
+    statusEl.textContent = "Please enter valid Name, Email, Password (min 6 chars) and 10-digit Phone.";
     statusEl.style.color = "#d32f2f";
     return;
   }
@@ -786,6 +791,7 @@ async function confirmOtpVerification(){
   const otp = $("otpInput").value.trim();
   const phone = normalizeIndianPhone($("regPhone").value);
   const email = $("regEmail").value.trim().toLowerCase();
+  const password = $("regPass").value.trim();
   const name = $("regName").value.trim();
   const statusEl = $("regStatusMsg");
 
@@ -796,7 +802,7 @@ async function confirmOtpVerification(){
   }
 
   statusEl.textContent = "Verifying OTP & Registering account...";
-  showLoading("Verifying OTP...");
+  showLoading("Verifying OTP & Creating Firebase User...");
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -806,9 +812,16 @@ async function confirmOtpVerification(){
     
     let data = {};
     try { data = await res.json(); } catch(e){}
-    hideLoading();
 
     if(res.ok && data.success) {
+      // Firebase Authentication mein bhi user create karein taaki Email & Password login kaam kare
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch(authErr) {
+        // Agar user pehle se auth mein hai toh ignore karein
+        console.log("Auth create note:", authErr);
+      }
+
       const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
       await db.ref("verified_users/" + cleanEmailKey).set({
         verified: true,
@@ -818,6 +831,7 @@ async function confirmOtpVerification(){
         verifiedAt: Date.now()
       });
 
+      hideLoading();
       statusEl.textContent = "Account Registered!";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
@@ -825,6 +839,7 @@ async function confirmOtpVerification(){
       showAppMessage("Account Created Successfully! You can now Login.", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
+      hideLoading();
       let errMsg = "Invalid OTP code.";
       if(data && data.error) {
         if(typeof data.error === 'string') errMsg = data.error;
@@ -915,7 +930,6 @@ async function confirmMobileLoginOtp(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success){
-      // Firebase database se is phone number ka record dhoondhein
       const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
       let matchedName = data.name || "User";
       let matchedEmail = "";
@@ -934,7 +948,6 @@ async function confirmMobileLoginOtp(){
       statusEl.textContent = "Login Verified!";
       statusEl.style.color = "#2e7d32";
       
-      // Custom object banakar session set kar dein taaki Google account details automatically show ho jayein
       currentUser = {
         uid: "mob_" + phone,
         displayName: matchedName,
@@ -980,17 +993,9 @@ async function loginWithEmailPassword(){
     return;
   }
 
-  statusEl.textContent = "Checking account and credentials...";
+  statusEl.textContent = "Checking credentials...";
   statusEl.style.color = "#1565c0";
   showLoading("Signing in with Email & Password...");
-
-  const isReg = await isEmailRegisteredInDatabase(email);
-  if(!isReg) {
-    hideLoading();
-    statusEl.textContent = "No account found with this email. Please click 'Create Account' first.";
-    statusEl.style.color = "#d32f2f";
-    return;
-  }
 
   try {
     await auth.signInWithEmailAndPassword(email, password);
@@ -1327,42 +1332,28 @@ auth.onAuthStateChanged(async user=>{
   if(user){
     const userEmail = (user.email || "").toLowerCase();
     
-    if(userEmail) {
-      showLoading("Checking account registration status...");
-      const isRegistered = await isEmailRegisteredInDatabase(userEmail);
-      if(!isRegistered) {
-        hideLoading();
-        await auth.signOut();
-        currentUser = null;
+    if(userEmail && !user.uid.startsWith("mob_")) {
+      const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
+      try {
+        let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
+        currentUser = user;   
+        authStateResolved = true;   
+        updateAuthUI();   
+        loadUserOrders(user.uid);   
+
+        const userData = snap.val();
+        if(userData && userData.phone) {
+          userPhone = userData.phone;
+          if($("custPhone")) $("custPhone").value = userPhone;
+        }
+      } catch(e) {
+        currentUser = user;
         updateAuthUI();
-        showAppMessage("No account found with " + userEmail + ".\nPlease click 'Create Account' first to register.", "⚠️");
-        switchTab("profileView", null);
-        return;
       }
-    }
-
-    const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
-    showLoading("Verifying account status...");
-    try {
-      let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
-      
-      currentUser = user;   
-      authStateResolved = true;   
-      updateAuthUI();   
-      loadUserOrders(user.uid);   
-
-      const userData = snap.val();
-      if(userData && userData.phone) {
-        userPhone = userData.phone;
-        if($("custPhone")) $("custPhone").value = userPhone;
-      }
-    } catch(e) {
-      hideLoading();
-      await auth.signOut();
-      currentUser = null;
+    } else {
+      currentUser = user;
       updateAuthUI();
-      showAppMessage("Error connecting account.", "⚠️");
-      switchTab("profileView", null);
+      loadUserOrders(user.uid);
     }
   }else{   
     if(!currentUser || !currentUser.uid.startsWith("mob_")) {
