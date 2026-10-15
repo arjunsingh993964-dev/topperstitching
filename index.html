@@ -847,7 +847,7 @@ async function triggerMobileLoginOtp(){
   const statusEl = $("mobLoginStatus");
 
   if(!/^[6-9]\d{9}$/.test(phone)){
-    statusEl.textContent = "Please enter a valid 10-digit Indian Mobile Number.";
+    statusEl.textContent = "Please enter a valid 10-digit mobile number.";
     statusEl.style.color = "#d32f2f";
     return;
   }
