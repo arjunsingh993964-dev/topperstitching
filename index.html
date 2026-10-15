@@ -51,11 +51,11 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}   
 .location-btn{background:#2e7d32!important;margin-top:12px!important}   
 .location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}   
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-around:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}   
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}.nav-item.active{color:#0d47a1}   
 .cart-badge{position:absolute;top:2px;right:25%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px}   
-.cart-container,.orders-container,.create-acc-container{padding:16px;max-width:800px;margin:auto}   
+.cart-container,.orders-container,.create-acc-container,.order-fullpage-container{padding:16px;max-width:800px;margin:auto}   
 .cart-item{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}   
 .cart-controls{display:flex;align-items:center;gap:8px;margin-top:6px}   
 .cart-btn-qty{background:#eee;border:0;width:26px;height:26px;font-weight:bold;border-radius:4px;cursor:pointer}   
@@ -124,6 +124,10 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-send{background:#1565c0}
 .ai-mic{background:#2e7d32}
 .ai-mic.on{background:#d32f2f}
+
+/* Dynamic Small Send OTP / Resend Button */
+.btn-otp-container{display:flex;justify-content:flex-end;margin-top:6px}
+.btn-otp-small{background:#2e7d32;color:#fff;border:0;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:bold;cursor:pointer;width:auto!important;display:inline-block}
 </style>
 </head>  
 <body>  
@@ -156,7 +160,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="brand-title">TOPPER STITCHING</div>  
     <div class="brand-subtitle">Trusted Sewing Machines and Quality Service</div>  
   </div>  
-  <button class="auth-header-btn" id="authBtn" onclick="handleAuthAction()">Sign In</button>  
+  <button class="auth-header-btn" id="authBtn" onclick="handleAuthAction()">Login</button>  
 </header>  
 
 <div class="banner">  
@@ -369,10 +373,45 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>  
 </div>  
 
-<!-- CREATE ACCOUNT / REGISTER VIEW (DEDICATED PAGE LINK) -->
+<!-- FULL PAGE ORDER VIEW SECTION -->
+<div id="orderFullView" class="view-section">
+  <div class="order-fullpage-container profile-container">
+    <h3>💳 Order and Payment</h3>  
+    <div class="delivery-badge" style="margin-top:10px;">  
+      🚚 Home Delivery Available Only In <br><b>Gopalganj District, Bihar</b>  
+    </div>  
+    <p id="fullModalProductInfo" style="margin-bottom:12px;font-weight:bold;color:#1a237e;text-align:center;font-size:16px;"></p>  
+    
+    <div class="form-group">  
+      <label for="custName">Full Name:</label>  
+      <input type="text" id="custName" placeholder="Enter your full name" autocomplete="name" maxlength="100">  
+    </div>  
+    <div class="form-group">  
+      <label for="custPhone">Mobile Number:</label>  
+      <input type="tel" id="custPhone" placeholder="Mobile number" readonly style="background:#f0f0f0; cursor:not-allowed; color:#555; font-weight:bold;">  
+      <small id="phoneStatus" style="display:block;margin-top:5px;color:#2e7d32">✓ Verified Auto-filled Mobile Number (Non-editable)</small>  
+    </div>  
+    <div class="form-group">  
+      <label for="custAddress">Full Address:</label>  
+      <textarea id="custAddress" rows="3" placeholder="Village, street, ward number and district" maxlength="500"></textarea>  
+    </div>  
+    <div class="terms-group">  
+      <input type="checkbox" id="termsCheck">  
+      <label for="termsCheck" style="font-size:13px">I agree to the Terms and Conditions and Refund Policy.</label>  
+    </div>  
+    <div class="qr-box">  
+      <p style="font-size:15px;font-weight:700">🔒 Secure online payment</p>  
+      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below. Choose Google Pay, PhonePe, Paytm or any UPI app, or pay by card or net banking.</p>  
+    </div>  
+    <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>  
+    <button class="btn-close" onclick="cancelOrderForm()" style="margin-top:8px">Cancel Order</button>  
+  </div>
+</div>
+
+<!-- CREATE ACCOUNT / REGISTER VIEW -->
 <div id="createAccountView" class="view-section">
   <div class="create-acc-container profile-container">
-    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account & Verify</h3>
+    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account</h3>
     <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Register with Email & Mobile (Max 3 SMS Verification Limits)</p>
     
     <div class="form-group" style="margin-bottom: 12px;">
@@ -387,8 +426,15 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <label>Mobile Number (10 digits):</label>
       <input type="tel" id="regPhone" placeholder="Enter mobile number" maxlength="10">
     </div>
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label>Set Password:</label>
+      <input type="password" id="regPassword" placeholder="Set account password">
+    </div>
     
-    <button class="btn-submit" style="background: #2e7d32;" onclick="triggerCreateAccountVerification()">Send Verification OTP (Limit 3)</button>
+    <div id="sendOtpBtnWrapper">
+      <button class="btn-submit" style="background: #2e7d32;" id="sendOtpBtn" onclick="triggerCreateAccountVerification()">Send Verification OTP (Limit 3)</button>
+    </div>
+    
     <div id="verifBox" style="display:none; margin-top: 15px;">
       <div class="form-group">
         <label>Enter OTP Code:</label>
@@ -402,6 +448,55 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
+<!-- LOGIN WITH MOBILE NUMBER VIEW -->
+<div id="loginMobileView" class="view-section">
+  <div class="profile-container">
+    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📱 Login with Mobile Number</h3>
+    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Enter your registered mobile number to get OTP</p>
+    
+    <div class="form-group">
+      <label>Registered Mobile Number:</label>
+      <input type="tel" id="loginMobileNum" placeholder="Enter 10 digit mobile number" maxlength="10">
+    </div>
+    
+    <div id="mobOtpBtnWrapper">
+      <button class="btn-submit" style="background: #1565c0;" id="sendMobOtpBtn" onclick="triggerMobileLoginOtp()">Send Login OTP</button>
+    </div>
+
+    <div id="mobVerifBox" style="display:none; margin-top: 15px;">
+      <div class="form-group">
+        <label>Enter OTP Code:</label>
+        <input type="text" id="mobOtpInput" placeholder="Enter OTP code">
+      </div>
+      <button class="btn-submit" style="background: #2e7d32;" onclick="confirmMobileLoginOtp()">Verify & Login</button>
+    </div>
+    <small id="mobLoginStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
+
+    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
+  </div>
+</div>
+
+<!-- LOGIN WITH EMAIL & PASSWORD VIEW -->
+<div id="loginEmailPassView" class="view-section">
+  <div class="profile-container">
+    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">✉️ Login with Email & Password</h3>
+    
+    <div class="form-group">
+      <label>Email Address:</label>
+      <input type="email" id="loginEmailInput" placeholder="Enter your email">
+    </div>
+    <div class="form-group">
+      <label>Password:</label>
+      <input type="password" id="loginPassInput" placeholder="Enter password">
+    </div>
+
+    <button class="btn-submit" style="background: #0d47a1;" onclick="loginWithEmailPassword()">Login</button>
+    <small id="emailPassStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #d32f2f; font-weight: bold; text-align:center;"></small>
+
+    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
+  </div>
+</div>
+
 <!-- PROFILE VIEW -->  
 <div id="profileView" class="view-section">  
   <div class="profile-container">  
@@ -409,13 +504,20 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <img id="profilePageImg" src="m1.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1a237e;cursor:pointer" onclick="openAvatarPicker()" alt="Profile">  
       <div style="font-size:11px;color:#666;margin-top:4px">Tap photo to change avatar</div>  
       <h3 id="profileName" style="color:#1a237e;margin-top:8px">Guest User</h3>  
-      <p id="profileEmail" style="font-size:13px;color:#666">Google Account Not Connected</p>  
+      <p id="profileEmail" style="font-size:13px;color:#666">Account Not Connected</p>  
     </div>  
     
-    <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Sign In with Google</button>  
-    
-    <!-- Link to open Create Account Page -->
-    <button class="btn-submit" style="background: #ff9800; margin-top: 10px;" onclick="switchTab('createAccountView', null)">Create Account & Verify</button>
+    <!-- Multi Login Options -->
+    <div id="unauthButtons">
+      <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Login with Google</button>  
+      <button class="btn-submit" style="background: #1565c0; margin-top: 8px;" onclick="switchTab('loginMobileView', null)">Login with Mobile Number</button>
+      <button class="btn-submit" style="background: #0d47a1; margin-top: 8px;" onclick="switchTab('loginEmailPassView', null)">Login with Email & Password</button>
+      <button class="btn-submit" style="background: #ff9800; margin-top: 8px;" onclick="switchTab('createAccountView', null)">Create Account</button>
+    </div>
+
+    <div id="authLogoutContainer" style="display:none;">
+      <button class="btn-close" onclick="googleSignOut()">Logout Account</button>
+    </div>
 
     <div class="profile-section-box">  
       <h4>Support</h4>  
@@ -458,40 +560,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <button class="nav-item" onclick="switchTab('profileView',this)">  
     <span class="icon">👤</span>Profile  
   </button>  
-</div>  
-
-<!-- ORDER MODAL -->  
-<div id="orderModal" class="modal">  
-  <div class="modal-content">  
-    <h3>💳 Order and Payment</h3>  
-    <div class="delivery-badge">  
-      🚚 Home Delivery Available Only In <br><b>Gopalganj District, Bihar</b>  
-    </div>  
-    <p id="modalProductInfo" style="margin-bottom:12px;font-weight:bold;color:#1a237e"></p>  
-    <div class="form-group">  
-      <label for="custName">Full Name:</label>  
-      <input type="text" id="custName" placeholder="Enter your full name" autocomplete="name" maxlength="100">  
-    </div>  
-    <div class="form-group">  
-      <label for="custPhone">Mobile Number:</label>  
-      <input type="tel" id="custPhone" placeholder="Enter your mobile number" inputmode="tel" maxlength="16" autocomplete="tel">  
-      <small id="phoneStatus" style="display:block;margin-top:5px;color:#666">Enter a valid mobile number.</small>  
-    </div>  
-    <div class="form-group">  
-      <label for="custAddress">Full Address:</label>  
-      <textarea id="custAddress" rows="3" placeholder="Village, street, ward number and district" maxlength="500"></textarea>  
-    </div>  
-    <div class="terms-group">  
-      <input type="checkbox" id="termsCheck">  
-      <label for="termsCheck" style="font-size:13px">I agree to the Terms and Conditions and Refund Policy.</label>  
-    </div>  
-    <div class="qr-box">  
-      <p style="font-size:15px;font-weight:700">🔒 Secure online payment</p>  
-      <p style="font-size:12px;color:#777;margin-top:8px">Tap the button below. Choose Google Pay, PhonePe, Paytm or any UPI app, or pay by card or net banking.</p>  
-    </div>  
-    <button id="onlineOrderBtn" class="btn-submit" style="font-size:16px;padding:14px" onclick="submitOnlineOrder()">💳 Pay ₹<span id="upiPayAmount">0</span> Securely</button>  
-    <button class="btn-close" onclick="cancelOrderForm()" style="margin-top:6px">Cancel</button>  
-  </div>  
 </div>  
 
 <!-- POLICY MODAL -->  
@@ -584,18 +652,36 @@ async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
   const phone = normalizeIndianPhone($("regPhone").value);
+  const password = $("regPassword").value.trim();
   const statusEl = $("regStatusMsg");
 
-  if(!name || !email || !/^[6-9]\d{9}$/.test(phone)){
-    statusEl.textContent = "Kripya Sahi Name, Email aur 10-digit Mobile Number dalein.";
+  if(!name || !email || !/^[6-9]\d{9}$/.test(phone) || !password){
+    statusEl.textContent = "Please fill Name, valid Email, Password & 10-digit Mobile Number.";
     statusEl.style.color = "#d32f2f";
     return;
   }
 
-  statusEl.textContent = "SMS Limit aur Verification check ki ja rahi hai...";
+  statusEl.textContent = "Checking existing registration...";
   statusEl.style.color = "#1565c0";
 
+  // Check Duplicate Registration in Realtime DB
+  const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
   try {
+    const emailSnap = await db.ref("verified_users/" + cleanEmailKey).once("value");
+    if(emailSnap.exists()){
+      statusEl.textContent = "Email already registered!";
+      statusEl.style.color = "#d32f2f";
+      return;
+    }
+
+    const phoneSnap = await db.ref("verified_phones/" + phone).once("value");
+    if(phoneSnap.exists()){
+      statusEl.textContent = "Mobile number already registered!";
+      statusEl.style.color = "#d32f2f";
+      return;
+    }
+
+    statusEl.textContent = "Sending OTP...";
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -606,16 +692,20 @@ async function triggerCreateAccountVerification(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok) {
-      statusEl.textContent = "OTP bhej diya gaya hai! (Bache hue limits: " + (data.remaining ?? 2) + ")";
+      statusEl.textContent = "OTP Sent! (Limits left: " + (data.remaining ?? 2) + ")";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
+
+      // Transform Send OTP Button to Small Resend OTP on Right Side
+      $("sendOtpBtnWrapper").className = "btn-otp-container";
+      $("sendOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerCreateAccountVerification()">Resend OTP</button>`;
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit poori ho chuki hai.");
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit reached.");
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
-    statusEl.textContent = "Network error: " + (e.message || e);
+    statusEl.textContent = "Network Error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -625,15 +715,16 @@ async function confirmOtpVerification(){
   const phone = normalizeIndianPhone($("regPhone").value);
   const email = $("regEmail").value.trim().toLowerCase();
   const name = $("regName").value.trim();
+  const password = $("regPassword").value.trim();
   const statusEl = $("regStatusMsg");
 
   if(!otp){
-    statusEl.textContent = "Kripya OTP enter karein.";
+    statusEl.textContent = "Please enter OTP code.";
     statusEl.style.color = "#d32f2f";
     return;
   }
 
-  statusEl.textContent = "OTP verify ho raha hai...";
+  statusEl.textContent = "Verifying OTP & Registering account...";
   try {
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
@@ -645,30 +736,167 @@ async function confirmOtpVerification(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success) {
+      // Create Firebase Auth user with Email/Password
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        if(auth.currentUser){
+          await auth.currentUser.updateProfile({ displayName: name });
+        }
+      } catch(authErr) {
+        if(authErr.code !== 'auth/email-already-in-use'){
+          throw authErr;
+        }
+      }
+
       const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
-      // Save verified details with phone in database
       await db.ref("verified_users/" + cleanEmailKey).set({
         verified: true,
         phone: phone,
         name: name,
+        email: email,
         verifiedAt: Date.now()
       });
+      await db.ref("verified_phones/" + phone).set({
+        email: email,
+        name: name
+      });
 
-      statusEl.textContent = "Verification Safal! Ab aap Sign In kar sakte hain.";
+      statusEl.textContent = "Verification & Registration Successful! Logging in...";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
-      showAppMessage("Account verify ho gaya hai! Ab Profile mein jaakar Sign In with Google button daba kar login karein.", "✅");
+      showAppMessage("Account Created & Verified Successfully!", "✅");
+      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Galat OTP code.");
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Invalid OTP code.");
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
-    statusEl.textContent = "Verification mein samasya aayi: " + (e.message || e);
+    statusEl.textContent = "Registration error: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
-  
+
+/* --- MOBILE NUMBER LOGIN LOGIC --- */
+let tempMobileUser = null;
+async function triggerMobileLoginOtp(){
+  const phone = normalizeIndianPhone($("loginMobileNum").value);
+  const statusEl = $("mobLoginStatus");
+
+  if(!/^[6-9]\d{9}$/.test(phone)){
+    statusEl.textContent = "Enter valid 10-digit mobile number.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "Verifying Mobile Number...";
+  try {
+    const phoneSnap = await db.ref("verified_phones/" + phone).once("value");
+    if(!phoneSnap.exists()){
+      statusEl.textContent = "Mobile number not registered! Please Create Account first.";
+      statusEl.style.color = "#d32f2f";
+      return;
+    }
+
+    tempMobileUser = phoneSnap.val();
+    statusEl.textContent = "Sending Login OTP...";
+
+    const res = await fetch(PAY_API_BASE + "/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, email: tempMobileUser.email, name: tempMobileUser.name })
+    });
+
+    if(res.ok){
+      statusEl.textContent = "Login OTP sent!";
+      statusEl.style.color = "#2e7d32";
+      $("mobVerifBox").style.display = "block";
+
+      $("mobOtpBtnWrapper").className = "btn-otp-container";
+      $("mobOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerMobileLoginOtp()">Resend OTP</button>`;
+    } else {
+      statusEl.textContent = "Could not send OTP.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e) {
+    statusEl.textContent = "Error: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+async function confirmMobileLoginOtp(){
+  const otp = $("mobOtpInput").value.trim();
+  const phone = normalizeIndianPhone($("loginMobileNum").value);
+  const statusEl = $("mobLoginStatus");
+
+  if(!otp || !tempMobileUser){
+    statusEl.textContent = "Enter valid OTP.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "Verifying OTP...";
+  try {
+    const res = await fetch(PAY_API_BASE + "/verify-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, otp: otp, email: tempMobileUser.email })
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+
+    if(res.ok && data.success){
+      statusEl.textContent = "Mobile Login Verified! Logging in...";
+      statusEl.style.color = "#2e7d32";
+      
+      // Auto Login with Custom/Email token or Anonymous Auth fallback with profile set
+      await firebase.auth().signInWithEmailAndPassword(tempMobileUser.email, "DefaultPass123!").catch(async ()=>{
+        await firebase.auth().signInAnonymously();
+      });
+      
+      if(auth.currentUser){
+        await auth.currentUser.updateProfile({ displayName: tempMobileUser.name });
+      }
+
+      showAppMessage("Logged in successfully with Mobile Number!", "✅");
+      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+    } else {
+      statusEl.textContent = "Invalid OTP code.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e) {
+    statusEl.textContent = "Login failed: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+/* --- EMAIL & PASSWORD LOGIN LOGIC --- */
+async function loginWithEmailPassword(){
+  const email = $("loginEmailInput").value.trim().toLowerCase();
+  const password = $("loginPassInput").value.trim();
+  const statusEl = $("emailPassStatus");
+
+  if(!email || !password){
+    statusEl.textContent = "Please enter both Email and Password.";
+    return;
+  }
+
+  statusEl.textContent = "Authenticating...";
+  statusEl.style.color = "#1565c0";
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    statusEl.textContent = "Login Successful!";
+    statusEl.style.color = "#2e7d32";
+    showAppMessage("Logged in successfully!", "✅");
+    switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+  } catch(e) {
+    statusEl.textContent = "Login Failed: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
 function showLoading(message){   
   $("authLoadingText").textContent=message||"Checking your account...";   
   $("authLoading").style.display="flex";   
@@ -760,17 +988,17 @@ window.nativeLocationError=nativeLocationError;
 
 function handleAuthAction(){   
   if(currentUser) googleSignOut();   
-  else googleSignIn();   
+  else switchTab("profileView", document.querySelectorAll(".nav-item")[3]);   
 }   
   
 function googleSignOut(){   
-  showLoading("Signing out...");   
+  showLoading("Logging out...");   
   auth.signOut().then(()=>{   
     currentUser=null;   
     updateAuthUI();   
-    showAppMessage("You have signed out successfully.","✅");   
+    showAppMessage("Logged out successfully.","✅");   
   }).catch(error=>{   
-    showAuthError(error.message||"Sign-out failed.");   
+    showAuthError(error.message||"Logout failed.");   
   }).finally(hideLoading);   
 }   
   
@@ -782,8 +1010,10 @@ function updateAuthUI(){
   const authBtn=$("authBtn");   
   const name=$("profileName");   
   const email=$("profileEmail");   
-  const profileBtn=$("profileAuthBtn");   
+  const unauthBtns=$("unauthButtons");
+  const logoutBox=$("authLogoutContainer");
   const avatar=getSavedAvatar();   
+
   if(currentUser){   
     authBtn.innerHTML="";   
     const img=document.createElement("img");   
@@ -791,18 +1021,18 @@ function updateAuthUI(){
     img.className="user-pic";   
     img.alt="Profile";   
     authBtn.appendChild(img);   
-    authBtn.appendChild(document.createTextNode(" Sign Out"));   
-    name.textContent=currentUser.displayName||"Google User";   
-    email.textContent=currentUser.email||"";   
-    profileBtn.textContent="Sign Out";   
-    profileBtn.onclick=googleSignOut;   
+    authBtn.appendChild(document.createTextNode(" Logout"));   
+    name.textContent=currentUser.displayName||"Logged User";   
+    email.textContent=currentUser.email||"Verified Account";   
+    unauthBtns.style.display="none";
+    logoutBox.style.display="block";
     setProfileAvatar(avatar);   
   }else{   
-    authBtn.textContent="Sign In";   
+    authBtn.textContent="Login";   
     name.textContent="Guest User";   
-    email.textContent="Google Account Not Connected";   
-    profileBtn.textContent="Sign In with Google";   
-    profileBtn.onclick=googleSignIn;   
+    email.textContent="Account Not Connected";   
+    unauthBtns.style.display="block";
+    logoutBox.style.display="none";
   }   
   authBusy=false;   
 }   
@@ -812,16 +1042,16 @@ auth.onAuthStateChanged(async user=>{
     const userEmail = (user.email || "").toLowerCase();
     const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
 
-    showLoading("Verifying account registration...");
+    showLoading("Verifying account status...");
     try {
-      const snapshot = await db.ref("verified_users/" + cleanEmailKey).once("value");
+      let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
       
-      if(!snapshot.exists() || !snapshot.val().verified){
+      if(!snap.exists() && user.email){
         hideLoading();
         await auth.signOut();
         currentUser = null;
         updateAuthUI();
-        showAppMessage("Google account does not exist. Please create an account first by clicking 'Create Account & Verify'.", "⚠️");
+        showAppMessage("Google account does not exist. Please create an account first.", "⚠️");
         switchTab("createAccountView", null);
         return;
       }
@@ -831,8 +1061,8 @@ auth.onAuthStateChanged(async user=>{
       updateAuthUI();   
       loadUserOrders(user.uid);   
 
-      // Auto-fill phone number if available in verified data
-      const userData = snapshot.val();
+      // Auto-fill phone number in order form & set read-only
+      const userData = snap.val();
       if(userData && userData.phone && $("custPhone")) {
         $("custPhone").value = userData.phone;
       }
@@ -899,12 +1129,12 @@ const dialTone = $("dialToneAudio");
   
 function startWebRtcCall(){  
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){  
-    showAppMessage("माइक्रोफ़ोन समर्थित नहीं है।","⚠️");  
+    showAppMessage("Microphone not supported.","⚠️");  
     return;  
   }  
     
   $("callScreenModal").style.display = "flex";  
-  $("callStatusText").textContent = "रिंगिंग हो रही है... (Calling owner)";  
+  $("callStatusText").textContent = "Calling owner...";  
     
   if(dialTone) { dialTone.currentTime = 0; dialTone.play().catch(e=>console.log(e)); }  
   
@@ -920,7 +1150,7 @@ function startWebRtcCall(){
   
       const timeoutCheck = setTimeout(()=>{  
         if(!isConnected){  
-          $("callStatusText").textContent = "ओनर व्यस्त हैं या कॉल अस्वीकृत कर दी (Owner is Busy / Rejected)";  
+          $("callStatusText").textContent = "Owner Busy / Call Rejected";  
           if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }  
           setTimeout(endWebRtcCall, 3000);  
         }  
@@ -933,25 +1163,25 @@ function startWebRtcCall(){
         const audio = $("customerAudio");  
         audio.srcObject = remoteStream;  
         audio.play().catch(e => console.log(e));  
-        $("callStatusText").textContent = "कॉल कनेक्ट हो गई है 🟢";  
+        $("callStatusText").textContent = "Call Connected 🟢";  
       });  
   
       call.on('close', () => {  
         if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }  
-        $("callStatusText").textContent = "कॉल काट दी गई है / अस्वीकृत (Call Rejected)";  
+        $("callStatusText").textContent = "Call Ended / Rejected";  
         setTimeout(endWebRtcCall, 2500);  
       });  
     });  
   
     customerPeer.on('error', (err) => {  
       if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }  
-      $("callStatusText").textContent = "ओनर अभी ऑनलाइन नहीं हैं (Owner Offline)";  
+      $("callStatusText").textContent = "Owner Offline";  
       setTimeout(endWebRtcCall, 3000);  
     });  
   
   }).catch(err => {  
     if(dialTone) { dialTone.pause(); dialTone.currentTime = 0; }  
-    $("callStatusText").textContent = "माइक्रोफ़ोन की अनुमति अस्वीकृत।";  
+    $("callStatusText").textContent = "Microphone Permission Denied.";  
     setTimeout(endWebRtcCall, 3000);  
   });  
 }  
@@ -1006,7 +1236,7 @@ function selectAvatar(fileName){
 function openPolicyModal(type){   
   if(type==="terms"){   
     $("policyModalTitle").textContent="Terms and Conditions";   
-    $("policyModalText").textContent= "1. Product descriptions and prices are displayed on the website.\n"+ "2. Please provide accurate contact details and a complete delivery address.\n"+ "3. Home delivery is available only in Gopalganj district, Bihar.\n"+ "4. Keep your Google account and personal information secure.\n"+ "5. Orders are subject to confirmation and applicable laws.\n"+ "6. Contact topperstitching@gmail.com for assistance.";   
+    $("policyModalText").textContent= "1. Product descriptions and prices are displayed on the website.\n"+ "2. Please provide accurate contact details and a complete delivery address.\n"+ "3. Home delivery is available only in Gopalganj district, Bihar.\n"+ "4. Keep your account and personal information secure.\n"+ "5. Orders are subject to confirmation and applicable laws.\n"+ "6. Contact topperstitching@gmail.com for assistance.";   
   }else{   
     $("policyModalTitle").textContent="Refund Policy";   
     $("policyModalText").textContent= "Refund requests are accepted only until delivery is completed. Once an order has been delivered, refund requests will not be accepted, except where required by applicable law. For assistance, contact topperstitching@gmail.com.";   
@@ -1088,7 +1318,7 @@ function getSelectedTableColor(){
   
 function requireLogin(){   
   if(currentUser) return true;   
-  showAppMessage("Please sign in with Google before placing an order.","🔐");   
+  showAppMessage("Please login before placing an order.","🔐");   
   switchTab("profileView",document.querySelectorAll(".nav-item")[3]);   
   return false;   
 }   
@@ -1182,7 +1412,7 @@ function checkoutCart(){
 function saveOrderDraft(){   
   try{   
     const draft={   
-      isOpen:$("orderModal").style.display==="block",   
+      isOpen:$("orderFullView").classList.contains("active-view"),   
       selectedProduct:selectedProduct,   
       selectedPrice:selectedPrice,   
       customerName:$("custName").value,   
@@ -1210,10 +1440,9 @@ function restoreOrderDraft(){
     $("termsCheck").checked=Boolean(draft.termsChecked);   
     userLocationLink=draft.locationLink||"";   
     locationReady=Boolean(userLocationLink);   
-    $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN");   
+    $("fullModalProductInfo").textContent=selectedProduct+" - ₹"+Number(selectedPrice||0).toLocaleString("en-IN");   
     $("upiPayAmount").textContent=Number(selectedPrice||0).toLocaleString("en-IN");   
-    $("orderModal").style.display="block";   
-    validatePhone(false);   
+    switchTab("orderFullView", null);
   }catch(e){}   
 }   
   
@@ -1222,7 +1451,7 @@ async function prepareNewPayment(productName,price){
   selectedPrice=String(price);   
   $("custName").value=currentUser?.displayName||"";   
   
-  // Fetch auto-filled verified phone number if available
+  // Auto-fill non-editable verified mobile number
   if(currentUser && currentUser.email){
     const cleanEmailKey = currentUser.email.toLowerCase().replace(/[.#$\[\]]/g, "_");
     try {
@@ -1235,9 +1464,10 @@ async function prepareNewPayment(productName,price){
 
   $("custAddress").value="";   
   $("termsCheck").checked=false;   
-  $("modalProductInfo").textContent=selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");   
+  $("fullModalProductInfo").textContent=selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");   
   $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN");   
-  $("orderModal").style.display="block";   
+  
+  switchTab("orderFullView", null); // Open Order Form in Full Page View
   saveOrderDraft();   
   requestUserLocation();   
 }   
@@ -1250,17 +1480,14 @@ function openTableOrderForm(){
   }   
 }   
 function cancelOrderForm(){   
-  $("orderModal").style.display="none";   
+  switchTab("homeView", document.querySelectorAll(".nav-item")[0]);
   clearOrderDraft();   
 }   
   
 ["custName","custPhone","custAddress","termsCheck"].forEach(id=>{   
   const el=$(id);   
   if(!el) return;   
-  el.addEventListener("input",()=>{   
-    if(id==="custPhone") validatePhone(false);   
-    saveOrderDraft();   
-  });   
+  el.addEventListener("input",saveOrderDraft);   
   el.addEventListener("change",saveOrderDraft);   
 });   
   
@@ -1269,23 +1496,6 @@ function normalizeIndianPhone(value){
   if(digits.length===12&&digits.startsWith("91")){ digits=digits.slice(2); }   
   else if(digits.length===11&&digits.startsWith("0")){ digits=digits.slice(1); }   
   return digits;   
-}   
-function validatePhone(showMessage=true){   
-  const input=$("custPhone");   
-  const status=$("phoneStatus");   
-  const normalized=normalizeIndianPhone(input.value);   
-  const valid=/^[6-9]\d{9}$/.test(normalized);   
-  if(!input.value.trim()){   
-    status.textContent="Enter a valid mobile number.";   
-    status.style.color="#666";   
-  }else if(valid){   
-    status.textContent="✓ Mobile number format is valid.";   
-    status.style.color="#2e7d32";   
-  }else{   
-    status.textContent="Enter a valid mobile number.";   
-    status.style.color="#d32f2f";   
-  }   
-  return valid;   
 }   
   
 function getDefaultDeliveryDate() {  
@@ -1336,7 +1546,7 @@ function itemsTotal(items){
   
 async function submitOnlineOrder(){   
   if(!currentUser){   
-    showAppMessage("Please sign in with Google before placing an order.","🔐");   
+    showAppMessage("Please login before placing an order.","🔐");   
     return;   
   }   
   if(!$("termsCheck").checked){   
@@ -1347,7 +1557,6 @@ async function submitOnlineOrder(){
   const phone=normalizeIndianPhone($("custPhone").value);   
   const address=$("custAddress").value.trim();   
   if(!name){ showAppMessage("Please enter your full name.","📝"); return; }   
-  if(!validatePhone(true)){ return; }   
   if(!address||address.length<8){ showAppMessage("Please enter a complete delivery address.","🏠"); return; }  
   
   const items=buildOrderItems();  
@@ -1390,7 +1599,6 @@ async function submitOnlineOrder(){
       cart=[];   
       saveCart();   
     }   
-    $("orderModal").style.display="none";   
     clearOrderDraft();   
     switchTab("ordersView",document.querySelectorAll(".nav-item")[2]);   
   }catch(error){   
@@ -1510,7 +1718,7 @@ window.addEventListener("focus",verifyPendingOrders);
 function clearOrdersListener(){   
   latestOrders=[];   
   if(ordersQuery){ ordersQuery.off(); ordersQuery=null; }   
-  $("ordersList").innerHTML='<p class="empty-orders">Sign in with Google to view your orders.</p>';   
+  $("ordersList").innerHTML='<p class="empty-orders">Login to view your orders.</p>';   
 }   
   
 function loadUserOrders(userId){   
@@ -1762,7 +1970,7 @@ async function sendAIText(){
   try{  
     const contents=aiHistory.slice(-20);  
     while(contents.length&&contents[0].role!=="user") contents.shift();  
-    if(!currentUser) throw new Error("Please sign in with Google to use the AI assistant.");  
+    if(!currentUser) throw new Error("Please login to use the AI assistant.");  
     const idToken=await currentUser.getIdToken();  
     const res=await fetch(AI_API_BASE+"/chat",{  
       method:"POST",  
@@ -1815,7 +2023,7 @@ async function sendAIText(){
       aiHistory.pop();  
       if(bubble) bubble.remove();  
       const em=String(err.message||err);  
-      addAIMsg("sys",/sign in/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Call Support.");  
+      addAIMsg("sys",/login/i.test(em)?em:"The AI could not reply right now: "+em+"\nPlease try again or use Call Support.");  
     }  
   }finally{  
     aiBusy=false;  
@@ -1849,7 +2057,7 @@ async function startLive(){
     addAIMsg("sys","Microphone is not supported here. The page must be opened over https://.");  
     return;  
   }  
-  if(!currentUser){ addAIMsg("sys","Please sign in with Google to use live voice."); return; }  
+  if(!currentUser){ addAIMsg("sys","Please login to use live voice."); return; }  
   live.active=true; live.ready=false;  
   setLiveUI(true,"Requesting microphone permission...");  
   try{  
@@ -2005,7 +2213,7 @@ function handleAppBack(){
   const box=$("appMessageBox");  
   if(box){ box.remove(); return true; }  
   if($("aiPanel").style.display==="flex"){ closeAI(); return true; }  
-  if($("orderModal").style.display==="block"){ $("orderModal").style.display="none"; saveOrderDraft(); return true; }  
+  if($("orderFullView").classList.contains("active-view")){ switchTab("homeView",document.querySelectorAll(".nav-item")[0]); saveOrderDraft(); return true; }  
   if($("policyModal").style.display==="block"){ closePolicyModal(); return true; }  
   if($("avatarModal").style.display==="block"){ closeAvatarPicker(); return true; }  
   if(!$("homeView").classList.contains("active-view")){  
