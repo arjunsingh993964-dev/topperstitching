@@ -11,7 +11,6 @@ body{background:#f0f2f5;padding-bottom:90px;color:#222}
 header{background:linear-gradient(135deg,#1a237e,#0d47a1);color:#fff;padding:15px 12px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 10px #0003;display:flex;justify-content:space-between;align-items:center}   
 .brand-title{font-size:20px;font-weight:900;letter-spacing:1px;color:#ffab00;text-align:left}   
 .brand-subtitle{font-size:11px;color:#e0e0e0;margin-top:2px;text-align:left}   
-.auth-header-btn{background:#fff;color:#1a237e;border:0;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}   
 .user-pic{width:25px;height:25px;border-radius:50%;object-fit:cover}   
 .banner{background:#283593;color:#fff;padding:12px;text-align:center;border-bottom:3px solid #ffab00}   
 .banner h2{font-size:16px}.banner p{font-size:12px;opacity:.9;margin-top:3px}   
@@ -51,7 +50,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .footer-address strong{color:#1a237e;font-size:15px;display:block;margin-bottom:4px}   
 .location-btn{background:#2e7d32!important;margin-top:12px!important}   
 .location-status{margin-top:8px;font-size:12px;color:#666;line-height:1.5}   
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid #ddd;display:flex;justify-around:space-around;padding:8px 0;box-shadow:0 -2px 10px #0001;z-index:100}   
 .nav-item{border:0;background:none;flex:1;text-align:center;color:#666;font-size:11px;font-weight:bold;cursor:pointer;position:relative}   
 .nav-item .icon{font-size:20px;display:block;margin-bottom:2px}.nav-item.active{color:#0d47a1}   
 .cart-badge{position:absolute;top:2px;right:25%;background:#d32f2f;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px}   
@@ -125,7 +124,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-mic{background:#2e7d32}
 .ai-mic.on{background:#d32f2f}
 
-/* Dynamic Small Send OTP / Resend Button */
 .btn-otp-container{display:flex;justify-content:flex-end;margin-top:6px}
 .btn-otp-small{background:#2e7d32;color:#fff;border:0;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:bold;cursor:pointer;width:auto!important;display:inline-block}
 </style>
@@ -160,7 +158,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="brand-title">TOPPER STITCHING</div>  
     <div class="brand-subtitle">Trusted Sewing Machines and Quality Service</div>  
   </div>  
-  <button class="auth-header-btn" id="authBtn" onclick="handleAuthAction()">Login</button>  
 </header>  
 
 <div class="banner">  
@@ -389,7 +386,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="form-group">  
       <label for="custPhone">Mobile Number:</label>  
       <input type="tel" id="custPhone" placeholder="Mobile number" readonly style="background:#f0f0f0; cursor:not-allowed; color:#555; font-weight:bold;">  
-      <small id="phoneStatus" style="display:block;margin-top:5px;color:#2e7d32">✓ Verified Auto-filled Mobile Number (Non-editable)</small>  
+      <small id="phoneStatus" style="display:block;margin-top:5px;color:#2e7d32">✓ Verified Mobile Number (Non-editable)</small>  
     </div>  
     <div class="form-group">  
       <label for="custAddress">Full Address:</label>  
@@ -408,7 +405,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- CREATE ACCOUNT / REGISTER VIEW -->
+<!-- CREATE ACCOUNT VIEW -->
 <div id="createAccountView" class="view-section">
   <div class="create-acc-container profile-container">
     <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account</h3>
@@ -425,10 +422,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <div class="form-group" style="margin-bottom: 12px;">
       <label>Mobile Number (10 digits):</label>
       <input type="tel" id="regPhone" placeholder="Enter mobile number" maxlength="10">
-    </div>
-    <div class="form-group" style="margin-bottom: 12px;">
-      <label>Set Password:</label>
-      <input type="password" id="regPassword" placeholder="Set account password">
     </div>
     
     <div id="sendOtpBtnWrapper">
@@ -497,6 +490,53 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
+<!-- CHANGE MOBILE NUMBER VIEW -->
+<div id="changeMobileView" class="view-section">
+  <div class="profile-container">
+    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📲 Change Mobile Number</h3>
+    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Verify current mobile number first</p>
+
+    <!-- Step 1: Current Number Verification -->
+    <div id="changeMobStep1">
+      <div class="form-group">
+        <label>Current Mobile Number:</label>
+        <input type="tel" id="currMobileNum" readonly style="background:#f0f0f0; cursor:not-allowed; color:#555; font-weight:bold;">
+      </div>
+      <div id="currOtpBtnWrapper">
+        <button class="btn-submit" style="background: #1565c0;" onclick="sendCurrMobOtp()">Send OTP to Current Number</button>
+      </div>
+      <div id="currVerifBox" style="display:none; margin-top: 15px;">
+        <div class="form-group">
+          <label>Enter OTP Code:</label>
+          <input type="text" id="currOtpInput" placeholder="Enter OTP code">
+        </div>
+        <button class="btn-submit" style="background: #2e7d32;" onclick="verifyCurrMobOtp()">Verify Current Number</button>
+      </div>
+    </div>
+
+    <!-- Step 2: New Number Verification -->
+    <div id="changeMobStep2" style="display:none;">
+      <div class="form-group">
+        <label>New Mobile Number (10 digits):</label>
+        <input type="tel" id="newMobileNum" placeholder="Enter new mobile number" maxlength="10">
+      </div>
+      <div id="newOtpBtnWrapper">
+        <button class="btn-submit" style="background: #1565c0;" onclick="sendNewMobOtp()">Send OTP to New Number</button>
+      </div>
+      <div id="newVerifBox" style="display:none; margin-top: 15px;">
+        <div class="form-group">
+          <label>Enter OTP Code:</label>
+          <input type="text" id="newOtpInput" placeholder="Enter OTP code">
+        </div>
+        <button class="btn-submit" style="background: #2e7d32;" onclick="verifyNewMobOtp()">Verify & Update Mobile Number</button>
+      </div>
+    </div>
+
+    <small id="changeMobStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
+    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
+  </div>
+</div>
+
 <!-- PROFILE VIEW -->  
 <div id="profileView" class="view-section">  
   <div class="profile-container">  
@@ -517,6 +557,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 
     <div id="authLogoutContainer" style="display:none;">
       <button class="btn-close" onclick="googleSignOut()">Logout Account</button>
+      <button class="btn-submit" style="background: #ff9800; margin-top: 10px;" onclick="openChangeMobileView()">Change Mobile Number</button>
     </div>
 
     <div class="profile-section-box">  
@@ -633,6 +674,7 @@ const db=firebase.database();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});   
   
 let currentUser=null;   
+let userPhone="";
 let selectedProduct="";   
 let selectedPrice="";   
 let userLocationLink="";   
@@ -647,41 +689,23 @@ const $=id=>document.getElementById(id);
 const ORDER_DRAFT_KEY="topper_order_draft_v1";   
 const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";
 
-/* --- CREATE ACCOUNT & SMS VERIFICATION LOGIC --- */
+/* --- CREATE ACCOUNT LOGIC --- */
 async function triggerCreateAccountVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
   const phone = normalizeIndianPhone($("regPhone").value);
-  const password = $("regPassword").value.trim();
   const statusEl = $("regStatusMsg");
 
-  if(!name || !email || !/^[6-9]\d{9}$/.test(phone) || !password){
-    statusEl.textContent = "Please fill Name, valid Email, Password & 10-digit Mobile Number.";
+  if(!name || !email || !/^[6-9]\d{9}$/.test(phone)){
+    statusEl.textContent = "Please enter valid Name, Email and 10-digit Mobile Number.";
     statusEl.style.color = "#d32f2f";
     return;
   }
 
-  statusEl.textContent = "Checking existing registration...";
+  statusEl.textContent = "Checking account status & sending OTP...";
   statusEl.style.color = "#1565c0";
 
-  // Check Duplicate Registration in Realtime DB
-  const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
   try {
-    const emailSnap = await db.ref("verified_users/" + cleanEmailKey).once("value");
-    if(emailSnap.exists()){
-      statusEl.textContent = "Email already registered!";
-      statusEl.style.color = "#d32f2f";
-      return;
-    }
-
-    const phoneSnap = await db.ref("verified_phones/" + phone).once("value");
-    if(phoneSnap.exists()){
-      statusEl.textContent = "Mobile number already registered!";
-      statusEl.style.color = "#d32f2f";
-      return;
-    }
-
-    statusEl.textContent = "Sending OTP...";
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -696,11 +720,10 @@ async function triggerCreateAccountVerification(){
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "block";
 
-      // Transform Send OTP Button to Small Resend OTP on Right Side
       $("sendOtpBtnWrapper").className = "btn-otp-container";
       $("sendOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerCreateAccountVerification()">Resend OTP</button>`;
     } else {
-      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit reached.");
+      const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "SMS Limit reached or already registered.");
       statusEl.textContent = errMsg;
       statusEl.style.color = "#d32f2f";
     }
@@ -715,7 +738,6 @@ async function confirmOtpVerification(){
   const phone = normalizeIndianPhone($("regPhone").value);
   const email = $("regEmail").value.trim().toLowerCase();
   const name = $("regName").value.trim();
-  const password = $("regPassword").value.trim();
   const statusEl = $("regStatusMsg");
 
   if(!otp){
@@ -736,18 +758,6 @@ async function confirmOtpVerification(){
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success) {
-      // Create Firebase Auth user with Email/Password
-      try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        if(auth.currentUser){
-          await auth.currentUser.updateProfile({ displayName: name });
-        }
-      } catch(authErr) {
-        if(authErr.code !== 'auth/email-already-in-use'){
-          throw authErr;
-        }
-      }
-
       const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
       await db.ref("verified_users/" + cleanEmailKey).set({
         verified: true,
@@ -756,15 +766,12 @@ async function confirmOtpVerification(){
         email: email,
         verifiedAt: Date.now()
       });
-      await db.ref("verified_phones/" + phone).set({
-        email: email,
-        name: name
-      });
 
-      statusEl.textContent = "Verification & Registration Successful! Logging in...";
+      statusEl.textContent = "Account Registered! Logging in...";
       statusEl.style.color = "#2e7d32";
       $("verifBox").style.display = "none";
-      showAppMessage("Account Created & Verified Successfully!", "✅");
+      
+      showAppMessage("Account Verified! Please Login with Google or Email/Password.", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
       const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : (data.error || "Invalid OTP code.");
@@ -778,7 +785,6 @@ async function confirmOtpVerification(){
 }
 
 /* --- MOBILE NUMBER LOGIN LOGIC --- */
-let tempMobileUser = null;
 async function triggerMobileLoginOtp(){
   const phone = normalizeIndianPhone($("loginMobileNum").value);
   const statusEl = $("mobLoginStatus");
@@ -789,23 +795,18 @@ async function triggerMobileLoginOtp(){
     return;
   }
 
-  statusEl.textContent = "Verifying Mobile Number...";
+  statusEl.textContent = "Sending Login OTP...";
+  statusEl.style.color = "#1565c0";
+
   try {
-    const phoneSnap = await db.ref("verified_phones/" + phone).once("value");
-    if(!phoneSnap.exists()){
-      statusEl.textContent = "Mobile number not registered! Please Create Account first.";
-      statusEl.style.color = "#d32f2f";
-      return;
-    }
-
-    tempMobileUser = phoneSnap.val();
-    statusEl.textContent = "Sending Login OTP...";
-
     const res = await fetch(PAY_API_BASE + "/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, email: tempMobileUser.email, name: tempMobileUser.name })
+      body: JSON.stringify({ phone: phone, action: "login" })
     });
+
+    let data = {};
+    try { data = await res.json(); } catch(e){}
 
     if(res.ok){
       statusEl.textContent = "Login OTP sent!";
@@ -815,7 +816,7 @@ async function triggerMobileLoginOtp(){
       $("mobOtpBtnWrapper").className = "btn-otp-container";
       $("mobOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="triggerMobileLoginOtp()">Resend OTP</button>`;
     } else {
-      statusEl.textContent = "Could not send OTP.";
+      statusEl.textContent = (data.error || "Mobile number not registered.");
       statusEl.style.color = "#d32f2f";
     }
   } catch(e) {
@@ -829,7 +830,7 @@ async function confirmMobileLoginOtp(){
   const phone = normalizeIndianPhone($("loginMobileNum").value);
   const statusEl = $("mobLoginStatus");
 
-  if(!otp || !tempMobileUser){
+  if(!otp){
     statusEl.textContent = "Enter valid OTP.";
     statusEl.style.color = "#d32f2f";
     return;
@@ -840,25 +841,24 @@ async function confirmMobileLoginOtp(){
     const res = await fetch(PAY_API_BASE + "/verify-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, otp: otp, email: tempMobileUser.email })
+      body: JSON.stringify({ phone: phone, otp: otp, action: "login" })
     });
 
     let data = {};
     try { data = await res.json(); } catch(e){}
 
     if(res.ok && data.success){
-      statusEl.textContent = "Mobile Login Verified! Logging in...";
+      statusEl.textContent = "Login Verified!";
       statusEl.style.color = "#2e7d32";
       
-      // Auto Login with Custom/Email token or Anonymous Auth fallback with profile set
-      await firebase.auth().signInWithEmailAndPassword(tempMobileUser.email, "DefaultPass123!").catch(async ()=>{
+      if(!auth.currentUser){
         await firebase.auth().signInAnonymously();
-      });
-      
+      }
       if(auth.currentUser){
-        await auth.currentUser.updateProfile({ displayName: tempMobileUser.name });
+        await auth.currentUser.updateProfile({ displayName: data.name || "Mobile User" });
       }
 
+      userPhone = phone;
       showAppMessage("Logged in successfully with Mobile Number!", "✅");
       switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
@@ -878,11 +878,11 @@ async function loginWithEmailPassword(){
   const statusEl = $("emailPassStatus");
 
   if(!email || !password){
-    statusEl.textContent = "Please enter both Email and Password.";
+    statusEl.textContent = "Please enter Email and Password.";
     return;
   }
 
-  statusEl.textContent = "Authenticating...";
+  statusEl.textContent = "Logging in...";
   statusEl.style.color = "#1565c0";
 
   try {
@@ -892,7 +892,158 @@ async function loginWithEmailPassword(){
     showAppMessage("Logged in successfully!", "✅");
     switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
   } catch(e) {
-    statusEl.textContent = "Login Failed: " + (e.message || e);
+    let msg = "Invalid Email or Password.";
+    if(e.code === 'auth/user-not-found') msg = "Account not found with this Email.";
+    if(e.code === 'auth/wrong-password') msg = "Incorrect Password.";
+    statusEl.textContent = msg;
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+/* --- CHANGE MOBILE NUMBER WORKFLOW --- */
+function openChangeMobileView(){
+  if(!userPhone){
+    showAppMessage("No mobile number associated with current account.", "⚠️");
+    return;
+  }
+  $("currMobileNum").value = userPhone;
+  $("changeMobStep1").style.display = "block";
+  $("changeMobStep2").style.display = "none";
+  $("changeMobStatus").textContent = "";
+  switchTab("changeMobileView", null);
+}
+
+async function sendCurrMobOtp(){
+  const phone = $("currMobileNum").value;
+  const statusEl = $("changeMobStatus");
+  statusEl.textContent = "Sending OTP to current mobile number...";
+  statusEl.style.color = "#1565c0";
+
+  try {
+    const res = await fetch(PAY_API_BASE + "/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, action: "change_curr" })
+    });
+    if(res.ok){
+      statusEl.textContent = "OTP sent to current number!";
+      statusEl.style.color = "#2e7d32";
+      $("currVerifBox").style.display = "block";
+      $("currOtpBtnWrapper").className = "btn-otp-container";
+      $("currOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="sendCurrMobOtp()">Resend OTP</button>`;
+    } else {
+      statusEl.textContent = "Could not send OTP.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e){
+    statusEl.textContent = "Error: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+async function verifyCurrMobOtp(){
+  const phone = $("currMobileNum").value;
+  const otp = $("currOtpInput").value.trim();
+  const statusEl = $("changeMobStatus");
+
+  if(!otp){
+    statusEl.textContent = "Enter OTP code.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "Verifying current number...";
+  try {
+    const res = await fetch(PAY_API_BASE + "/verify-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, otp: otp, action: "change_curr" })
+    });
+    let data = {}; try{ data=await res.json(); }catch(e){}
+
+    if(res.ok && data.success){
+      statusEl.textContent = "Current number verified! Enter new number below.";
+      statusEl.style.color = "#2e7d32";
+      $("changeMobStep1").style.display = "none";
+      $("changeMobStep2").style.display = "block";
+    } else {
+      statusEl.textContent = "Invalid OTP code.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e){
+    statusEl.textContent = "Error: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+async function sendNewMobOtp(){
+  const newPhone = normalizeIndianPhone($("newMobileNum").value);
+  const statusEl = $("changeMobStatus");
+
+  if(!/^[6-9]\d{9}$/.test(newPhone)){
+    statusEl.textContent = "Enter valid 10-digit new mobile number.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "Sending OTP to new number...";
+  statusEl.style.color = "#1565c0";
+
+  try {
+    const res = await fetch(PAY_API_BASE + "/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: newPhone, action: "change_new" })
+    });
+    if(res.ok){
+      statusEl.textContent = "OTP sent to new number!";
+      statusEl.style.color = "#2e7d32";
+      $("newVerifBox").style.display = "block";
+      $("newOtpBtnWrapper").className = "btn-otp-container";
+      $("newOtpBtnWrapper").innerHTML = `<button class="btn-otp-small" onclick="sendNewMobOtp()">Resend OTP</button>`;
+    } else {
+      statusEl.textContent = "Could not send OTP to new number.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e){
+    statusEl.textContent = "Error: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+async function verifyNewMobOtp(){
+  const newPhone = normalizeIndianPhone($("newMobileNum").value);
+  const otp = $("newOtpInput").value.trim();
+  const statusEl = $("changeMobStatus");
+
+  if(!otp){
+    statusEl.textContent = "Enter OTP code.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "Updating Mobile Number...";
+  try {
+    const res = await fetch(PAY_API_BASE + "/verify-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: newPhone, otp: otp, action: "change_new", oldPhone: userPhone, email: currentUser?.email })
+    });
+    let data = {}; try{ data=await res.json(); }catch(e){}
+
+    if(res.ok && data.success){
+      userPhone = newPhone;
+      if($("custPhone")) $("custPhone").value = userPhone;
+      statusEl.textContent = "Mobile Number Updated Successfully!";
+      statusEl.style.color = "#2e7d32";
+      showAppMessage("Mobile Number updated successfully!", "✅");
+      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+    } else {
+      statusEl.textContent = "Invalid OTP code.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e){
+    statusEl.textContent = "Update failed: " + (e.message || e);
     statusEl.style.color = "#d32f2f";
   }
 }
@@ -995,6 +1146,7 @@ function googleSignOut(){
   showLoading("Logging out...");   
   auth.signOut().then(()=>{   
     currentUser=null;   
+    userPhone="";
     updateAuthUI();   
     showAppMessage("Logged out successfully.","✅");   
   }).catch(error=>{   
@@ -1007,7 +1159,6 @@ function getSavedAvatar(){
 }   
   
 function updateAuthUI(){   
-  const authBtn=$("authBtn");   
   const name=$("profileName");   
   const email=$("profileEmail");   
   const unauthBtns=$("unauthButtons");
@@ -1015,20 +1166,12 @@ function updateAuthUI(){
   const avatar=getSavedAvatar();   
 
   if(currentUser){   
-    authBtn.innerHTML="";   
-    const img=document.createElement("img");   
-    img.src=avatar;   
-    img.className="user-pic";   
-    img.alt="Profile";   
-    authBtn.appendChild(img);   
-    authBtn.appendChild(document.createTextNode(" Logout"));   
     name.textContent=currentUser.displayName||"Logged User";   
     email.textContent=currentUser.email||"Verified Account";   
     unauthBtns.style.display="none";
     logoutBox.style.display="block";
     setProfileAvatar(avatar);   
   }else{   
-    authBtn.textContent="Login";   
     name.textContent="Guest User";   
     email.textContent="Account Not Connected";   
     unauthBtns.style.display="block";
@@ -1046,36 +1189,27 @@ auth.onAuthStateChanged(async user=>{
     try {
       let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
       
-      if(!snap.exists() && user.email){
-        hideLoading();
-        await auth.signOut();
-        currentUser = null;
-        updateAuthUI();
-        showAppMessage("Google account does not exist. Please create an account first.", "⚠️");
-        switchTab("createAccountView", null);
-        return;
-      }
-
       currentUser = user;   
       authStateResolved = true;   
       updateAuthUI();   
       loadUserOrders(user.uid);   
 
-      // Auto-fill phone number in order form & set read-only
       const userData = snap.val();
-      if(userData && userData.phone && $("custPhone")) {
-        $("custPhone").value = userData.phone;
+      if(userData && userData.phone) {
+        userPhone = userData.phone;
+        if($("custPhone")) $("custPhone").value = userPhone;
       }
     } catch(e) {
       hideLoading();
       await auth.signOut();
       currentUser = null;
       updateAuthUI();
-      showAppMessage("Google account does not exist. Please create an account.", "⚠️");
-      switchTab("createAccountView", null);
+      showAppMessage("Error connecting account.", "⚠️");
+      switchTab("profileView", null);
     }
   }else{   
     currentUser=null;   
+    userPhone="";
     authStateResolved=true;   
     updateAuthUI();   
     clearOrdersListener();   
@@ -1222,8 +1356,6 @@ function toggleSpeaker(){
 function setProfileAvatar(src){   
   const img=$("profilePageImg");   
   if(img) img.src=src;   
-  const topPic=document.querySelector("#authBtn .user-pic");   
-  if(topPic) topPic.src=src;   
 }   
 function openAvatarPicker(){ $("avatarModal").style.display="block"; }   
 function closeAvatarPicker(){ $("avatarModal").style.display="none"; }   
@@ -1435,7 +1567,7 @@ function restoreOrderDraft(){
     selectedProduct=String(draft.selectedProduct||"");   
     selectedPrice=String(draft.selectedPrice||"");   
     $("custName").value=draft.customerName||"";   
-    $("custPhone").value=draft.customerPhone||"";   
+    $("custPhone").value=userPhone||draft.customerPhone||"";   
     $("custAddress").value=draft.customerAddress||"";   
     $("termsCheck").checked=Boolean(draft.termsChecked);   
     userLocationLink=draft.locationLink||"";   
@@ -1450,24 +1582,14 @@ async function prepareNewPayment(productName,price){
   selectedProduct=String(productName);   
   selectedPrice=String(price);   
   $("custName").value=currentUser?.displayName||"";   
-  
-  // Auto-fill non-editable verified mobile number
-  if(currentUser && currentUser.email){
-    const cleanEmailKey = currentUser.email.toLowerCase().replace(/[.#$\[\]]/g, "_");
-    try {
-      const snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
-      if(snap.exists() && snap.val().phone){
-        $("custPhone").value = snap.val().phone;
-      }
-    } catch(e){}
-  }
+  $("custPhone").value=userPhone||"";
 
   $("custAddress").value="";   
   $("termsCheck").checked=false;   
   $("fullModalProductInfo").textContent=selectedProduct+" - ₹"+Number(price).toLocaleString("en-IN");   
   $("upiPayAmount").textContent=Number(price).toLocaleString("en-IN");   
   
-  switchTab("orderFullView", null); // Open Order Form in Full Page View
+  switchTab("orderFullView", null); 
   saveOrderDraft();   
   requestUserLocation();   
 }   
