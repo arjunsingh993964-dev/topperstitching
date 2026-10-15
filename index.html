@@ -1,4 +1,5 @@
-<!DOCTYPE html>  <html lang="en">  
+<!DOCTYPE html>  
+<html lang="en">  
 <head>  
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
@@ -90,7 +91,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}}   /* ===== WHATSAPP STYLE CALL SCREEN (CUSTOMER) ===== */
 #callScreenModal{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#075e54,#128c7e);flex-direction:column;justify-content:space-between;align-items:center;padding:40px 20px;color:#fff;text-align:center;}
 .call-avatar{width:100px;height:100px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:45px;margin-top:40px;box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:pulseAvatar 1.5s infinite;}
-@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0);}}
+@keyframes pulseAvatar{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,0.4);}70%{transform:scale(1.05);box-shadow:0 0 0 15px rgba(37,211,102,0);}}
 .call-info h2{font-size:24px;margin-top:15px;font-weight:600;}
 .call-info p{font-size:15px;opacity:0.8;margin-top:5px;}
 .call-controls-row{display:flex;gap:20px;margin-bottom:40px;align-items:center;}
@@ -356,7 +357,32 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <h3 id="profileName" style="color:#1a237e;margin-top:8px">Guest User</h3>  
       <p id="profileEmail" style="font-size:13px;color:#666">Google Account Not Connected</p>  
     </div>  
-    <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Sign In with Google</button>  <div class="profile-section-box">  
+    <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Sign In with Google</button>  
+    
+    <!-- CREATE ACCOUNT SECTION (WITH MOBILE & EMAIL VERIFICATION + 3 LIMIT) -->
+    <div style="margin-top: 15px; background: #fff8e1; border: 1px dashed #ffa000; padding: 12px; border-radius: 8px; text-align: left;">
+      <h4 style="color: #d84315; font-size: 14px; margin-bottom: 6px;">📝 Create Account & Verify</h4>
+      <p style="font-size: 11px; color: #555; margin-bottom: 8px;">Register with Email & Mobile (Max 3 SMS Verification Limits per user)</p>
+      
+      <div class="form-group" style="margin-bottom: 8px;">
+        <input type="text" id="regName" placeholder="Full Name" style="font-size: 13px; padding: 8px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 8px;">
+        <input type="email" id="regEmail" placeholder="Email Address" style="font-size: 13px; padding: 8px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 8px;">
+        <input type="tel" id="regPhone" placeholder="Mobile Number (10 digits)" maxlength="10" style="font-size: 13px; padding: 8px;">
+      </div>
+      
+      <button class="btn-submit" style="background: #2e7d32; font-size: 13px; padding: 8px;" onclick="triggerCreateAccountVerification()">Send Verification OTP (Limit 3)</button>
+      <div id="verifBox" style="display:none; margin-top: 10px;">
+        <input type="text" id="otpInput" placeholder="Enter OTP code" style="font-size: 13px; padding: 8px; margin-bottom: 6px;">
+        <button class="btn-submit" style="font-size: 13px; padding: 8px;" onclick="confirmOtpVerification()">Verify & Register</button>
+      </div>
+      <small id="regStatusMsg" style="display:block; margin-top: 5px; font-size: 11px; color: #666;"></small>
+    </div>
+
+    <div class="profile-section-box">  
   <h4>Support</h4>  
   <ul>  
     <li onclick="triggerSupport('ai_assistant')">💬 AI Assistant (Chat + Voice)</li>  
@@ -494,6 +520,83 @@ let locationRequestBusy=false;
   
 const $=id=>document.getElementById(id);   
 const ORDER_DRAFT_KEY="topper_order_draft_v1";   
+
+/* --- CREATE ACCOUNT & SMS VERIFICATION LOGIC (LIMIT 3 PER USER) --- */
+async function triggerCreateAccountVerification(){
+  const name = $("regName").value.trim();
+  const email = $("regEmail").value.trim();
+  const phone = normalizeIndianPhone($("regPhone").value);
+  const statusEl = $("regStatusMsg");
+
+  if(!name || !email || !/^[6-9]\d{9}$/.test(phone)){
+    statusEl.textContent = "Kripya Sahi Name, Email aur 10-digit Mobile Number dalein.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "SMS Limit aur Verification check ki ja rahi hai...";
+  statusEl.style.color = "#1565c0";
+
+  try {
+    const res = await fetch("https://topper-ai.ankiteeepad009.workers.dev/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, email: email, name: name })
+    });
+    
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+
+    if(res.ok) {
+      statusEl.textContent = "OTP bhej diya gaya hai! (Bache hue limits: " + (data.remaining ?? 2) + ")";
+      statusEl.style.color = "#2e7d32";
+      $("verifBox").style.display = "block";
+    } else {
+      statusEl.textContent = data.error || "SMS Limit (3 max) poori ho chuki hai.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e) {
+    statusEl.textContent = "Network error. Traccar SMS Gateway connection check karein.";
+    statusEl.style.color = "#d32f2f";
+  }
+}
+
+async function confirmOtpVerification(){
+  const otp = $("otpInput").value.trim();
+  const phone = normalizeIndianPhone($("regPhone").value);
+  const statusEl = $("regStatusMsg");
+
+  if(!otp){
+    statusEl.textContent = "Kripya OTP enter karein.";
+    statusEl.style.color = "#d32f2f";
+    return;
+  }
+
+  statusEl.textContent = "OTP verify ho raha hai...";
+  try {
+    const res = await fetch("https://topper-ai.ankiteeepad009.workers.dev/verify-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone, otp: otp })
+    });
+    
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+
+    if(res.ok && data.success) {
+      statusEl.textContent = "Verification Safal! Account ban gaya hai.";
+      statusEl.style.color = "#2e7d32";
+      $("verifBox").style.display = "none";
+      showAppMessage("Aapka account safalpurvak register ho gaya hai!", "✅");
+    } else {
+      statusEl.textContent = data.error || "Galat OTP code.";
+      statusEl.style.color = "#d32f2f";
+    }
+  } catch(e) {
+    statusEl.textContent = "Verification mein samasya aayi.";
+    statusEl.style.color = "#d32f2f";
+  }
+}
   
 function showLoading(message){   
   $("authLoadingText").textContent=message||"Checking your account...";   
