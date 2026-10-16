@@ -122,9 +122,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-send{background:#1565c0}
 .ai-mic{background:#2e7d32}
 .ai-mic.on{background:#d32f2f}
-
-.btn-otp-container{display:flex;justify-content:flex-end;margin-top:6px}
-.btn-otp-small{background:#2e7d32;color:#fff;border:0;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:bold;cursor:pointer;width:auto!important;display:inline-block}
 </style>
 </head>  
 <body>  
@@ -408,7 +405,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
 <div id="createAccountView" class="view-section">
   <div class="create-acc-container profile-container">
     <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account</h3>
-    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Register with Email & WhatsApp Verification (100% Free)</p>
+    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Register with Email & WhatsApp OTP Verification (100% Free)</p>
     
     <div class="form-group" style="margin-bottom: 12px;">
       <label>Full Name:</label>
@@ -428,80 +425,12 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
     
     <div id="sendOtpBtnWrapper">
-      <button class="btn-submit" style="background: #25D366; color:#000;" id="sendOtpBtn" onclick="triggerWhatsAppVerification()">💬 Verify via WhatsApp (Free)</button>
+      <button class="btn-submit" style="background: #25D366; color:#000;" id="sendOtpBtn" onclick="triggerWhatsAppVerification()">💬 Send WhatsApp OTP (Free)</button>
     </div>
     
-    <div id="verifBox" style="display:none; margin-top: 15px; text-align:center;">
-      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp is opening... Please send the message!</p>
-      <div class="auth-loader" style="margin:auto;"></div>
-      <p style="font-size:12px; color:#666; margin-top:10px;">Waiting for automatic verification...</p>
-    </div>
+    <div id="verifBox" style="display:none; margin-top: 15px; text-align:center;"></div>
     <small id="regStatusMsg" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
     
-    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
-  </div>
-</div>
-
-<!-- LOGIN WITH MOBILE NUMBER VIEW -->
-<div id="loginMobileView" class="view-section">
-  <div class="profile-container">
-    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📱 Login with WhatsApp</h3>
-    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Enter your registered mobile number to verify via WhatsApp</p>
-    
-    <div class="form-group">
-      <label>Registered Mobile Number:</label>
-      <input type="tel" id="loginMobileNum" placeholder="Enter 10 digit mobile number" maxlength="10">
-    </div>
-    
-    <div id="mobOtpBtnWrapper">
-      <button class="btn-submit" style="background: #25D366; color:#000;" id="sendMobOtpBtn" onclick="triggerWhatsAppLogin()">💬 Verify via WhatsApp</button>
-    </div>
-
-    <div id="mobVerifBox" style="display:none; margin-top: 15px; text-align:center;">
-      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp is opening... Please send the message!</p>
-      <div class="auth-loader" style="margin:auto;"></div>
-      <p style="font-size:12px; color:#666; margin-top:10px;">Waiting for automatic verification...</p>
-    </div>
-    <small id="mobLoginStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
-
-    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
-  </div>
-</div>
-
-<!-- LOGIN WITH EMAIL & PASSWORD VIEW -->
-<div id="loginEmailPassView" class="view-section">
-  <div class="profile-container">
-    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">✉️ Login with Email & Password</h3>
-    
-    <div class="form-group">
-      <label>Email Address:</label>
-      <input type="email" id="loginEmailInput" placeholder="Enter your email">
-    </div>
-    <div class="form-group">
-      <label>Password:</label>
-      <input type="password" id="loginPassInput" placeholder="Enter password">
-    </div>
-
-    <button class="btn-submit" style="background: #0d47a1;" onclick="loginWithEmailPassword()">Login</button>
-    <small id="emailPassStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #d32f2f; font-weight: bold; text-align:center;"></small>
-
-    <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
-  </div>
-</div>
-
-<!-- CHANGE MOBILE NUMBER VIEW -->
-<div id="changeMobileView" class="view-section">
-  <div class="profile-container">
-    <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📲 Change Mobile Number</h3>
-    <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">Verify via WhatsApp</p>
-
-    <div class="form-group">
-      <label>New Mobile Number (10 digits):</label>
-      <input type="tel" id="newMobileNum" placeholder="Enter new mobile number" maxlength="10">
-    </div>
-    <button class="btn-submit" style="background: #25D366; color:#000;" onclick="triggerChangeMobile()">💬 Verify & Update via WhatsApp</button>
-    
-    <small id="changeMobStatus" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
     <button class="btn-close" style="margin-top: 20px;" onclick="switchTab('profileView', document.querySelectorAll('.nav-item')[3])">Back to Profile</button>
   </div>
 </div>
@@ -516,17 +445,13 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <p id="profileEmail" style="font-size:13px;color:#666">Account Not Connected</p>  
     </div>  
     
-    <!-- Multi Login Options -->
     <div id="unauthButtons">
       <button class="btn-submit" id="profileAuthBtn" onclick="googleSignIn()">Login with Google</button>  
-      <button class="btn-submit" style="background: #25D366; color:#000; margin-top: 8px;" onclick="switchTab('loginMobileView', null)">💬 Login with WhatsApp</button>
-      <button class="btn-submit" style="background: #0d47a1; margin-top: 8px;" onclick="switchTab('loginEmailPassView', null)">Login with Email & Password</button>
-      <button class="btn-submit" style="background: #ff9800; margin-top: 8px;" onclick="switchTab('createAccountView', null)">Create Account</button>
+      <button class="btn-submit" style="background: #ff9800; margin-top: 8px;" onclick="switchTab('createAccountView', null)">Create Account & Register</button>
     </div>
 
     <div id="authLogoutContainer" style="display:none;">
       <button class="btn-close" onclick="googleSignOut()">Logout Account</button>
-      <button class="btn-submit" style="background: #25D366; color:#000; margin-top: 10px;" onclick="openChangeMobileView()">Change Mobile Number</button>
     </div>
 
     <div class="profile-section-box">  
@@ -679,7 +604,7 @@ async function isPhoneRegisteredInDatabase(phone) {
   }
 }
 
-/* --- WHATSAPP CLICK-TO-VERIFY REGISTRATION --- */
+/* --- WHATSAPP OTP VERIFICATION (CREATE ACCOUNT) --- */
 async function triggerWhatsAppVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
@@ -694,8 +619,6 @@ async function triggerWhatsAppVerification(){
     return;
   }
 
-  statusEl.textContent = "Checking account status...";
-  statusEl.style.color = "#1565c0";
   showLoading("Checking account details...");
 
   try {
@@ -732,28 +655,20 @@ async function triggerWhatsAppVerification(){
       phoneInput.style.background = "#f0f0f0";
       phoneInput.style.cursor = "not-allowed";
 
+      $("verifBox").innerHTML = `
+        <div style="margin-top:15px; background:#e8f5e9; padding:15px; border-radius:10px; border:1px solid #a5d6a7;">
+          <p style="font-size:13px; color:#2e7d32; font-weight:bold; margin-bottom:8px;">
+            WhatsApp is opening... Check code in WhatsApp message and enter below:
+          </p>
+          <div style="display:flex; gap:8px; justify-content:center;">
+            <input type="number" id="enteredOtpCode" placeholder="Enter 4-Digit OTP" maxlength="4" style="width:160px; padding:10px; text-align:center; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px;">
+            <button class="btn-submit" style="width:auto; padding:10px 16px; background:#2e7d32;" onclick="confirmEnteredOtp('${phone}', '${email}', '${password}', '${name}')">Verify OTP</button>
+          </div>
+        </div>
+      `;
       $("verifBox").style.display = "block";
-      statusEl.textContent = "WhatsApp is opening... Please send the message!";
-      statusEl.style.color = "#25D366";
 
       window.open(data.waUrl, "_blank");
-      pollWhatsAppVerification(data.code, async () => {
-        try {
-          await auth.createUserWithEmailAndPassword(email, password);
-        } catch(e) {}
-
-        const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
-        await db.ref("verified_users/" + cleanEmailKey).set({
-          verified: true,
-          phone: phone,
-          name: name,
-          email: email,
-          verifiedAt: Date.now()
-        });
-
-        showAppMessage("Account Created & Verified Successfully via WhatsApp!", "✅");
-        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
-      });
     } else {
       statusEl.textContent = data.error?.message || "Could not generate WhatsApp link.";
       statusEl.style.color = "#d32f2f";
@@ -765,206 +680,51 @@ async function triggerWhatsAppVerification(){
   }
 }
 
-/* --- WHATSAPP CLICK-TO-VERIFY LOGIN --- */
-async function triggerWhatsAppLogin(){
-  const phoneInput = $("loginMobileNum");
-  const phone = normalizeIndianPhone(phoneInput.value);
-  const statusEl = $("mobLoginStatus");
+async function confirmEnteredOtp(phone, email, password, name){
+  const otpInput = $("enteredOtpCode");
+  const otp = otpInput ? otpInput.value.trim() : "";
 
-  if(!/^[6-9]\d{9}$/.test(phone)){
-    statusEl.textContent = "Please enter a valid 10-digit mobile number.";
-    statusEl.style.color = "#d32f2f";
+  if(!otp || otp.length !== 4){
+    showAppMessage("Please enter valid 4-digit OTP code.", "⚠️");
     return;
   }
 
-  statusEl.textContent = "Checking mobile registration...";
-  statusEl.style.color = "#1565c0";
-  showLoading("Checking registered mobile...");
+  showLoading("Verifying OTP code...");
 
   try {
-    const phoneExists = await isPhoneRegisteredInDatabase(phone);
-    if (!phoneExists) {
-      hideLoading();
-      statusEl.textContent = "Mobile number not registered. Please create an account first.";
-      statusEl.style.color = "#d32f2f";
-      showAppMessage("Mobile number not registered. Please create an account first.", "⚠️");
-      return;
-    }
-
-    const res = await fetch(PAY_API_BASE + "/send-wa-code", {
+    const res = await fetch(PAY_API_BASE + "/verify-wa-code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone })
+      body: JSON.stringify({ phone, otp })
     });
 
     let data = {};
     try { data = await res.json(); } catch(e){}
     hideLoading();
 
-    if(res.ok && data.waUrl){
-      phoneInput.readOnly = true;
-      phoneInput.style.background = "#f0f0f0";
-      phoneInput.style.cursor = "not-allowed";
+    if(res.ok && data.success){
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch(e) {}
 
-      $("mobVerifBox").style.display = "block";
-      statusEl.textContent = "WhatsApp is opening... Please send the message!";
-      statusEl.style.color = "#25D366";
-
-      window.open(data.waUrl, "_blank");
-      pollWhatsAppVerification(data.code, async () => {
-        const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
-        let matchedName = "User", matchedEmail = "";
-        if(userSnap.exists()){
-          userSnap.forEach(child => {
-            const val = child.val();
-            if(val) { matchedName = val.name || "User"; matchedEmail = val.email || ""; }
-          });
-        }
-
-        currentUser = {
-          uid: "mob_" + phone,
-          displayName: matchedName,
-          email: matchedEmail,
-          photoURL: getSavedAvatar(),
-          getIdToken: async () => "mock_token"
-        };
-
-        userPhone = phone;
-        if($("custPhone")) $("custPhone").value = userPhone;
-        
-        updateAuthUI();
-        loadUserOrders(currentUser.uid);
-
-        showAppMessage("Logged in successfully via WhatsApp!", "✅");
-        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+      const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
+      await db.ref("verified_users/" + cleanEmailKey).set({
+        verified: true,
+        phone: phone,
+        name: name,
+        email: email,
+        verifiedAt: Date.now()
       });
+
+      showAppMessage("Account Created & Verified Successfully!", "✅");
+      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
     } else {
-      statusEl.textContent = data.error?.message || "Could not generate WhatsApp login link.";
-      statusEl.style.color = "#d32f2f";
+      showAppMessage(data.error?.message || "Invalid OTP code. Please check WhatsApp.", "❌");
     }
   } catch(e) {
     hideLoading();
-    statusEl.textContent = "Error: " + (e.message || e);
-    statusEl.style.color = "#d32f2f";
+    showAppMessage("Network Error: " + (e.message || e), "❌");
   }
-}
-
-/* --- WHATSAPP CLICK-TO-VERIFY CHANGE MOBILE --- */
-async function triggerChangeMobile(){
-  const phoneInput = $("newMobileNum");
-  const newPhone = normalizeIndianPhone(phoneInput.value);
-  const statusEl = $("changeMobStatus");
-
-  if(!/^[6-9]\d{9}$/.test(newPhone)){
-    statusEl.textContent = "Enter valid 10-digit new mobile number.";
-    statusEl.style.color = "#d32f2f";
-    return;
-  }
-
-  statusEl.textContent = "Connecting to WhatsApp API...";
-  statusEl.style.color = "#1565c0";
-  showLoading("Preparing WhatsApp Verification...");
-
-  try {
-    const res = await fetch(PAY_API_BASE + "/send-wa-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: newPhone })
-    });
-    let data = {}; try{ data=await res.json(); }catch(e){}
-    hideLoading();
-
-    if(res.ok && data.waUrl){
-      phoneInput.readOnly = true;
-      phoneInput.style.background = "#f0f0f0";
-      phoneInput.style.cursor = "not-allowed";
-
-      statusEl.textContent = "WhatsApp is opening... Please send the message!";
-      statusEl.style.color = "#25D366";
-
-      window.open(data.waUrl, "_blank");
-      pollWhatsAppVerification(data.code, async () => {
-        userPhone = newPhone;
-        if($("custPhone")) $("custPhone").value = userPhone;
-        if(currentUser && currentUser.email){
-          const cleanEmailKey = currentUser.email.replace(/[.#$\[\]]/g, "_");
-          await db.ref("verified_users/" + cleanEmailKey).update({ phone: newPhone });
-        }
-        showAppMessage("Mobile Number updated successfully via WhatsApp!", "✅");
-        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
-      });
-    } else {
-      statusEl.textContent = data.error?.message || "Could not generate WhatsApp link.";
-      statusEl.style.color = "#d32f2f";
-    }
-  } catch(e){
-    hideLoading();
-    statusEl.textContent = "Error: " + (e.message || e);
-    statusEl.style.color = "#d32f2f";
-  }
-}
-
-async function pollWhatsAppVerification(code, onSuccess){
-  let attempts = 0;
-  const interval = setInterval(async () => {
-    attempts++;
-    try {
-      const res = await fetch(PAY_API_BASE + `/check-status?code=${code}`);
-      const data = await res.json();
-      if(data && data.verified){
-        clearInterval(interval);
-        onSuccess();
-      }
-    } catch(e){}
-
-    if(attempts > 60){ // 5 minutes timeout
-      clearInterval(interval);
-      showAppMessage("Verification timeout. Please try again.", "❌");
-    }
-  }, 5000);
-}
-
-/* --- EMAIL & PASSWORD LOGIN LOGIC --- */
-async function loginWithEmailPassword(){
-  const email = $("loginEmailInput").value.trim().toLowerCase();
-  const password = $("loginPassInput").value.trim();
-  const statusEl = $("emailPassStatus");
-
-  if(!email || !password){
-    statusEl.textContent = "Please enter Email and Password.";
-    return;
-  }
-
-  statusEl.textContent = "Checking credentials...";
-  statusEl.style.color = "#1565c0";
-  showLoading("Signing in with Email & Password...");
-
-  try {
-    await auth.signInWithEmailAndPassword(email, password);
-    hideLoading();
-    statusEl.textContent = "Login Successful!";
-    statusEl.style.color = "#2e7d32";
-    showAppMessage("Logged in successfully!", "✅");
-    switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
-  } catch(e) {
-    hideLoading();
-    statusEl.textContent = "Invalid Email or Password.";
-    statusEl.style.color = "#d32f2f";
-  }
-}
-
-function openChangeMobileView(){
-  if(!userPhone){
-    showAppMessage("No mobile number associated with current account.", "⚠️");
-    return;
-  }
-  const input = $("newMobileNum");
-  input.value = "";
-  input.readOnly = false;
-  input.style.background = "#fff";
-  input.style.cursor = "text";
-  $("changeMobStatus").textContent = "";
-  switchTab("changeMobileView", null);
 }
 
 function showLoading(message){   
@@ -1055,11 +815,6 @@ window.nativeLocationSuccess=nativeLocationSuccess;
 window.nativeLocationReceived=nativeLocationReceived;   
 window.nativeLocationError=nativeLocationError;
 
-function handleAuthAction(){   
-  if(currentUser) googleSignOut();   
-  else switchTab("profileView", document.querySelectorAll(".nav-item")[3]);   
-}   
-  
 function googleSignOut(){   
   showLoading("Logging out...");   
   auth.signOut().then(()=>{   
@@ -1101,8 +856,7 @@ function updateAuthUI(){
 auth.onAuthStateChanged(async user=>{   
   if(user){
     const userEmail = (user.email || "").toLowerCase();
-    
-    if(userEmail && !user.uid.startsWith("mob_")) {
+    if(userEmail) {
       const cleanEmailKey = userEmail.replace(/[.#$\[\]]/g, "_");
       try {
         let snap = await db.ref("verified_users/" + cleanEmailKey).once("value");
@@ -1126,13 +880,11 @@ auth.onAuthStateChanged(async user=>{
       loadUserOrders(user.uid);
     }
   }else{   
-    if(!currentUser || !currentUser.uid.startsWith("mob_")) {
-      currentUser=null;   
-      userPhone="";
-      authStateResolved=true;   
-      updateAuthUI();   
-      clearOrdersListener();   
-    }
+    currentUser=null;   
+    userPhone="";
+    authStateResolved=true;   
+    updateAuthUI();   
+    clearOrdersListener();   
   }   
   hideLoading();   
 });   
