@@ -404,7 +404,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
 </div>
 
-<!-- CREATE ACCOUNT VIEW (100% Free WhatsApp Click-to-Verify) -->
+<!-- CREATE ACCOUNT VIEW -->
 <div id="createAccountView" class="view-section">
   <div class="create-acc-container profile-container">
     <h3 style="color: #1a237e; margin-bottom: 10px; text-align: center;">📝 Create Account</h3>
@@ -432,9 +432,9 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
     
     <div id="verifBox" style="display:none; margin-top: 15px; text-align:center;">
-      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp open ho raha hai... Send button dabayein!</p>
+      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp is opening... Please send the message!</p>
       <div class="auth-loader" style="margin:auto;"></div>
-      <p style="font-size:12px; color:#666; margin-top:10px;">Waiting for automatic verification from WhatsApp...</p>
+      <p style="font-size:12px; color:#666; margin-top:10px;">Waiting for automatic verification...</p>
     </div>
     <small id="regStatusMsg" style="display:block; margin-top: 10px; font-size: 12px; color: #666; font-weight: bold; text-align:center;"></small>
     
@@ -458,7 +458,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     </div>
 
     <div id="mobVerifBox" style="display:none; margin-top: 15px; text-align:center;">
-      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp open ho raha hai... Send button dabayein!</p>
+      <p style="font-size:13px; color:#1a237e; margin-bottom:10px; font-weight:bold;">WhatsApp is opening... Please send the message!</p>
       <div class="auth-loader" style="margin:auto;"></div>
       <p style="font-size:12px; color:#666; margin-top:10px;">Waiting for automatic verification...</p>
     </div>
@@ -658,7 +658,6 @@ const $=id=>document.getElementById(id);
 const ORDER_DRAFT_KEY="topper_order_draft_v1";   
 const PAY_API_BASE="https://topper-ai.ankiteeepad009.workers.dev";
 
-/* --- CHECK IF EMAIL IS REGISTERED FUNCTION --- */
 async function isEmailRegisteredInDatabase(email) {
   if (!email) return false;
   const cleanEmailKey = email.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
@@ -670,7 +669,6 @@ async function isEmailRegisteredInDatabase(email) {
   }
 }
 
-/* --- CHECK IF PHONE IS REGISTERED FUNCTION --- */
 async function isPhoneRegisteredInDatabase(phone) {
   if (!phone) return false;
   try {
@@ -681,12 +679,13 @@ async function isPhoneRegisteredInDatabase(phone) {
   }
 }
 
-/* --- 100% FREE WHATSAPP CLICK-TO-VERIFY REGISTRATION --- */
+/* --- WHATSAPP CLICK-TO-VERIFY REGISTRATION --- */
 async function triggerWhatsAppVerification(){
   const name = $("regName").value.trim();
   const email = $("regEmail").value.trim().toLowerCase();
   const password = $("regPass").value.trim();
-  const phone = normalizeIndianPhone($("regPhone").value);
+  const phoneInput = $("regPhone");
+  const phone = normalizeIndianPhone(phoneInput.value);
   const statusEl = $("regStatusMsg");
 
   if(!name || !email || !password || password.length < 6 || !/^[6-9]\d{9}$/.test(phone)){
@@ -718,37 +717,47 @@ async function triggerWhatsAppVerification(){
       return;
     }
 
-    hideLoading();
-    const verificationCode = "TOPPER-" + Math.floor(100000 + Math.random() * 900000);
-    localStorage.setItem("pending_reg", JSON.stringify({ name, email, password, phone, code: verificationCode }));
-
-    const businessWhatsApp = "917250048759";
-    const message = encodeURIComponent(`Verify my Topper Stitching account. Code: ${verificationCode}`);
-    const waUrl = `https://wa.me/${businessWhatsApp}?text=${message}`;
-
-    $("verifBox").style.display = "block";
-    statusEl.textContent = "WhatsApp open ho raha hai... Message send karein!";
-    statusEl.style.color = "#25D366";
-
-    window.open(waUrl, "_blank");
-    pollWhatsAppVerification(verificationCode, async () => {
-      try {
-        await auth.createUserWithEmailAndPassword(email, password);
-      } catch(e) {}
-
-      const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
-      await db.ref("verified_users/" + cleanEmailKey).set({
-        verified: true,
-        phone: phone,
-        name: name,
-        email: email,
-        verifiedAt: Date.now()
-      });
-
-      showAppMessage("Account Created & Verified Successfully via WhatsApp!", "✅");
-      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+    const res = await fetch(PAY_API_BASE + "/send-wa-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone })
     });
+    
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+    hideLoading();
 
+    if(res.ok && data.waUrl){
+      phoneInput.readOnly = true;
+      phoneInput.style.background = "#f0f0f0";
+      phoneInput.style.cursor = "not-allowed";
+
+      $("verifBox").style.display = "block";
+      statusEl.textContent = "WhatsApp is opening... Please send the message!";
+      statusEl.style.color = "#25D366";
+
+      window.open(data.waUrl, "_blank");
+      pollWhatsAppVerification(data.code, async () => {
+        try {
+          await auth.createUserWithEmailAndPassword(email, password);
+        } catch(e) {}
+
+        const cleanEmailKey = email.replace(/[.#$\[\]]/g, "_");
+        await db.ref("verified_users/" + cleanEmailKey).set({
+          verified: true,
+          phone: phone,
+          name: name,
+          email: email,
+          verifiedAt: Date.now()
+        });
+
+        showAppMessage("Account Created & Verified Successfully via WhatsApp!", "✅");
+        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+      });
+    } else {
+      statusEl.textContent = data.error?.message || "Could not generate WhatsApp link.";
+      statusEl.style.color = "#d32f2f";
+    }
   } catch(e) {
     hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
@@ -758,7 +767,8 @@ async function triggerWhatsAppVerification(){
 
 /* --- WHATSAPP CLICK-TO-VERIFY LOGIN --- */
 async function triggerWhatsAppLogin(){
-  const phone = normalizeIndianPhone($("loginMobileNum").value);
+  const phoneInput = $("loginMobileNum");
+  const phone = normalizeIndianPhone(phoneInput.value);
   const statusEl = $("mobLoginStatus");
 
   if(!/^[6-9]\d{9}$/.test(phone)){
@@ -781,45 +791,57 @@ async function triggerWhatsAppLogin(){
       return;
     }
 
-    hideLoading();
-    const verificationCode = "TOPPER-LOGIN-" + Math.floor(100000 + Math.random() * 900000);
-    const businessWhatsApp = "917250048759";
-    const message = encodeURIComponent(`Login to Topper Stitching account. Code: ${verificationCode}`);
-    const waUrl = `https://wa.me/${businessWhatsApp}?text=${message}`;
-
-    $("mobVerifBox").style.display = "block";
-    statusEl.textContent = "WhatsApp open ho raha hai... Message send karein!";
-    statusEl.style.color = "#25D366";
-
-    window.open(waUrl, "_blank");
-    pollWhatsAppVerification(verificationCode, async () => {
-      const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
-      let matchedName = "", matchedEmail = "";
-      if(userSnap.exists()){
-        userSnap.forEach(child => {
-          const val = child.val();
-          if(val) { matchedName = val.name; matchedEmail = val.email; }
-        });
-      }
-
-      currentUser = {
-        uid: "mob_" + phone,
-        displayName: matchedName || "User",
-        email: matchedEmail || "",
-        photoURL: getSavedAvatar(),
-        getIdToken: async () => "mock_token"
-      };
-
-      userPhone = phone;
-      if($("custPhone")) $("custPhone").value = userPhone;
-      
-      updateAuthUI();
-      loadUserOrders(currentUser.uid);
-
-      showAppMessage("Logged in successfully via WhatsApp!", "✅");
-      switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+    const res = await fetch(PAY_API_BASE + "/send-wa-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone })
     });
 
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+    hideLoading();
+
+    if(res.ok && data.waUrl){
+      phoneInput.readOnly = true;
+      phoneInput.style.background = "#f0f0f0";
+      phoneInput.style.cursor = "not-allowed";
+
+      $("mobVerifBox").style.display = "block";
+      statusEl.textContent = "WhatsApp is opening... Please send the message!";
+      statusEl.style.color = "#25D366";
+
+      window.open(data.waUrl, "_blank");
+      pollWhatsAppVerification(data.code, async () => {
+        const userSnap = await db.ref("verified_users").orderByChild("phone").equalTo(phone).once("value");
+        let matchedName = "User", matchedEmail = "";
+        if(userSnap.exists()){
+          userSnap.forEach(child => {
+            const val = child.val();
+            if(val) { matchedName = val.name || "User"; matchedEmail = val.email || ""; }
+          });
+        }
+
+        currentUser = {
+          uid: "mob_" + phone,
+          displayName: matchedName,
+          email: matchedEmail,
+          photoURL: getSavedAvatar(),
+          getIdToken: async () => "mock_token"
+        };
+
+        userPhone = phone;
+        if($("custPhone")) $("custPhone").value = userPhone;
+        
+        updateAuthUI();
+        loadUserOrders(currentUser.uid);
+
+        showAppMessage("Logged in successfully via WhatsApp!", "✅");
+        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+      });
+    } else {
+      statusEl.textContent = data.error?.message || "Could not generate WhatsApp login link.";
+      statusEl.style.color = "#d32f2f";
+    }
   } catch(e) {
     hideLoading();
     statusEl.textContent = "Error: " + (e.message || e);
@@ -829,7 +851,8 @@ async function triggerWhatsAppLogin(){
 
 /* --- WHATSAPP CLICK-TO-VERIFY CHANGE MOBILE --- */
 async function triggerChangeMobile(){
-  const newPhone = normalizeIndianPhone($("newMobileNum").value);
+  const phoneInput = $("newMobileNum");
+  const newPhone = normalizeIndianPhone(phoneInput.value);
   const statusEl = $("changeMobStatus");
 
   if(!/^[6-9]\d{9}$/.test(newPhone)){
@@ -838,34 +861,55 @@ async function triggerChangeMobile(){
     return;
   }
 
-  const verificationCode = "TOPPER-CHANGE-" + Math.floor(100000 + Math.random() * 900000);
-  const businessWhatsApp = "917250048759";
-  const message = encodeURIComponent(`Change Topper Stitching mobile number to ${newPhone}. Code: ${verificationCode}`);
-  const waUrl = `https://wa.me/${businessWhatsApp}?text=${message}`;
+  statusEl.textContent = "Connecting to WhatsApp API...";
+  statusEl.style.color = "#1565c0";
+  showLoading("Preparing WhatsApp Verification...");
 
-  statusEl.textContent = "WhatsApp open ho raha hai... Message send karein!";
-  statusEl.style.color = "#25D366";
+  try {
+    const res = await fetch(PAY_API_BASE + "/send-wa-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: newPhone })
+    });
+    let data = {}; try{ data=await res.json(); }catch(e){}
+    hideLoading();
 
-  window.open(waUrl, "_blank");
-  pollWhatsAppVerification(verificationCode, async () => {
-    userPhone = newPhone;
-    if($("custPhone")) $("custPhone").value = userPhone;
-    if(currentUser && currentUser.email){
-      const cleanEmailKey = currentUser.email.replace(/[.#$\[\]]/g, "_");
-      await db.ref("verified_users/" + cleanEmailKey).update({ phone: newPhone });
+    if(res.ok && data.waUrl){
+      phoneInput.readOnly = true;
+      phoneInput.style.background = "#f0f0f0";
+      phoneInput.style.cursor = "not-allowed";
+
+      statusEl.textContent = "WhatsApp is opening... Please send the message!";
+      statusEl.style.color = "#25D366";
+
+      window.open(data.waUrl, "_blank");
+      pollWhatsAppVerification(data.code, async () => {
+        userPhone = newPhone;
+        if($("custPhone")) $("custPhone").value = userPhone;
+        if(currentUser && currentUser.email){
+          const cleanEmailKey = currentUser.email.replace(/[.#$\[\]]/g, "_");
+          await db.ref("verified_users/" + cleanEmailKey).update({ phone: newPhone });
+        }
+        showAppMessage("Mobile Number updated successfully via WhatsApp!", "✅");
+        switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
+      });
+    } else {
+      statusEl.textContent = data.error?.message || "Could not generate WhatsApp link.";
+      statusEl.style.color = "#d32f2f";
     }
-    showAppMessage("Mobile Number updated successfully via WhatsApp!", "✅");
-    switchTab("profileView", document.querySelectorAll(".nav-item")[3]);
-  });
+  } catch(e){
+    hideLoading();
+    statusEl.textContent = "Error: " + (e.message || e);
+    statusEl.style.color = "#d32f2f";
+  }
 }
 
-/* --- POLLING CLOUDFLARE WORKER FOR WHATSAPP VERIFICATION --- */
 async function pollWhatsAppVerification(code, onSuccess){
   let attempts = 0;
   const interval = setInterval(async () => {
     attempts++;
     try {
-      const res = await fetch(`${PAY_API_BASE}/check-status?code=${code}`);
+      const res = await fetch(PAY_API_BASE + `/check-status?code=${code}`);
       const data = await res.json();
       if(data && data.verified){
         clearInterval(interval);
@@ -873,7 +917,7 @@ async function pollWhatsAppVerification(code, onSuccess){
       }
     } catch(e){}
 
-    if(attempts > 40){ // 3+ minutes timeout
+    if(attempts > 60){ // 5 minutes timeout
       clearInterval(interval);
       showAppMessage("Verification timeout. Please try again.", "❌");
     }
@@ -909,13 +953,16 @@ async function loginWithEmailPassword(){
   }
 }
 
-/* --- CHANGE MOBILE NUMBER VIEW --- */
 function openChangeMobileView(){
   if(!userPhone){
     showAppMessage("No mobile number associated with current account.", "⚠️");
     return;
   }
-  $("newMobileNum").value = "";
+  const input = $("newMobileNum");
+  input.value = "";
+  input.readOnly = false;
+  input.style.background = "#fff";
+  input.style.cursor = "text";
   $("changeMobStatus").textContent = "";
   switchTab("changeMobileView", null);
 }
