@@ -155,17 +155,6 @@ button:disabled{opacity:.7;cursor:not-allowed}
 @keyframes offShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 #offlineToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:11px 22px;border-radius:24px;font-size:14px;font-weight:700;z-index:1000001;box-shadow:0 6px 20px #0005;display:none}
 .auth-cancel{display:none;margin-top:22px;background:#fff;color:#1a237e;border:2px solid #1a237e;padding:9px 26px;border-radius:22px;font-size:14px;font-weight:700;cursor:pointer}
-#aiInput{flex:1;min-width:0;padding:11px 14px;border:1px solid #ccc;border-radius:22px;font-size:16px;outline:none;resize:none;max-height:120px;line-height:1.4;font-family:inherit}
-.ai-msg-actions{display:flex;gap:8px;margin-top:6px;font-size:12px}
-.ai-msg-actions button{background:none;border:0;color:#555;cursor:pointer;font-weight:600;padding:3px 6px;border-radius:4px}
-.ai-msg-actions button:active{background:#eee}
-.app-message-actions{display:flex;gap:10px;justify-content:center}
-.app-message-cancel{border:1px solid #ccc;background:#fff;color:#444;padding:11px 24px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
-#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#212121;color:#fff;padding:11px 18px;border-radius:24px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:999997;max-width:90%;text-align:center}
-#toast.show{opacity:1;transform:translateX(-50%)}
-.fly{position:fixed;z-index:999996;width:22px;height:22px;border-radius:50%;background:#ffab00;box-shadow:0 2px 8px #0005;pointer-events:none;transition:transform .75s cubic-bezier(.5,-.2,.8,.6),opacity .75s}
-.cart-bump{display:inline-block;animation:cartBump .45s}
-@keyframes cartBump{40%{transform:scale(1.45)}}
 </style>
 </head>
 <body>
@@ -703,7 +692,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
   <div class="ai-messages" id="aiMessages"></div>
   <div class="ai-input-row">
     <button class="ai-btn ai-mic" id="aiMicBtn" onclick="toggleLive()" aria-label="Live voice">🎙️</button>
-    <textarea id="aiInput" rows="1" placeholder="Type your question..." autocomplete="off"></textarea>
+    <input type="text" id="aiInput" placeholder="Type your question..." maxlength="1000" autocomplete="off">
     <button class="ai-btn ai-send" id="aiSendBtn" onclick="sendAIText()" aria-label="Send">➤</button>
   </div>
 </div>
@@ -907,26 +896,6 @@ function showAppMessage(message,icon="⚠️"){
   box.appendChild(overlay); 
   document.body.appendChild(box); 
 } 
-function appConfirm(message,icon="❓"){
-  return new Promise(resolve=>{
-    const o=document.createElement("div");
-    o.className="app-message-overlay"; o.style.zIndex=1000000;
-    o.innerHTML='<div class="app-message-card"><div class="app-message-icon"></div><div class="app-message-text"></div><div class="app-message-actions"><button class="app-message-cancel">No</button><button class="app-message-ok">Yes</button></div></div>';
-    o.querySelector(".app-message-icon").textContent=icon;
-    o.querySelector(".app-message-text").textContent=message;
-    document.body.appendChild(o);
-    const done=v=>{ o.remove(); resolve(v); };
-    o.querySelector(".app-message-ok").onclick=()=>done(true);
-    o.querySelector(".app-message-cancel").onclick=()=>done(false);
-  });
-}
-let toastTimer=null;
-function showToast(msg){
-  let t=document.getElementById("toast");
-  if(!t){ t=document.createElement("div"); t.id="toast"; document.body.appendChild(t); }
-  t.textContent=msg; t.classList.add("show");
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
-}
 function showOutOfStock(){ 
   showAppMessage("This product is currently out of stock.","📦"); 
 } 
@@ -991,11 +960,7 @@ function handleAuthAction(){
   else googleSignIn(); 
 } 
 
-async function googleSignOut(){
-  if(!(await appConfirm("Kya aap sach me Log Out karna chahte hain?","🚪"))) return;
-  doSignOut();
-}
-function doSignOut(){ 
+function googleSignOut(){ 
   showLoading("Signing out..."); 
   auth.signOut().then(()=>{ 
     currentUser=null; 
@@ -1209,35 +1174,18 @@ function saveCart(){
   try{ localStorage.setItem("topper_cart",JSON.stringify(cart)); }catch(e){} 
   updateCartUI(); 
 } 
-function flyToCart(btnEl){
-  const badge=document.getElementById("cartCountBadge");
-  const target=badge&&badge.parentElement?(badge.parentElement.querySelector(".icon")||badge.parentElement):null;
-  if(!btnEl||!target) return;
-  const a=btnEl.getBoundingClientRect(), b=target.getBoundingClientRect();
-  const f=document.createElement("div"); f.className="fly";
-  f.style.left=(a.left+a.width/2-11)+"px"; f.style.top=(a.top+a.height/2-11)+"px";
-  document.body.appendChild(f);
-  requestAnimationFrame(()=>{
-    f.style.transform="translate("+(b.left+b.width/2-a.left-a.width/2)+"px,"+(b.top+b.height/2-a.top-a.height/2)+"px) scale(.3)";
-    f.style.opacity=".4";
-  });
-  setTimeout(()=>{ f.remove(); target.classList.add("cart-bump"); setTimeout(()=>target.classList.remove("cart-bump"),450); },750);
-}
-async function toggleCart(name,price,btnEl){
-  const index=cart.findIndex(item=>item.name===name);
-  if(index>-1){
-    if(!(await appConfirm("Is item ko cart se remove karna hai?","🗑️"))) return;
-    const i2=cart.findIndex(item=>item.name===name);
-    if(i2>-1) cart.splice(i2,1);
-    saveCart();
-    showToast("Item removed from cart");
-  }else{
-    cart.push({name:name,price:Number(price),qty:1});
-    saveCart();
-    flyToCart(btnEl);
-    showToast("Added to cart ✓");
-  }
-}
+function toggleCart(name,price,btnEl){ 
+  const index=cart.findIndex(item=>item.name===name); 
+  if(index>-1){ 
+    cart.splice(index,1); 
+    saveCart(); 
+    showAppMessage("Item removed from your cart.","ℹ️"); 
+  }else{ 
+    cart.push({name:name,price:Number(price),qty:1}); 
+    saveCart(); 
+    showAppMessage("Item added to your cart.","✅"); 
+  } 
+} 
 function addTableToCart(btnEl){ 
   toggleCart("Sewing Machine Top Table ["+getSelectedTableColor()+"]",600,btnEl); 
 } 
@@ -1287,13 +1235,12 @@ function updateQty(index,delta){
   cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta); 
   saveCart(); 
 } 
-async function removeFromCart(index){
-  if(!cart[index]) return;
-  if(!(await appConfirm("Is item ko cart se remove karna hai?","🗑️"))) return;
-  cart.splice(index,1);
-  saveCart();
-  showToast("Item removed from cart");
-}
+function removeFromCart(index){ 
+  if(!cart[index]) return; 
+  cart.splice(index,1); 
+  saveCart(); 
+  showAppMessage("Item removed from your cart.","ℹ️"); 
+} 
 function checkoutCart(){ 
   if(!requireLogin()||!cart.length) return; 
   const names=cart.map(i=>i.name+" (x"+i.qty+")").join(", "); 
@@ -1776,27 +1723,9 @@ function addAIMsg(role,text){
   const d=document.createElement("div");
   d.className="ai-msg "+role;
   d.textContent=text;
-  if(role==="bot") addBotActions(d,text);
   $("aiMessages").appendChild(d);
   aiScroll();
   return d;
-}
-function copyText(t){
-  const ok=()=>showToast("Copied ✓");
-  const fb=()=>{
-    const a=document.createElement("textarea"); a.value=t; a.style.cssText="position:fixed;opacity:0";
-    document.body.appendChild(a); a.select();
-    try{ document.execCommand("copy"); ok(); }catch(e){ showToast("Copy nahi ho paya"); }
-    a.remove();
-  };
-  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(ok,fb); else fb();
-}
-function addBotActions(el,text){
-  if(el.querySelector(".ai-msg-actions")) return;
-  const acts=document.createElement("div"); acts.className="ai-msg-actions";
-  const l=document.createElement("button"); l.type="button"; l.textContent="🔊 Listen"; l.onclick=()=>speakReply(text);
-  const c=document.createElement("button"); c.type="button"; c.textContent="📋 Copy"; c.onclick=()=>copyText(text);
-  acts.append(l,c); el.appendChild(acts);
 }
 function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
 function aiWarnOnce(){
@@ -1807,7 +1736,7 @@ function localKey(){ return "topper_ai_chat_"+aiOwner(); }
 function localRead(){ try{ const a=JSON.parse(localStorage.getItem(localKey())||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 function localWrite(arr){ try{ localStorage.setItem(localKey(),JSON.stringify(arr.slice(-50))); }catch(e){} }
 function persistMsg(role,text){
-  const rec={role:role==="user"?"user":"bot",text:String(text),t:Date.now()};
+  const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
   const cache=localRead(); cache.push(rec); localWrite(cache);
   if(currentUser){
     try{ db.ref("chats/"+currentUser.uid).push(rec).catch(aiWarnOnce); }catch(e){ aiWarnOnce(); }
@@ -1913,22 +1842,21 @@ async function sendAIText(textOverride){
   const input=$("aiInput");
   const text=String(typeof textOverride==="string"?textOverride:input.value).trim();
   if(!text) return;
-  input.value=""; input.style.height="auto";
+  input.value="";
   aiBusy=true;
   $("aiSendBtn").disabled=true;
   addAIMsg("user",text);
   persistMsg("user",text);
   const typing=addAIMsg("bot","Typing...");
   typing.classList.add("typing");
-  let reply="", spoke=false;
+  let reply="";
   try{
     reply=await askAI(text);
     aiHistory.push({role:"user",text:text},{role:"model",text:reply});
     typing.classList.remove("typing");
     typing.textContent=reply;
-    addBotActions(typing,reply);
     persistMsg("bot",reply);
-    if(liveOn){ spoke=true; speakReply(reply,listenOnce); }
+    if(liveOn) speakReply(reply);
   }catch(e){
     typing.classList.remove("typing");
     typing.className="ai-msg sys";
@@ -1937,15 +1865,12 @@ async function sendAIText(textOverride){
     aiBusy=false;
     $("aiSendBtn").disabled=false;
     aiScroll();
-    if(liveOn&&!spoke) listenOnce();
+    if(liveOn) listenOnce();
   }
 }
 $("aiInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey&&window.innerWidth>700){ e.preventDefault(); sendAIText(); }
+  if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendAIText(); }
 });
-
-function autoGrow(el){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,120)+"px"; }
-$("aiInput").addEventListener("input",function(){ autoGrow(this); });
 
 /* ============ VOICE (speech recognition + spoken reply) ============ */
 let liveOn=false;
@@ -1953,33 +1878,14 @@ let recognizer=null;
 function speechSupported(){
   return !!(window.SpeechRecognition||window.webkitSpeechRecognition);
 }
-let ttsVoices=[];
-function loadVoices(){ try{ ttsVoices=window.speechSynthesis.getVoices()||[]; }catch(e){} }
-if("speechSynthesis" in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
-function pickVoice(){
-  return ttsVoices.find(v=>/^hi/i.test(v.lang))||ttsVoices.find(v=>/en[-_]IN/i.test(v.lang))||ttsVoices.find(v=>/^en/i.test(v.lang))||null;
-}
-function speakReply(text,done){
-  const fin=()=>{ if(typeof done==="function") done(); };
+function speakReply(text){
   try{
-    if(!("speechSynthesis" in window)){ showToast("Is device me voice (speaker) support nahi hai"); fin(); return; }
-    const synth=window.speechSynthesis;
-    const clean=String(text).replace(/[*_#`>~]/g,"").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").replace(/\s+/g," ").trim();
-    if(!clean){ fin(); return; }
-    synth.cancel(); if(synth.paused) synth.resume();
-    let parts=(clean.match(/[^.!?।\n]+[.!?।]?/g)||[clean]).map(x=>x.trim()).filter(Boolean);
-    parts=parts.flatMap(x=>x.length>170?(x.match(/.{1,160}(\s|$)/g)||[x]):[x]);
-    loadVoices();
-    const v=pickVoice();
-    setTimeout(()=>{
-      parts.forEach((x,i)=>{
-        const u=new SpeechSynthesisUtterance(x);
-        u.lang=v?v.lang:"hi-IN"; if(v) u.voice=v; u.rate=1; u.volume=1;
-        if(i===parts.length-1){ u.onend=fin; u.onerror=fin; }
-        synth.speak(u);
-      });
-    },80);
-  }catch(e){ fin(); }
+    if(!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text).slice(0,600));
+    u.lang="hi-IN";
+    window.speechSynthesis.speak(u);
+  }catch(e){}
 }
 function listenOnce(){
   if(!liveOn||aiBusy) return;
