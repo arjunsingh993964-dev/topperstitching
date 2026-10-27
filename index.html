@@ -111,11 +111,20 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:#d32f2f;margin-right:6px;animation:aiPulse 1.1s ease-in-out infinite}
 @keyframes aiPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.4)}}
 .ai-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.ai-msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+.ai-msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;position:relative}
 .ai-msg.bot{background:#fff;border:1px solid #e0e0e0;align-self:flex-start;border-bottom-left-radius:4px;color:#222}
 .ai-msg.user{background:#1565c0;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .ai-msg.sys{background:#fff8e1;color:#6d4c00;align-self:center;font-size:12px;text-align:center;border:1px dashed #ffcc80}
 .ai-msg.typing{color:#888;font-style:italic}
+.ai-msg-actions{display:flex;gap:8px;margin-top:6px;font-size:12px}
+.ai-msg-actions button{background:none;border:0;color:#555;cursor:pointer;font-weight:600;padding:2px 4px;border-radius:4px}
+.ai-msg-actions button:hover{background:#eee}
+.ai-tray{display:none;gap:8px;padding:8px 12px 0;background:#fff;overflow-x:auto}
+.ai-tray.has{display:flex}
+.ai-chip{position:relative;flex:0 0 auto;display:flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #c5cae9;border-radius:10px;padding:4px 26px 4px 6px;font-size:12px;max-width:170px}
+.ai-chip img{width:36px;height:36px;border-radius:7px;object-fit:cover}
+.ai-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-chip b{position:absolute;top:2px;right:7px;cursor:pointer;color:#c62828;font-size:16px}
 .ai-input-row{display:flex;gap:6px;align-items:center;padding:10px 12px;background:#fff;border-top:1px solid #ddd;padding-bottom:max(10px,env(safe-area-inset-top))}
 .ai-input-row input[type="text"]{flex:1;min-width:0;padding:11px 14px;border:1px solid #ccc;border-radius:22px;font-size:16px;outline:none}
 .ai-input-row input[type="text"]:focus{border-color:#1565c0}
@@ -535,6 +544,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
     <button onclick="stopLive()">End</button>
   </div>
   <div class="ai-messages" id="aiMessages"></div>
+  <div class="ai-tray" id="aiTray"></div>
   <div class="ai-input-row">
     <input type="file" id="aiFile" accept="image/*,application/pdf,text/plain" multiple hidden onchange="handleFileSelect(this)">
     <button class="ai-btn ai-attach" title="Attach File/Photo" onclick="$('aiFile').click()">📎</button>
@@ -604,47 +614,19 @@ let locationReady=false;
 let locationRequestBusy=false; 
 
 const $=id=>document.getElementById(id); 
-const ORDER_DRAFT_KEY="topper_order_draft_v1"; 
-
-let loadingCancelTimer=null;
-let loadingMaxTimer=null;
-let signInOpenedAt=0;
 
 function showLoading(message){
   $("authLoadingText").textContent=message||"Loading your account...";
   $("authLoading").style.display="flex";
-  const cancelBtn=$("authLoadingCancel");
-  if(cancelBtn) cancelBtn.style.display="none";
-  clearTimeout(loadingCancelTimer);
-  clearTimeout(loadingMaxTimer);
-  loadingCancelTimer=setTimeout(()=>{
-    const b=$("authLoadingCancel");
-    if(b&&$("authLoading").style.display!=="none") b.style.display="inline-block";
-  },6000);
-  loadingMaxTimer=setTimeout(()=>{
-    if($("authLoading").style.display!=="none"){
-      authBusy=false;
-      hideLoading();
-    }
-  },40000);
 }
-
 function hideLoading(){
-  clearTimeout(loadingCancelTimer);
-  clearTimeout(loadingMaxTimer);
-  const cancelBtn=$("authLoadingCancel");
-  if(cancelBtn) cancelBtn.style.display="none";
   $("authLoading").style.display="none";
 }
-
 function cancelLoading(){
   authBusy=false;
   hideLoading();
 }
 window.cancelLoading=cancelLoading;
-
-showLoading("Loading your account...");
-setTimeout(()=>{ if(!authStateResolved) hideLoading(); },10000);
 
 function escapeHtml(value){ 
   return String(value??"") 
@@ -697,7 +679,7 @@ async function googleSignIn(){
   showLoading("Opening Google Sign-In..."); 
   try{ 
     if(window.AndroidApp&&typeof window.AndroidApp.signIn==="function"){ 
-      signInOpenedAt=Date.now(); window.AndroidApp.signIn(); 
+      window.AndroidApp.signIn(); 
       return; 
     } 
     const provider=new firebase.auth.GoogleAuthProvider(); 
@@ -714,27 +696,17 @@ async function nativeGoogleLogin(idToken){
     if(!idToken) throw new Error("Google ID token was not received."); 
     showLoading("Signing in to your account..."); 
     const credential=firebase.auth.GoogleAuthProvider.credential(idToken); 
-    await Promise.race([
-      auth.signInWithCredential(credential),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Network is slow. Please try again.")),25000))
-    ]); 
+    await auth.signInWithCredential(credential); 
   }catch(error){ 
     showAuthError("We could not sign you in with Google. Please try again.");
     hideLoading(); 
   }finally{ 
     authBusy=false; 
-    if(authStateResolved) hideLoading(); 
+    hideLoading(); 
   } 
 } 
 
-function nativeGoogleLoginError(message){ 
-  authBusy=false; 
-  hideLoading(); 
-  showAuthError("We could not sign you in with Google. Please try again."); 
-} 
-
 window.nativeGoogleLogin=nativeGoogleLogin; 
-window.nativeGoogleLoginError=nativeGoogleLoginError; 
 
 function handleAuthAction(){ 
   if(currentUser) googleSignOut(); 
@@ -788,10 +760,7 @@ function updateAuthUI(){
   authBusy=false; 
 } 
 
-let authSeen=false;
 auth.onAuthStateChanged(user=>{ 
-  if(user&&!currentUser&&authSeen) showToast("Signed in as "+(user.displayName||user.email||"your account"));
-  authSeen=true;
   currentUser=user||null; 
   authStateResolved=true; 
   updateAuthUI(); 
@@ -802,23 +771,16 @@ auth.onAuthStateChanged(user=>{
 
 function openNativeCall(number){ 
   const phoneNumber=String(number||"+919264137710"); 
-  try{ 
-    if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){ 
-      window.AndroidApp.callPhone(phoneNumber); 
-      return false; 
-    } 
-    window.location.href="tel:"+phoneNumber; 
-  }catch(e){ 
-    showAppMessage("Unable to open the phone dialer.","⚠️"); 
+  if(window.AndroidApp&&typeof window.AndroidApp.callPhone==="function"){ 
+    window.AndroidApp.callPhone(phoneNumber); 
+    return false; 
   } 
+  window.location.href="tel:"+phoneNumber; 
   return false; 
 } 
 
 function openNativeEmail(email,subject){ 
-  const targetEmail=String(email||"topperstitching@gmail.com").trim(); 
-  const targetSubject=String(subject||"Support Request"); 
-  const mailtoUrl="mailto:"+targetEmail+"?subject="+encodeURIComponent(targetSubject); 
-  try{ window.location.href=mailtoUrl; }catch(error){ showAppMessage("Unable to open an email app.","⚠️"); } 
+  window.location.href="mailto:"+email+"?subject="+encodeURIComponent(subject); 
   return false; 
 } 
 
@@ -869,39 +831,17 @@ function switchTab(viewId,btnEl){
 }
 
 function setUserLocation(lat,lon){ 
-  const latitude=Number(lat); 
-  const longitude=Number(lon); 
-  if(!Number.isFinite(latitude)||!Number.isFinite(longitude)) return; 
-  userLocationLink="https://www.google.com/maps?q="+latitude+","+longitude; 
+  userLocationLink="https://www.google.com/maps?q="+lat+","+lon; 
   locationReady=true; 
   locationRequestBusy=false; 
   $("locationStatus").textContent="Live location is available."; 
 } 
 function requestUserLocation(){ 
-  if(locationReady||locationRequestBusy) return; 
-  locationRequestBusy=true; 
-  $("locationStatus").textContent="Getting your live location..."; 
-  if(!navigator.geolocation){ 
-    locationRequestBusy=false; 
-    $("locationStatus").textContent="Location is not available on this device."; 
-    return; 
-  } 
-  navigator.geolocation.getCurrentPosition( 
-    pos=>setUserLocation(pos.coords.latitude,pos.coords.longitude), 
-    ()=>{ locationRequestBusy=false; $("locationStatus").textContent="Allow location permission and try again."; }, 
-    {enableHighAccuracy:true,timeout:20000,maximumAge:0} 
-  ); 
+  if(!navigator.geolocation){ $("locationStatus").textContent="Location not supported."; return; } 
+  navigator.geolocation.getCurrentPosition(pos=>setUserLocation(pos.coords.latitude,pos.coords.longitude),()=>{"Location permission denied"}); 
 } 
 
 const tableColors=["Light Wooden","Grey Wooden","Light Dark Wooden","Dark Wooden"]; 
-const tableSliderTrack=$("tableSlider"); 
-if(tableSliderTrack){ 
-  tableSliderTrack.addEventListener("scroll",()=>{ 
-    const width=tableSliderTrack.clientWidth||1; 
-    const index=Math.round(tableSliderTrack.scrollLeft/width); 
-    if(tableColors[index]){ $("selectedTableColorText").textContent=tableColors[index]; } 
-  }); 
-} 
 function slideImages(id,direction){ 
   const track=$(id); 
   if(track) track.scrollBy({left:direction*track.clientWidth,behavior:"smooth"}); 
@@ -1075,39 +1015,22 @@ function normalizeIndianPhone(value){
   return digits; 
 } 
 
-function validatePhone(showMessage=true){ 
+function validatePhone(){ 
   const input=$("custPhone"); 
   const status=$("phoneStatus"); 
   const normalized=normalizeIndianPhone(input.value); 
   const valid=/^[6-9]\d{9}$/.test(normalized); 
-  if(!input.value.trim()){ 
-    status.textContent="Enter a valid mobile number."; 
-    status.style.color="#666"; 
-  }else if(valid){ 
-    status.textContent="✓ Mobile number format is valid."; 
-    status.style.color="#2e7d32"; 
-  }else{ 
-    status.textContent="Enter a valid mobile number."; 
-    status.style.color="#d32f2f"; 
-  } 
+  status.textContent=valid?"✓ Valid mobile number.":"Enter a valid mobile number."; 
+  status.style.color=valid?"#2e7d32":"#d32f2f"; 
   return valid; 
 } 
 
 async function submitOnlineOrder(){ 
-  if(!currentUser){ 
-    showAppMessage("Please sign in with Google before placing an order.","🔐"); 
-    return; 
-  } 
-  if(!$("termsCheck").checked){ 
-    showAppMessage("Please accept the Terms and Conditions.","📝"); 
-    return; 
-  } 
+  if(!currentUser || !$("termsCheck").checked) return; 
   const name=$("custName").value.trim(); 
   const phone=normalizeIndianPhone($("custPhone").value); 
   const address=$("custAddress").value.trim(); 
-  if(!name){ showAppMessage("Please enter your full name.","📝"); return; } 
-  if(!validatePhone(true)){ return; } 
-  if(!address||address.length<8){ showAppMessage("Please enter a complete delivery address.","🏠"); return; } 
+  if(!name || !validatePhone() || !address){ showAppMessage("Please fill all details correctly.","📝"); return; } 
 
   const orderData={ 
     userId:currentUser.uid, 
@@ -1127,15 +1050,12 @@ async function submitOnlineOrder(){
   try{ 
     const ref=db.ref("orders").push(); 
     await ref.set(orderData); 
-    if(selectedProduct.startsWith("Cart Items:")){ 
-      cart=[]; 
-      saveCart(); 
-    } 
+    if(selectedProduct.startsWith("Cart Items:")){ cart=[]; saveCart(); } 
     $("orderModal").style.display="none"; 
     switchTab("ordersView",document.querySelectorAll(".nav-item")[2]); 
     showAppMessage("Order placed successfully!","✅");
   }catch(error){ 
-    showAppMessage("Unable to create your order.\n"+(error.message||error),"❌"); 
+    showAppMessage("Unable to create order.","❌"); 
   }
 } 
 
@@ -1147,7 +1067,6 @@ function clearOrdersListener(){
 function loadUserOrders(userId){ 
   if(ordersQuery) ordersQuery.off(); 
   ordersQuery=db.ref("orders").orderByChild("userId").equalTo(userId); 
-  $("ordersList").innerHTML='<p class="empty-orders">Loading orders...</p>'; 
   ordersQuery.on("value",snapshot=>{ 
     const list=$("ordersList"); 
     list.innerHTML=""; 
@@ -1155,30 +1074,21 @@ function loadUserOrders(userId){
       list.innerHTML='<p class="empty-orders">📦 No orders found yet.</p>'; 
       return; 
     } 
-    const orders=[]; 
     snapshot.forEach(child=>{ 
       const o=child.val(); 
-      if(o){ o._id=child.key; orders.push(o); } 
-    }); 
-    orders.sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0)); 
-
-    orders.forEach(order=>{ 
       const card=document.createElement("div"); 
       card.className="order-card"; 
       card.innerHTML= `
-        <div class="order-header"><b>${escapeHtml(order.product||"Product")}</b></div>
-        <div><b>🆔 Order ID:</b> ${escapeHtml(order._id)}</div>
-        <div style="margin-top:6px"><b>💰 Price:</b> ₹${Number(order.price||0).toLocaleString("en-IN")}</div>
-        <div style="margin-top:6px"><b>👤 Name:</b> ${escapeHtml(order.customerName||"")}</div>
-        <div style="margin-top:6px"><b>📞 Mobile:</b> ${escapeHtml(order.customerPhone||"Not provided")}</div>
-        <div style="margin-top:6px"><b>🏠 Address:</b> ${escapeHtml(order.address||"")}</div>
+        <div class="order-header"><b>${escapeHtml(o.product||"Product")}</b></div>
+        <div><b>🆔 Order ID:</b> ${escapeHtml(child.key)}</div>
+        <div style="margin-top:6px"><b>💰 Price:</b> ₹${Number(o.price||0).toLocaleString("en-IN")}</div>
+        <div style="margin-top:6px"><b>👤 Name:</b> ${escapeHtml(o.customerName||"")}</div>
+        <div style="margin-top:6px"><b>📞 Mobile:</b> ${escapeHtml(o.customerPhone||"")}</div>
+        <div style="margin-top:6px"><b>🏠 Address:</b> ${escapeHtml(o.address||"")}</div>
         <div style="margin-top:6px"><b>💳 Status:</b> <span style="color:#e65100;font-weight:bold">Pending ⏳</span></div>
-        <div style="margin-top:6px"><b>🕐 Date:</b> ${escapeHtml(order.date||"")}</div>
       `; 
       list.appendChild(card); 
     }); 
-  },error=>{ 
-    $("ordersList").textContent="Unable to load orders: "+(error.message||error); 
   }); 
 } 
 
@@ -1186,38 +1096,59 @@ setProfileAvatar(getSavedAvatar());
 loadCart();
 </script>
 
-<!-- ===== AI ASSISTANT SCRIPT ===== -->
+<!-- ===== UPGRADED AI ASSISTANT SCRIPT WITH FILE UPLOAD & BETTER VOICE ===== -->
 <script>
 "use strict";
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
-const AI_GREETING = "Hello! Main Topper Stitching AI Assistant hoon. Aap mujhse machines, prices, warranty, delivery ya apne orders ke baare mein pooch sakte hain. Aap type kar sakte hain, file attach kar sakte hain, ya live voice chat use kar sakte hain!";
+const AI_GREETING = "Hello! Main Topper Stitching AI Assistant hoon. Aap mujhse sewing machines, prices, warranty, delivery ya apne orders ke baare mein pooch sakte hain!";
 
 const aiHistory = [];
 let aiLoadedFor = null;
 let aiBusy = false;
 let liveOn = false;
 let recognizer = null;
+let attachedFilePayload = null;
 
 function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
 
-function addAIMsg(role,text){
+function addAIMsg(role,text, isHtml=false){
   const d=document.createElement("div");
   d.className="ai-msg "+role;
-  d.textContent=text;
+  if(isHtml) d.innerHTML=text;
+  else d.textContent=text;
+
+  if(role === "bot"){
+    const acts = document.createElement("div");
+    acts.className = "ai-msg-actions";
+    
+    const speakBtn = document.createElement("button");
+    speakBtn.textContent = "🔊 Listen";
+    speakBtn.onclick = () => speakReply(text);
+    
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "📋 Copy";
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      showToast("Copied to clipboard");
+    };
+    
+    acts.appendChild(speakBtn);
+    acts.appendChild(copyBtn);
+    d.appendChild(acts);
+  }
+
   $("aiMessages").appendChild(d);
   aiScroll();
   return d;
 }
 
-function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
-
-async function loadAIChat(){
-  const owner=aiOwner();
-  if(aiLoadedFor===owner) return;
-  aiLoadedFor=owner;
+function loadAIChat(){
+  const owner = currentUser ? currentUser.uid : "guest";
+  if(aiLoadedFor === owner) return;
+  aiLoadedFor = owner;
   $("aiMessages").innerHTML="";
   aiHistory.length=0;
-  addAIMsg("bot",AI_GREETING);
+  addAIMsg("bot", AI_GREETING);
 }
 
 function openAI(mode){
@@ -1236,25 +1167,52 @@ function closeAI(){
 function clearAIChat(){
   $("aiMessages").innerHTML="";
   aiHistory.length=0;
-  addAIMsg("bot",AI_GREETING);
+  addAIMsg("bot", AI_GREETING);
 }
 
 function handleFileSelect(input){
-  if(input.files && input.files.length > 0){
-    const fileName = input.files[0].name;
-    addAIMsg("user", "[Attached file: " + fileName + "]");
-    addAIMsg("bot", "File mil gayi hai! Main isko analyze kar raha hoon.");
+  if(input.files && input.files[0]){
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e){
+      attachedFilePayload = {
+        name: file.name,
+        type: file.type,
+        data: e.target.result
+      };
+      const tray = $("aiTray");
+      tray.className = "ai-tray has";
+      tray.innerHTML = `
+        <div class="ai-chip">
+          <span>📎 ${escapeHtml(file.name)}</span>
+          <b onclick="removeAttachment()">&times;</b>
+        </div>
+      `;
+      addAIMsg("sys", "File attached: " + file.name + ". Type your question and send.");
+    };
+    reader.readAsDataURL(file);
   }
 }
 
-async function askAI(text){
+function removeAttachment(){
+  attachedFilePayload = null;
+  const tray = $("aiTray");
+  tray.className = "ai-tray";
+  tray.innerHTML = "";
+}
+
+async function askAI(text, fileData){
   if(!currentUser) throw new Error("Please sign in with Google to use the AI Assistant.");
   const headers={"Content-Type":"application/json"};
   headers["Authorization"]="Bearer "+await currentUser.getIdToken();
+  
+  const payload = {message: text, history: aiHistory.slice(-20)};
+  if(fileData) payload.file = fileData;
+
   const res=await fetch(AI_API_BASE+"/chat",{
     method:"POST",
     headers:headers,
-    body:JSON.stringify({message:text,history:aiHistory.slice(-20)})
+    body:JSON.stringify(payload)
   });
   const data=await res.json();
   if(!res.ok) throw new Error(data.error?.message || "API Error");
@@ -1265,25 +1223,29 @@ async function sendAIText(textOverride){
   if(aiBusy) return;
   const input=$("aiInput");
   const text=String(typeof textOverride==="string"?textOverride:input.value).trim();
-  if(!text) return;
+  if(!text && !attachedFilePayload) return;
+  
+  const userMsg = text + (attachedFilePayload ? " [File: "+attachedFilePayload.name+"]" : "");
   input.value="";
+  const currentFile = attachedFilePayload;
+  removeAttachment();
+  
   aiBusy=true;
   $("aiSendBtn").disabled=true;
-  addAIMsg("user",text);
+  addAIMsg("user", userMsg);
   
   const typing=addAIMsg("bot","Typing...");
   typing.classList.add("typing");
   
   try{
-    const reply=await askAI(text);
-    aiHistory.push({role:"user",text:text},{role:"model",text:reply});
-    typing.classList.remove("typing");
-    typing.textContent=reply;
+    const reply=await askAI(text || "Please analyze this file.", currentFile);
+    aiHistory.push({role:"user", text: userMsg},{role:"model", text: reply});
+    typing.remove();
+    addAIMsg("bot", reply);
     if(liveOn) speakReply(reply);
   }catch(e){
-    typing.classList.remove("typing");
-    typing.className="ai-msg sys";
-    typing.textContent="Error: "+e.message;
+    typing.remove();
+    addAIMsg("sys", "Error: " + e.message);
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
@@ -1296,16 +1258,18 @@ $("aiInput").addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendAIText(); }
 });
 
-function speechSupported(){
-  return !!(window.SpeechRecognition||window.webkitSpeechRecognition)&&("speechSynthesis" in window);
-}
-
 function speakReply(text){
   try{
     if(!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(String(text).slice(0,600));
     u.lang="hi-IN";
+    
+    // Choose best Indian English/Hindi voice if available for clarity
+    const voices = window.speechSynthesis.getVoices();
+    const hiVoice = voices.find(v => v.lang.includes("hi") || v.lang.includes("IN"));
+    if(hiVoice) u.voice = hiVoice;
+    
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -1323,12 +1287,7 @@ function listenOnce(){
       const t=ev.results&&ev.results[0]&&ev.results[0][0]?ev.results[0][0].transcript:"";
       if(t) sendAIText(t);
     };
-    recognizer.onerror=ev=>{
-      if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){
-        addAIMsg("sys","Microphone permission is blocked. Allow the microphone and try again.");
-        stopLive();
-      }
-    };
+    recognizer.onerror=()=>{ stopLive(); };
     recognizer.onend=()=>{ if(liveOn&&!aiBusy){ setTimeout(listenOnce,400); } };
     recognizer.start();
   }catch(e){}
@@ -1336,10 +1295,6 @@ function listenOnce(){
 
 function toggleLive(){
   if(liveOn){ stopLive(); return; }
-  if(!speechSupported()){
-    alert("Voice features are not fully supported in this browser.");
-    return;
-  }
   liveOn=true;
   $("aiLiveBar").classList.add("on");
   $("aiLiveBtn").classList.add("on");
@@ -1349,7 +1304,7 @@ function toggleLive(){
 
 function toggleDictation(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ alert("Voice dictation not supported."); return; }
+  if(!SR){ showAppMessage("Voice dictation not supported in this browser.","⚠️"); return; }
   try{
     const r=new SR();
     r.lang="hi-IN";
