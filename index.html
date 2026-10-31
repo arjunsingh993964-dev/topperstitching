@@ -83,9 +83,19 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .app-message-card{width:100%;max-width:360px;background:#fff;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 10px 35px #0005} 
 .app-message-icon{font-size:40px;margin-bottom:10px}.app-message-text{font-size:16px;font-weight:600;color:#222;line-height:1.5;margin-bottom:20px;white-space:pre-line} 
 .app-message-ok{border:0;background:#1565c0;color:#fff;padding:11px 32px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer} 
-#authLoading{position:fixed;inset:0;z-index:999998;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column} 
+/* Confirmation dialog + toast */
+#appConfirmBox{position:fixed;inset:0;z-index:999999}
+.app-message-actions{display:flex;gap:10px;justify-content:center}
+.app-message-actions button{flex:1;max-width:150px;padding:11px 10px}
+.app-message-cancel{background:#eceff1!important;color:#37474f!important}
+.app-message-ok.danger{background:#d32f2f}
+.app-toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(10px);background:#263238;color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;font-weight:600;z-index:999997;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:88%;text-align:center}
+.app-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Smooth loading screen (no flicker) */
+#authLoading{position:fixed;inset:0;z-index:999998;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .25s ease} 
+#authLoading.fade-out{opacity:0;pointer-events:none}
 .auth-loader{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;animation:authSpin .8s linear infinite} 
-.auth-loading-title{font-size:17px;font-weight:700;color:#1a237e;margin-top:16px} 
+.auth-loading-title{font-size:17px;font-weight:700;color:#1a237e;margin-top:16px;text-align:center;padding:0 20px;min-height:22px} 
 .auth-loading-subtitle{font-size:13px;color:#666;margin-top:6px} 
 @keyframes authSpin{to{transform:rotate(360deg)}} 
 @media(max-width:380px){.brand-title{font-size:17px}.products{padding:10px;gap:10px}.card{padding:11px}} 
@@ -130,6 +140,29 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .ai-send{background:#1565c0}
 .ai-mic{background:#2e7d32}
 .ai-mic.on{background:#d32f2f}
+.ai-liveb{background:#6a1b9a}
+.ai-liveb.on{background:#d32f2f}
+/* Rich AI replies */
+.ai-msg.rich{white-space:normal;max-width:92%}
+.ai-msg.rich p{margin:0 0 8px}
+.ai-msg.rich p:last-child{margin-bottom:0}
+.ai-msg.rich ul,.ai-msg.rich ol{margin:0 0 8px 20px}
+.ai-msg.rich li{margin-bottom:3px}
+.ai-h{font-weight:800;color:#1a237e;margin:6px 0 4px}
+.ai-ic{background:#eef1f6;border-radius:4px;padding:1px 5px;font-family:Consolas,Menlo,monospace;font-size:12.5px}
+.ai-code{margin:8px 0;border-radius:10px;overflow:hidden;background:#1e1e2e;border:1px solid #2b2b40}
+.ai-code-head{display:flex;justify-content:space-between;align-items:center;background:#2b2b40;color:#b8c0d8;padding:6px 10px;font-size:12px}
+.ai-code-copy{background:#ffab00;color:#1a237e;border:0;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+.ai-code pre{margin:0;padding:10px 12px;overflow-x:auto;color:#e6e9f5;font-family:Consolas,Menlo,monospace;font-size:12.5px;line-height:1.5;white-space:pre}
+.ai-actions{display:flex;gap:6px;margin-top:8px;padding-top:6px;border-top:1px solid #eee}
+.ai-act{border:0;background:#f3f5f9;border-radius:8px;width:36px;height:30px;font-size:15px;cursor:pointer}
+.ai-act.on{background:#c8e6c9}
+.ai-act.bad{background:#ffcdd2}
+.ai-dots{display:inline-flex;gap:4px;align-items:center;height:18px}
+.ai-dots i{width:7px;height:7px;border-radius:50%;background:#9aa3b5;animation:aiDot 1.2s infinite ease-in-out}
+.ai-dots i:nth-child(2){animation-delay:.2s}
+.ai-dots i:nth-child(3){animation-delay:.4s}
+@keyframes aiDot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1.1)}}
 
 /* ===== OFFLINE SCREEN + LOADING CANCEL ===== */
 #offlineScreen{position:fixed;inset:0;z-index:1000000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;color:#fff;background:radial-gradient(120% 80% at 50% 0%,#2a3ec4 0%,#14237f 50%,#0a1450 100%);overflow:hidden}
@@ -680,7 +713,7 @@ button:disabled{opacity:.7;cursor:not-allowed}
       <img class="ai-logo" src="IMA123.png" alt="Topper AI Assistant" onerror="this.style.display='none'">
       <div>
         <div class="ai-head-title">Topper AI Assistant</div>
-        <div class="ai-head-sub">Chat or talk with live voice</div>
+        <div class="ai-head-sub">Chat, speak to text, or talk live</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center"><button class="ai-close" id="aiClearBtn" onclick="clearAIChat()" aria-label="Clear chat" style="width:auto;padding:0 12px">🗑</button><button class="ai-close" onclick="closeAI()" aria-label="Close">✕</button></div>
@@ -691,7 +724,8 @@ button:disabled{opacity:.7;cursor:not-allowed}
   </div>
   <div class="ai-messages" id="aiMessages"></div>
   <div class="ai-input-row">
-    <button class="ai-btn ai-mic" id="aiMicBtn" onclick="toggleLive()" aria-label="Live voice">🎙️</button>
+    <button class="ai-btn ai-liveb" id="aiLiveBtn" onclick="startLiveVoice()" aria-label="Live voice chat" title="Live voice chat">🎧</button>
+    <button class="ai-btn ai-mic" id="aiMicBtn" onclick="toggleDictation()" aria-label="Speak to text" title="Speak to text">🎤</button>
     <input type="text" id="aiInput" placeholder="Type your question..." maxlength="1000" autocomplete="off">
     <button class="ai-btn ai-send" id="aiSendBtn" onclick="sendAIText()" aria-label="Send">➤</button>
   </div>
@@ -816,53 +850,58 @@ let locationRequestBusy=false;
 const $=id=>document.getElementById(id); 
 const ORDER_DRAFT_KEY="topper_order_draft_v1"; 
 
-let loadingCancelTimer=null;
-let loadingMaxTimer=null;
+/* ================= LOADING SCREEN (smooth, no flicker) ================= */
+const SIGNIN_TEXT="Opening Google Sign-In...";
+let lcT=null,lmT=null,hideT=null,finalT=null;
+let lastFocusAt=0;
 let signInOpenedAt=0;
+
 function showLoading(message){
-  $("authLoadingText").textContent=message||"Loading your account...";
-  $("authLoading").style.display="flex";
+  clearTimeout(hideT); clearTimeout(finalT); clearTimeout(lcT); clearTimeout(lmT);
+  const box=$("authLoading");
   const cancelBtn=$("authLoadingCancel");
+  $("authLoadingText").textContent=message||"Loading your account...";
+  box.style.display="flex";
+  box.classList.remove("fade-out");
   if(cancelBtn) cancelBtn.style.display="none";
-  clearTimeout(loadingCancelTimer);
-  clearTimeout(loadingMaxTimer);
   // After 6 seconds the Cancel button appears so the screen can never trap the user.
-  loadingCancelTimer=setTimeout(()=>{
-    const b=$("authLoadingCancel");
-    if(b&&$("authLoading").style.display!=="none") b.style.display="inline-block";
+  lcT=setTimeout(()=>{
+    if(box.style.display!=="none"&&!box.classList.contains("fade-out")&&cancelBtn) cancelBtn.style.display="inline-block";
   },6000);
   // Safety net: after 40 seconds the loading screen closes by itself.
-  loadingMaxTimer=setTimeout(()=>{
-    if($("authLoading").style.display!=="none"){
-      authBusy=false;
-      hideLoading();
-    }
-  },40000);
+  lmT=setTimeout(()=>{ authBusy=false; hideLoading(true); },40000);
 }
-function hideLoading(){
-  clearTimeout(loadingCancelTimer);
-  clearTimeout(loadingMaxTimer);
+function hideLoading(force){
+  // While Google is handing the sign-in result back, keep the screen steady.
+  if(force!==true&&$("authLoadingText").textContent===SIGNIN_TEXT&&Date.now()-lastFocusAt<8000) return;
+  clearTimeout(lcT); clearTimeout(lmT); clearTimeout(hideT); clearTimeout(finalT);
+  const box=$("authLoading");
   const cancelBtn=$("authLoadingCancel");
   if(cancelBtn) cancelBtn.style.display="none";
-  $("authLoading").style.display="none";
+  // Short delay: if another loading message follows at once, the screen does not blink.
+  hideT=setTimeout(()=>{
+    box.classList.add("fade-out");
+    finalT=setTimeout(()=>{ box.style.display="none"; },280);
+  },120);
 }
 function cancelLoading(){
   authBusy=false;
-  hideLoading();
+  hideLoading(true);
 }
 window.cancelLoading=cancelLoading;
 // First page load: never wait more than 10 seconds for the account check.
 showLoading("Loading your account...");
-setTimeout(()=>{ if(!authStateResolved) hideLoading(); },10000);
+setTimeout(()=>{ if(!authStateResolved) hideLoading(true); },10000);
 // If the Google account picker is closed without any answer, release the screen.
 window.addEventListener("focus",()=>{
+  lastFocusAt=Date.now();
   if(authBusy&&signInOpenedAt&&!currentUser){
     setTimeout(()=>{
-      if(authBusy&&$("authLoadingText").textContent==="Opening Google Sign-In..."){
+      if(authBusy&&!currentUser&&$("authLoadingText").textContent===SIGNIN_TEXT){
         authBusy=false;
-        hideLoading();
+        hideLoading(true);
       }
-    },4000);
+    },9000);
   }
 });
 function escapeHtml(value){ 
@@ -896,6 +935,39 @@ function showAppMessage(message,icon="⚠️"){
   box.appendChild(overlay); 
   document.body.appendChild(box); 
 } 
+
+/* ================= CONFIRMATION DIALOG + TOAST ================= */
+function confirmAction(message,icon,okText,cancelText,danger){
+  return new Promise(resolve=>{
+    const old=$("appConfirmBox"); if(old) old.remove();
+    const box=document.createElement("div");
+    box.id="appConfirmBox";
+    const overlay=document.createElement("div"); overlay.className="app-message-overlay";
+    const card=document.createElement("div"); card.className="app-message-card";
+    const ic=document.createElement("div"); ic.className="app-message-icon"; ic.textContent=icon||"❓";
+    const tx=document.createElement("div"); tx.className="app-message-text"; tx.textContent=message;
+    const row=document.createElement("div"); row.className="app-message-actions";
+    const no=document.createElement("button"); no.className="app-message-ok app-message-cancel"; no.textContent=cancelText||"Cancel";
+    const yes=document.createElement("button"); yes.className="app-message-ok"+(danger?" danger":""); yes.textContent=okText||"Confirm";
+    const done=v=>{ box.remove(); resolve(v); };
+    no.onclick=()=>done(false);
+    yes.onclick=()=>done(true);
+    overlay.addEventListener("click",e=>{ if(e.target===overlay) done(false); });
+    row.append(no,yes); card.append(ic,tx,row); overlay.appendChild(card); box.appendChild(overlay);
+    document.body.appendChild(box);
+  });
+}
+let toastT=null;
+function showToast(msg){
+  let t=$("appToast");
+  if(!t){ t=document.createElement("div"); t.id="appToast"; t.className="app-toast"; document.body.appendChild(t); }
+  t.textContent=msg;
+  void t.offsetWidth;
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
 function showOutOfStock(){ 
   showAppMessage("This product is currently out of stock.","📦"); 
 } 
@@ -910,7 +982,7 @@ async function googleSignIn(){
   if(currentUser||authBusy) return;
   if(!navigator.onLine){ showAppMessage("No internet connection. Please connect and try again.","\u{1F4E1}"); return; } 
   authBusy=true; 
-  showLoading("Opening Google Sign-In..."); 
+  showLoading(SIGNIN_TEXT); 
   try{ 
     if(window.AndroidApp&&typeof window.AndroidApp.signIn==="function"){ 
       signInOpenedAt=Date.now(); window.AndroidApp.signIn(); 
@@ -920,7 +992,7 @@ async function googleSignIn(){
     await auth.signInWithPopup(provider); 
   }catch(error){ 
     authBusy=false; 
-    hideLoading(); 
+    hideLoading(true); 
     showAuthError("Google sign-in failed: "+(error.message||error)); 
   } 
 } 
@@ -936,16 +1008,16 @@ async function nativeGoogleLogin(idToken){
     ]); 
   }catch(error){ 
     showAuthError("Firebase sign-in failed: "+(error.message||error));
-    hideLoading(); 
+    hideLoading(true); 
   }finally{ 
     authBusy=false; 
-    if(authStateResolved) hideLoading(); 
+    if(authStateResolved) hideLoading(true); 
   } 
 } 
 
 function nativeGoogleLoginError(message){ 
   authBusy=false; 
-  hideLoading(); 
+  hideLoading(true); 
   showAuthError("Google sign-in failed: "+String(message||"Unknown error")); 
 } 
 
@@ -960,15 +1032,25 @@ function handleAuthAction(){
   else googleSignIn(); 
 } 
 
-function googleSignOut(){ 
-  showLoading("Signing out..."); 
-  auth.signOut().then(()=>{ 
-    currentUser=null; 
-    updateAuthUI(); 
-    showAppMessage("You have signed out successfully.","✅"); 
-  }).catch(error=>{ 
-    showAuthError(error.message||"Sign-out failed."); 
-  }).finally(hideLoading); 
+async function googleSignOut(){ 
+  if(!currentUser) return;
+  const ok=await confirmAction(
+    "Are you sure you want to sign out of your account?\n\nYou will need to sign in again to place or view your orders.",
+    "🔐","Sign Out","Stay Signed In",true
+  );
+  if(!ok) return;
+  showLoading("Signing out...");
+  try{
+    stopLive();
+    await auth.signOut();
+    currentUser=null;
+    updateAuthUI();
+    showAppMessage("You have been signed out successfully.","✅");
+  }catch(error){
+    showAuthError((error&&error.message)||"Sign-out failed. Please try again.");
+  }finally{
+    hideLoading(true);
+  }
 } 
 
 function getSavedAvatar(){ 
@@ -1010,7 +1092,7 @@ auth.onAuthStateChanged(user=>{
   updateAuthUI(); 
   if(user) loadUserOrders(user.uid); 
   else clearOrdersListener(); 
-  hideLoading(); 
+  hideLoading(true); 
 }); 
 
 function openNativeCall(number){ 
@@ -1174,16 +1256,21 @@ function saveCart(){
   try{ localStorage.setItem("topper_cart",JSON.stringify(cart)); }catch(e){} 
   updateCartUI(); 
 } 
-function toggleCart(name,price,btnEl){ 
+async function toggleCart(name,price,btnEl){ 
   const index=cart.findIndex(item=>item.name===name); 
   if(index>-1){ 
-    cart.splice(index,1); 
+    const ok=await confirmAction("Do you want to remove \u201C"+name+"\u201D from your cart?","🛒","Remove","Keep Item",true);
+    if(!ok) return;
+    const i=cart.findIndex(item=>item.name===name);
+    if(i>-1) cart.splice(i,1); 
     saveCart(); 
-    showAppMessage("Item removed from your cart.","ℹ️"); 
+    showToast("Item removed from your cart."); 
   }else{ 
-    cart.push({name:name,price:Number(price),qty:1}); 
+    const ok=await confirmAction("Would you like to add \u201C"+name+"\u201D to your cart?","🛒","Add to Cart","Not Now");
+    if(!ok) return;
+    if(!cart.some(item=>item.name===name)) cart.push({name:name,price:Number(price),qty:1}); 
     saveCart(); 
-    showAppMessage("Item added to your cart.","✅"); 
+    showToast("Item added to your cart."); 
   } 
 } 
 function addTableToCart(btnEl){ 
@@ -1235,11 +1322,15 @@ function updateQty(index,delta){
   cart[index].qty=Math.max(1,(Number(cart[index].qty)||1)+delta); 
   saveCart(); 
 } 
-function removeFromCart(index){ 
-  if(!cart[index]) return; 
-  cart.splice(index,1); 
+async function removeFromCart(index){ 
+  const item=cart[index];
+  if(!item) return; 
+  const ok=await confirmAction("Are you sure you want to remove \u201C"+item.name+"\u201D from your cart?","🗑️","Remove","Keep Item",true);
+  if(!ok) return;
+  const i=cart.indexOf(item);
+  if(i>-1) cart.splice(i,1); 
   saveCart(); 
-  showAppMessage("Item removed from your cart.","ℹ️"); 
+  showToast("Item removed from your cart."); 
 } 
 function checkoutCart(){ 
   if(!requireLogin()||!cart.length) return; 
@@ -1479,10 +1570,10 @@ async function startPayment(orderId,items){
       body:JSON.stringify({orderId:orderId})
     });
     let data={}; try{ data=await res.json(); }catch(e){}
-    if(res.ok&&data.paid){ hideLoading(); showAppMessage("This order is already paid.","✅"); return; }
+    if(res.ok&&data.paid){ hideLoading(true); showAppMessage("This order is already paid.","✅"); return; }
     if(res.ok&&data.payment_session_id){
       if(typeof Cashfree!=="function") throw new Error("Payment library could not load. Check your internet and try again.");
-      hideLoading();
+      hideLoading(true);
       const payMode=data.mode==="sandbox"?"sandbox":"production";
       // In the Android app the payment page is opened in the phone's browser,
       // where Google Pay / PhonePe / Paytm are shown. Older app builds fall back to the in-app page.
@@ -1505,15 +1596,15 @@ async function startPayment(orderId,items){
     if(res.status===503){ fallbackStaticPayment(items); return; }
     throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
   }catch(e){
-    hideLoading();
+    hideLoading(true);
     showAppMessage("Could not open the payment page.\n"+(e.message||e)+"\n\nYour order is saved. Open My Orders and tap Pay now to try again.","❌");
   }finally{
-    hideLoading();
+    hideLoading(true);
   }
 }
 
 function fallbackStaticPayment(items){
-  hideLoading();
+  hideLoading(true);
   if(items&&items.length===1&&Number(items[0].qty)===1){
     const link=PRODUCT_LINKS[baseProductName(items[0].name)];
     if(link){
@@ -1698,13 +1789,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 }); 
 </script>
 
-<!-- AI ASSISTANT (Gemini chat + voice) -->
+<!-- AI ASSISTANT (Gemini chat + live voice) -->
 <script>
 "use strict";
 /* ============ AI CONFIG ============ */
 // Your Cloudflare Worker address (see worker.js). The Gemini key lives ONLY inside the Worker.
 const AI_API_BASE = "https://topper-ai.ankiteeepad009.workers.dev";
-const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type here, or tap the 🎙️ button to talk.";
+const AI_GREETING = "Hello! I'm the Topper Stitching AI Assistant. Ask me about machines, prices, warranty, delivery or your order. You can type, tap 🎤 to speak and send, or tap 🎧 for a live voice conversation.";
 
 /* ============ STATE + SAVED CHAT (per user) ============ */
 const aiHistory = [];
@@ -1715,18 +1806,6 @@ let aiWarned = false;
 let aiClearArmed = null;
 
 function aiScroll(){ const m=$("aiMessages"); m.scrollTop=m.scrollHeight; }
-function addAIMsg(role,text){
-  if(role==="sys"){
-    const last=$("aiMessages").lastElementChild;
-    if(last&&last.classList.contains("sys")&&last.textContent===text){ aiScroll(); return last; }
-  }
-  const d=document.createElement("div");
-  d.className="ai-msg "+role;
-  d.textContent=text;
-  $("aiMessages").appendChild(d);
-  aiScroll();
-  return d;
-}
 function aiOwner(){ return currentUser?currentUser.uid:"guest"; }
 function aiWarnOnce(){
   if(aiWarned) return; aiWarned=true;
@@ -1736,12 +1815,190 @@ function localKey(){ return "topper_ai_chat_"+aiOwner(); }
 function localRead(){ try{ const a=JSON.parse(localStorage.getItem(localKey())||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 function localWrite(arr){ try{ localStorage.setItem(localKey(),JSON.stringify(arr.slice(-50))); }catch(e){} }
 function persistMsg(role,text){
-  const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,4000),t:Date.now()};
+  const rec={role:role==="user"?"user":"bot",text:String(text).slice(0,8000),t:Date.now()};
   const cache=localRead(); cache.push(rec); localWrite(cache);
   if(currentUser){
     try{ db.ref("chats/"+currentUser.uid).push(rec).catch(aiWarnOnce); }catch(e){ aiWarnOnce(); }
   }
 }
+
+/* ============ RICH MESSAGES (code blocks, lists, action buttons) ============ */
+function inlineMd(s){
+  let h=escapeHtml(s);
+  h=h.replace(/`([^`\n]+)`/g,'<code class="ai-ic">$1</code>');
+  h=h.replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>");
+  return h;
+}
+
+async function copyText(t){
+  t=String(t||"");
+  try{
+    if(navigator.clipboard&&window.isSecureContext){ await navigator.clipboard.writeText(t); return true; }
+  }catch(e){}
+  try{
+    const ta=document.createElement("textarea");
+    ta.value=t; ta.setAttribute("readonly","");
+    ta.style.cssText="position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0,t.length);
+    const ok=document.execCommand("copy");
+    ta.remove();
+    return ok;
+  }catch(e){ return false; }
+}
+
+function buildCodeBlock(lang,code){
+  const wrap=document.createElement("div"); wrap.className="ai-code";
+  const head=document.createElement("div"); head.className="ai-code-head";
+  const label=document.createElement("span"); label.textContent=lang||"code";
+  const btn=document.createElement("button"); btn.type="button"; btn.className="ai-code-copy"; btn.textContent="Copy code";
+  btn.onclick=async()=>{
+    const ok=await copyText(code);
+    btn.textContent=ok?"Copied ✓":"Copy failed";
+    setTimeout(()=>{ btn.textContent="Copy code"; },1800);
+  };
+  head.append(label,btn);
+  const pre=document.createElement("pre");
+  const c=document.createElement("code"); c.textContent=code;
+  pre.appendChild(c);
+  wrap.append(head,pre);
+  return wrap;
+}
+
+function renderBlocks(text,parent){
+  let list=null, listTag="", para=[];
+  const flush=()=>{
+    if(!para.length) return;
+    const p=document.createElement("p");
+    p.innerHTML=para.map(inlineMd).join("<br>");
+    parent.appendChild(p);
+    para=[];
+  };
+  text.split("\n").forEach(line=>{
+    const ul=/^\s*[-*\u2022]\s+(.*)$/.exec(line);
+    const ol=/^\s*\d+[.)]\s+(.*)$/.exec(line);
+    const h=/^\s{0,3}#{1,4}\s+(.*)$/.exec(line);
+    if(ul||ol){
+      flush();
+      const tag=ul?"UL":"OL";
+      if(!list||listTag!==tag){ list=document.createElement(tag); listTag=tag; parent.appendChild(list); }
+      const li=document.createElement("li");
+      li.innerHTML=inlineMd((ul||ol)[1]);
+      list.appendChild(li);
+      return;
+    }
+    list=null; listTag="";
+    if(h){ flush(); const d=document.createElement("div"); d.className="ai-h"; d.innerHTML=inlineMd(h[1]); parent.appendChild(d); return; }
+    if(!line.trim()){ flush(); return; }
+    para.push(line);
+  });
+  flush();
+}
+
+function renderMarkdown(text,parent){
+  const re=/```([\w#+.-]*)[ \t]*\n?([\s\S]*?)(?:```|$)/g;
+  let last=0, m;
+  while((m=re.exec(text))!==null){
+    if(m.index>last) renderBlocks(text.slice(last,m.index),parent);
+    parent.appendChild(buildCodeBlock(m[1],m[2].replace(/\n$/,"")));
+    last=re.lastIndex;
+  }
+  if(last<text.length) renderBlocks(text.slice(last),parent);
+}
+
+/* --- like / dislike memory --- */
+function hashText(s){ let h=0; for(let i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return "m"+(h>>>0).toString(36); }
+function fbRead(){ try{ return JSON.parse(localStorage.getItem("topper_ai_fb")||"{}")||{}; }catch(e){ return {}; } }
+function fbWrite(o){ try{ localStorage.setItem("topper_ai_fb",JSON.stringify(o)); }catch(e){} }
+function sendFeedback(text,value){
+  try{
+    if(currentUser) db.ref("ai_feedback/"+currentUser.uid).push({v:value,reply:String(text).slice(0,500),t:Date.now()}).catch(()=>{});
+  }catch(e){}
+}
+
+/* --- read aloud (speaker button) --- */
+let speakingBtn=null;
+function stopSpeaking(){
+  try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
+  if(speakingBtn){ speakingBtn.textContent="🔊"; speakingBtn.classList.remove("on"); speakingBtn=null; }
+}
+function speechText(text){
+  return String(text).replace(/```[\s\S]*?```/g," ").replace(/[*#`_>]/g,"").replace(/\s+/g," ").trim();
+}
+function toggleSpeak(btn,text){
+  if(!("speechSynthesis" in window)){ showToast("Read aloud is not supported on this device."); return; }
+  if(speakingBtn===btn){ stopSpeaking(); return; }
+  stopSpeaking();
+  const clean=speechText(text);
+  if(!clean) return;
+  const u=new SpeechSynthesisUtterance(clean.slice(0,3000));
+  u.lang=/[\u0900-\u097F]/.test(clean)?"hi-IN":"en-IN";
+  u.onend=u.onerror=()=>{ if(speakingBtn===btn) stopSpeaking(); };
+  speakingBtn=btn; btn.textContent="⏹️"; btn.classList.add("on");
+  window.speechSynthesis.speak(u);
+}
+
+function buildActions(text){
+  const bar=document.createElement("div"); bar.className="ai-actions";
+  const mk=(icon,label,fn)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="ai-act"; b.textContent=icon; b.title=label; b.setAttribute("aria-label",label);
+    b.onclick=fn; return b;
+  };
+  const speak=mk("🔊","Read aloud",()=>toggleSpeak(speak,text));
+  const copy=mk("📋","Copy reply",async()=>{
+    const ok=await copyText(text);
+    copy.textContent=ok?"✅":"⚠️";
+    setTimeout(()=>{ copy.textContent="📋"; },1500);
+  });
+  const key=hashText(text);
+  const like=mk("👍","Good answer",()=>setFb(like.dataset.v==="up"?"":"up"));
+  const dislike=mk("👎","Bad answer",()=>setFb(dislike.dataset.v==="down"?"":"down"));
+  function paint(v){
+    like.classList.toggle("on",v==="up"); like.dataset.v=v==="up"?"up":"";
+    dislike.classList.toggle("bad",v==="down"); dislike.dataset.v=v==="down"?"down":"";
+  }
+  function setFb(v){
+    const all=fbRead(); if(v) all[key]=v; else delete all[key];
+    fbWrite(all); paint(v);
+    if(v) sendFeedback(text,v);
+    showToast(v==="up"?"Thanks for your feedback.":v==="down"?"Thanks. We will improve.":"Feedback removed.");
+  }
+  paint(fbRead()[key]||"");
+  bar.append(speak,copy,like,dislike);
+  return bar;
+}
+
+function fillBotMessage(el,text){
+  el.className="ai-msg bot rich";
+  el.innerHTML="";
+  const body=document.createElement("div");
+  renderMarkdown(String(text),body);
+  el.appendChild(body);
+  el.appendChild(buildActions(String(text)));
+}
+
+function addAIMsg(role,text){
+  if(role==="sys"){
+    const last=$("aiMessages").lastElementChild;
+    if(last&&last.classList.contains("sys")&&last.textContent===text){ aiScroll(); return last; }
+  }
+  const d=document.createElement("div");
+  if(role==="bot"){
+    d.className="ai-msg bot";
+    if(text==="Typing..."){
+      d.classList.add("typing");
+      d.innerHTML='<span class="ai-dots"><i></i><i></i><i></i></span>';
+    }else fillBotMessage(d,text);
+  }else{
+    d.className="ai-msg "+role;
+    d.textContent=text;
+  }
+  $("aiMessages").appendChild(d);
+  aiScroll();
+  return d;
+}
+
 async function loadAIChat(){
   const owner=aiOwner();
   if(aiLoadedFor===owner) return;
@@ -1773,11 +2030,12 @@ function openAI(mode){
   $("aiPanel").style.display="flex";
   loadAIChat().then(()=>{
     aiScroll();
-    if(mode==="voice") toggleLive();
+    if(mode==="voice") startLiveVoice();
   });
 }
 function closeAI(){
   stopLive();
+  stopSpeaking();
   $("aiPanel").style.display="none";
 }
 function clearAIChat(){
@@ -1790,6 +2048,8 @@ function clearAIChat(){
   }
   aiClearArmed=null;
   btn.textContent="🗑";
+  stopLive();
+  stopSpeaking();
   try{ localStorage.removeItem(localKey()); }catch(e){}
   if(currentUser){ try{ db.ref("chats/"+currentUser.uid).remove().catch(()=>{}); }catch(e){} }
   aiHistory.length=0;
@@ -1816,7 +2076,7 @@ async function askAI(text){
   const headers={"Content-Type":"application/json"};
   headers["Authorization"]="Bearer "+await currentUser.getIdToken();
   const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),30000);
+  const timer=setTimeout(()=>ctrl.abort(),60000);
   try{
     const res=await fetch(AI_API_BASE+"/chat",{
       method:"POST",
@@ -1845,91 +2105,249 @@ async function sendAIText(textOverride){
   input.value="";
   aiBusy=true;
   $("aiSendBtn").disabled=true;
+  stopSpeaking();
   addAIMsg("user",text);
   persistMsg("user",text);
   const typing=addAIMsg("bot","Typing...");
-  typing.classList.add("typing");
-  let reply="";
   try{
-    reply=await askAI(text);
+    const reply=await askAI(text);
     aiHistory.push({role:"user",text:text},{role:"model",text:reply});
-    typing.classList.remove("typing");
-    typing.textContent=reply;
+    fillBotMessage(typing,reply);
     persistMsg("bot",reply);
-    if(liveOn) speakReply(reply);
   }catch(e){
-    typing.classList.remove("typing");
     typing.className="ai-msg sys";
+    typing.innerHTML="";
     typing.textContent=(e&&e.message&&e.message.length<120?e.message+"\n\n":"")+"Sorry, the assistant could not answer right now. Please try again, or call support at +91 92641 37710.";
   }finally{
     aiBusy=false;
     $("aiSendBtn").disabled=false;
     aiScroll();
-    if(liveOn) listenOnce();
   }
 }
 $("aiInput").addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendAIText(); }
 });
 
-/* ============ VOICE (speech recognition + spoken reply) ============ */
-let liveOn=false;
-let recognizer=null;
-function speechSupported(){
-  return !!(window.SpeechRecognition||window.webkitSpeechRecognition);
+/* ============ SPEECH TO TEXT (🎤): speak, then it is sent automatically ============ */
+const dict={rec:null,on:false};
+function paintMic(){ $("aiMicBtn").classList.toggle("on",dict.on); }
+function stopDictation(){
+  dict.on=false;
+  try{ if(dict.rec){ dict.rec.onend=null; dict.rec.abort(); } }catch(e){}
+  dict.rec=null;
+  paintMic();
 }
-function speakReply(text){
-  try{
-    if(!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(String(text).slice(0,600));
-    u.lang="hi-IN";
-    window.speechSynthesis.speak(u);
-  }catch(e){}
-}
-function listenOnce(){
-  if(!liveOn||aiBusy) return;
+function toggleDictation(){
+  if(LV.on) return;
+  if(dict.on){ stopDictation(); return; }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR) return;
+  if(!SR){ addAIMsg("sys","Speech to text is not supported on this device. Please type your question, or use Live Voice 🎧."); return; }
   try{
-    recognizer=new SR();
-    recognizer.lang="hi-IN";
-    recognizer.interimResults=false;
-    recognizer.maxAlternatives=1;
-    recognizer.onresult=ev=>{
-      const t=ev.results&&ev.results[0]&&ev.results[0][0]?ev.results[0][0].transcript:"";
-      if(t) sendAIText(t);
+    const r=new SR();
+    r.lang="hi-IN"; r.interimResults=true; r.maxAlternatives=1;
+    r.onresult=ev=>{
+      let t="", fin=false;
+      for(let i=ev.resultIndex;i<ev.results.length;i++){ t+=ev.results[i][0].transcript; if(ev.results[i].isFinal) fin=true; }
+      $("aiInput").value=t;
+      if(fin){ stopDictation(); sendAIText(t); }
     };
-    recognizer.onerror=ev=>{
+    r.onerror=ev=>{
       if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){
-        addAIMsg("sys","Microphone permission is blocked. Allow the microphone and try again.");
-        stopLive();
+        addAIMsg("sys","Microphone permission is blocked. Please allow the microphone and try again.");
       }
+      stopDictation();
     };
-    recognizer.onend=()=>{ if(liveOn&&!aiBusy){ setTimeout(listenOnce,400); } };
-    recognizer.start();
-  }catch(e){}
+    r.onend=()=>{ stopDictation(); };
+    dict.rec=r; dict.on=true; paintMic();
+    r.start();
+  }catch(e){ stopDictation(); }
 }
-function toggleLive(){
-  if(liveOn){ stopLive(); return; }
-  if(!speechSupported()){
-    addAIMsg("sys","Voice is not supported in this browser. Please type your question.");
+
+/* ============ LIVE VOICE CHAT (🎧): real-time talk with Gemini Live via the Worker ============ */
+const LV={on:false,ready:false,ws:null,stream:null,inCtx:null,outCtx:null,src:null,proc:null,
+          nextT:0,sources:[],speaking:false,uEl:null,uTxt:"",bEl:null,bTxt:"",connT:null};
+const ECHO_GATE=0.03;   // while the assistant speaks, only a louder voice interrupts it
+
+function setLiveStatus(text,color){
+  const dot='<span class="ai-pulse"'+(color?' style="background:'+color+'"':"")+'></span>';
+  $("aiLiveText").innerHTML=dot+text;
+}
+
+function downsample(buf,inRate,outRate){
+  if(inRate===outRate) return buf;
+  const ratio=inRate/outRate, len=Math.floor(buf.length/ratio), out=new Float32Array(len);
+  for(let i=0;i<len;i++){
+    const s=Math.floor(i*ratio), e=Math.min(buf.length,Math.floor((i+1)*ratio));
+    let sum=0,c=0; for(let j=s;j<e;j++){ sum+=buf[j]; c++; }
+    out[i]=c?sum/c:0;
+  }
+  return out;
+}
+function int16ToB64(i16){
+  const u8=new Uint8Array(i16.buffer); let s=""; const CH=0x8000;
+  for(let i=0;i<u8.length;i+=CH) s+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));
+  return btoa(s);
+}
+
+function stopPlayback(){
+  LV.sources.forEach(s=>{ s.onended=null; try{ s.stop(); }catch(e){} });
+  LV.sources=[]; LV.nextT=0; LV.speaking=false;
+}
+function playPcm(b64){
+  if(!LV.outCtx) return;
+  const bin=atob(b64), n=bin.length>>1;
+  const buf=LV.outCtx.createBuffer(1,n,24000);
+  const ch=buf.getChannelData(0);
+  for(let i=0;i<n;i++){
+    let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);
+    if(v>=0x8000) v-=0x10000;
+    ch[i]=v/32768;
+  }
+  const src=LV.outCtx.createBufferSource();
+  src.buffer=buf; src.connect(LV.outCtx.destination);
+  const now=LV.outCtx.currentTime;
+  if(LV.nextT<now+0.03) LV.nextT=now+0.03;
+  src.start(LV.nextT); LV.nextT+=buf.duration;
+  LV.sources.push(src);
+  if(!LV.speaking){ LV.speaking=true; setLiveStatus("Assistant is speaking...","#1565c0"); }
+  src.onended=()=>{
+    LV.sources=LV.sources.filter(s=>s!==src);
+    if(!LV.sources.length){ LV.speaking=false; if(LV.on&&LV.ready) setLiveStatus("Listening... speak now"); }
+  };
+}
+
+function finishUser(){
+  if(!LV.uEl) return;
+  const t=LV.uTxt.trim();
+  if(t){ persistMsg("user",t); aiHistory.push({role:"user",text:t}); }
+  else LV.uEl.remove();
+  LV.uEl=null; LV.uTxt="";
+}
+function finishBot(){
+  finishUser();
+  if(!LV.bEl) return;
+  const t=LV.bTxt.trim();
+  if(t){ fillBotMessage(LV.bEl,t); persistMsg("bot",t); aiHistory.push({role:"model",text:t}); }
+  else LV.bEl.remove();
+  LV.bEl=null; LV.bTxt="";
+  aiScroll();
+}
+function onUserText(t){
+  if(LV.bEl) finishBot();
+  if(!LV.uEl){ LV.uEl=addAIMsg("user",""); LV.uTxt=""; }
+  LV.uTxt+=t; LV.uEl.textContent=LV.uTxt.trim();
+  aiScroll();
+}
+function onBotText(t){
+  finishUser();
+  if(!LV.bEl){ LV.bEl=addAIMsg("bot","Typing..."); LV.bTxt=""; LV.bEl.classList.remove("typing"); LV.bEl.innerHTML=""; }
+  LV.bTxt+=t; LV.bEl.textContent=LV.bTxt.trim();
+  aiScroll();
+}
+
+function onLiveMessage(ev){
+  let txt=ev.data;
+  if(typeof txt!=="string"){
+    if(!(txt instanceof ArrayBuffer)) return;
+    try{ txt=new TextDecoder().decode(txt); }catch(e){ return; }
+  }
+  let m; try{ m=JSON.parse(txt); }catch(e){ return; }
+  if(m.setupComplete){
+    LV.ready=true; clearTimeout(LV.connT);
+    startCapture();
+    setLiveStatus("Listening... speak now");
     return;
   }
-  liveOn=true;
-  $("aiLiveBar").classList.add("on");
-  $("aiMicBtn").classList.add("on");
-  $("aiLiveText").innerHTML='<span class="ai-pulse"></span>Listening... speak now';
-  listenOnce();
+  const sc=m.serverContent;
+  if(!sc) return;
+  if(sc.interrupted){ stopPlayback(); finishBot(); }
+  if(sc.inputTranscription&&sc.inputTranscription.text) onUserText(sc.inputTranscription.text);
+  if(sc.modelTurn&&Array.isArray(sc.modelTurn.parts)){
+    sc.modelTurn.parts.forEach(p=>{ if(p.inlineData&&p.inlineData.data) playPcm(p.inlineData.data); });
+  }
+  if(sc.outputTranscription&&sc.outputTranscription.text) onBotText(sc.outputTranscription.text);
+  if(sc.turnComplete) finishBot();
 }
+
+function startCapture(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  LV.inCtx=new AC();
+  try{ LV.inCtx.resume(); }catch(e){}
+  const rate=LV.inCtx.sampleRate;
+  LV.src=LV.inCtx.createMediaStreamSource(LV.stream);
+  LV.proc=LV.inCtx.createScriptProcessor(4096,1,1);
+  LV.proc.onaudioprocess=e=>{
+    if(!LV.ready||!LV.ws||LV.ws.readyState!==1) return;
+    const data=e.inputBuffer.getChannelData(0);
+    if(LV.speaking){
+      let s=0,c=0; for(let i=0;i<data.length;i+=8){ s+=data[i]*data[i]; c++; }
+      if(Math.sqrt(s/c)<ECHO_GATE) return;
+    }
+    const f=downsample(data,rate,16000);
+    const i16=new Int16Array(f.length);
+    for(let i=0;i<f.length;i++){ const v=Math.max(-1,Math.min(1,f[i])); i16[i]=v<0?v*0x8000:v*0x7FFF; }
+    LV.ws.send(JSON.stringify({realtimeInput:{audio:{data:int16ToB64(i16),mimeType:"audio/pcm;rate=16000"}}}));
+  };
+  LV.src.connect(LV.proc);
+  LV.proc.connect(LV.inCtx.destination);
+}
+
+async function startLiveVoice(){
+  if(LV.on){ stopLive(); return; }
+  if(!currentUser){ addAIMsg("sys","Please sign in with Google to use Live Voice."); return; }
+  if(!navigator.onLine){ addAIMsg("sys","No internet connection. Please connect and try again."); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.WebSocket){
+    addAIMsg("sys","Live Voice is not supported on this device."); return;
+  }
+  stopDictation(); stopSpeaking();
+  LV.on=true;
+  $("aiLiveBar").classList.add("on");
+  $("aiLiveBtn").classList.add("on");
+  setLiveStatus("Connecting...");
+  try{
+    LV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+  }catch(e){
+    addAIMsg("sys","Microphone permission is blocked. Please allow the microphone and try again.");
+    stopLive(); return;
+  }
+  if(!LV.on){ stopLive(); return; }
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    LV.outCtx=new AC();
+    LV.outCtx.resume();
+    const token=await currentUser.getIdToken();
+    if(!LV.on){ stopLive(); return; }
+    const ws=new WebSocket(AI_API_BASE.replace(/^http/,"ws")+"/live?token="+encodeURIComponent(token));
+    ws.binaryType="arraybuffer";
+    LV.ws=ws;
+    ws.onmessage=onLiveMessage;
+    ws.onerror=()=>{ if(LV.on) addAIMsg("sys","Live Voice connection failed. Please try again."); };
+    ws.onclose=()=>{ if(LV.on){ addAIMsg("sys","Live Voice ended."); stopLive(); } };
+    LV.connT=setTimeout(()=>{
+      if(LV.on&&!LV.ready){ addAIMsg("sys","Could not start Live Voice. Please try again."); stopLive(); }
+    },15000);
+  }catch(e){
+    addAIMsg("sys","Could not start Live Voice. Please try again.");
+    stopLive();
+  }
+}
+
 function stopLive(){
-  liveOn=false;
-  try{ if(recognizer){ recognizer.onend=null; recognizer.abort(); } }catch(e){}
-  recognizer=null;
-  try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
-  const bar=$("aiLiveBar"), mic=$("aiMicBtn");
+  LV.on=false; LV.ready=false;
+  clearTimeout(LV.connT);
+  try{ finishBot(); }catch(e){}
+  stopPlayback();
+  try{ if(LV.proc){ LV.proc.onaudioprocess=null; LV.proc.disconnect(); } }catch(e){}
+  try{ if(LV.src) LV.src.disconnect(); }catch(e){}
+  try{ if(LV.stream) LV.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  try{ if(LV.inCtx) LV.inCtx.close(); }catch(e){}
+  try{ if(LV.outCtx) LV.outCtx.close(); }catch(e){}
+  try{ if(LV.ws){ LV.ws.onclose=null; LV.ws.onmessage=null; LV.ws.close(); } }catch(e){}
+  LV.ws=null; LV.stream=null; LV.inCtx=null; LV.outCtx=null; LV.src=null; LV.proc=null;
+  stopDictation();
+  const bar=$("aiLiveBar"), lb=$("aiLiveBtn");
   if(bar) bar.classList.remove("on");
-  if(mic) mic.classList.remove("on");
+  if(lb) lb.classList.remove("on");
 }
 </script>
 
