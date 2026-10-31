@@ -1472,6 +1472,8 @@ const PRODUCT_LINKS={
 };
 let latestOrders=[];
 let lastVerifyAt=0;
+// Prevent duplicate checkout requests for the same order.
+const paymentRequestsInProgress = new Set();
 
 function baseProductName(n){ return String(n||"").replace(/\s*\[.*\]\s*$/,"").trim(); }
 function buildOrderItems(){
@@ -1561,44 +1563,74 @@ async function submitOnlineOrder(){
 
 async function startPayment(orderId,items){
   if(!currentUser){ requireLogin(); return; }
-  showLoading("Opening secure payment...");
+  const safeOrderId=String(orderId||"").trim();
+  if(!safeOrderId){
+    showAppMessage("Order ID नहीं मिला। My Orders से दोबारा प्रयास करें।","⚠️");
+    return;
+  }
+  if(paymentRequestsInProgress.has(safeOrderId)) return;
+  paymentRequestsInProgress.add(safeOrderId);
+  showLoading("Creating a secure payment session...");
   try{
-    const idToken=await currentUser.getIdToken();
+    const idToken=await currentUser.getIdToken(true);
     const res=await fetch(PAY_API_BASE+"/pay/create",{
       method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},
-      body:JSON.stringify({orderId:orderId})
+      cache:"no-store",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+idToken,
+        "Cache-Control":"no-cache"
+      },
+      body:JSON.stringify({
+        orderId:safeOrderId,
+        requestId:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+"-"+Math.random().toString(36).slice(2))
+      })
     });
     let data={}; try{ data=await res.json(); }catch(e){}
-    if(res.ok&&data.paid){ hideLoading(true); showAppMessage("This order is already paid.","✅"); return; }
+    if(res.ok&&data.paid){
+      hideLoading(true);
+      showAppMessage("This order is already paid.","✅");
+      return;
+    }
     if(res.ok&&data.payment_session_id){
-      if(typeof Cashfree!=="function") throw new Error("Payment library could not load. Check your internet and try again.");
+      const sessionId=String(data.payment_session_id).trim();
+      if(sessionId.length<10||/\s/.test(sessionId)){
+        throw new Error("Cashfree server ने valid payment_session_id नहीं लौटाया। Worker के /pay/create response को जाँचें।");
+      }
+      if(typeof Cashfree!=="function"){
+        throw new Error("Cashfree payment library load नहीं हुई। Internet चालू करके दोबारा प्रयास करें।");
+      }
       hideLoading(true);
       const payMode=data.mode==="sandbox"?"sandbox":"production";
-      // In the Android app the payment page is opened in the phone's browser,
-      // where Google Pay / PhonePe / Paytm are shown. Older app builds fall back to the in-app page.
-      window.__lastPay={session:data.payment_session_id,mode:payMode,orderId:data.order_id||""};
-      // Newest app build: payment screen inside the app (Google Pay / PhonePe / Paytm list)
+      window.__lastPay={session:sessionId,mode:payMode,orderId:String(data.order_id||safeOrderId)};
       if(USE_NATIVE_CASHFREE_SDK&&data.order_id&&window.AndroidApp&&typeof window.AndroidApp.startCashfreePayment==="function"){
-        window.AndroidApp.startCashfreePayment(String(data.order_id),String(data.payment_session_id),payMode);
+        window.AndroidApp.startCashfreePayment(String(data.order_id),sessionId,payMode);
         return;
       }
       if(OPEN_PAYMENT_IN_BROWSER&&window.AndroidApp&&typeof window.AndroidApp.openExternal==="function"){
-        window.AndroidApp.openExternal(SITE_BASE_URL+"?cfpay="+encodeURIComponent(data.payment_session_id)+"&mode="+payMode);
-        showAppMessage("Payment is opening in your browser.\n\nAfter you pay, come back to this app. Your order will update automatically.","ℹ️");
+        window.AndroidApp.openExternal(SITE_BASE_URL+"?cforder="+encodeURIComponent(String(data.order_id||safeOrderId))+"&mode="+payMode);
+        showAppMessage("Payment browser में खुल रहा है। भुगतान के बाद ऐप में वापस आएँ।","ℹ️");
         return;
       }
       const cf=Cashfree({mode:payMode});
-      cf.checkout({paymentSessionId:data.payment_session_id,redirectTarget:"_self"});
+      const checkoutResult=cf.checkout({paymentSessionId:sessionId,redirectTarget:"_self"});
+      if(checkoutResult&&typeof checkoutResult.catch==="function"){
+        checkoutResult.catch(err=>{
+          console.error("Cashfree checkout error",err);
+          showAppMessage("Cashfree checkout शुरू नहीं हो पाया। My Orders में जाकर Pay now दबाकर नया प्रयास करें।","⚠️");
+        });
+      }
       return;
     }
     if(res.ok&&data.url){ window.location.href=data.url; return; }
     if(res.status===503){ fallbackStaticPayment(items); return; }
-    throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
+    throw new Error((data&&data.error&&data.error.message)||data.message||("HTTP "+res.status));
   }catch(e){
     hideLoading(true);
-    showAppMessage("Could not open the payment page.\n"+(e.message||e)+"\n\nYour order is saved. Open My Orders and tap Pay now to try again.","❌");
+    console.error("Cashfree payment session error",e);
+    showAppMessage("Secure payment नहीं खुला।\n"+(e.message||e)+"\n\nOrder सेव है। My Orders में जाकर Pay now से फिर कोशिश करें। अगर 'Invalid Session ID' फिर आए, तो Cashfree Worker के /pay/create endpoint में नया वैध session बनना जरूरी है।","❌");
   }finally{
+    paymentRequestsInProgress.delete(safeOrderId);
     hideLoading(true);
   }
 }
@@ -1773,19 +1805,31 @@ function loadUserOrders(userId){
 
 setProfileAvatar(getSavedAvatar()); 
 loadCart(); 
-document.addEventListener("DOMContentLoaded",()=>{ 
-  // Opened in the phone's browser by the app: start the Cashfree payment page straight away.
+document.addEventListener("DOMContentLoaded",async()=>{
+  // Do not automatically reuse an old payment_session_id copied into a URL.
+  // For browser return flows, request a server session using the order ID instead.
   try{
     const q=new URLSearchParams(window.location.search);
-    const sess=q.get("cfpay");
-    if(sess&&!window.AndroidApp&&/^[A-Za-z0-9_\-=.]{10,600}$/.test(sess)&&typeof Cashfree==="function"){
-      showLoading("Opening secure payment...");
-      const cf=Cashfree({mode:q.get("mode")==="sandbox"?"sandbox":"production"});
-      cf.checkout({paymentSessionId:sess,redirectTarget:"_self"});
+    const browserOrderId=q.get("cforder");
+    if(browserOrderId&&!window.AndroidApp){
+      const cleanId=String(browserOrderId).trim();
+      if(!/^[A-Za-z0-9_-]{10,100}$/.test(cleanId)) throw new Error("Invalid order reference.");
+      if(!currentUser){
+        restoreOrderDraft();
+        showAppMessage("Payment जारी रखने के लिए पहले इसी खाते से Google Sign-In करें।","🔐");
+        return;
+      }
+      await startPayment(cleanId,[]);
       return;
     }
-  }catch(e){}
-  restoreOrderDraft(); 
+    if(q.has("cfpay")){
+      history.replaceState({},document.title,window.location.pathname);
+      showAppMessage("यह पुराना payment link है। My Orders में जाकर Pay now दबाएँ ताकि नया secure session बने।","ℹ️");
+    }
+  }catch(e){
+    console.error("Payment return URL error",e);
+  }
+  restoreOrderDraft();
 }); 
 </script>
 
